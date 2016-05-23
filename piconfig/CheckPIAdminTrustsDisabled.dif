@@ -1,0 +1,6 @@
+@mode list
+@table piident
+@ostr ident,flags
+@select ident=*,identid=1,flags<28
+@ends
+@exit
