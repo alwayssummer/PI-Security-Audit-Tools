@@ -1,7 +1,0 @@
-@deli ^
-@mode list
-@table dbsecurity
-@ostr dbname^security
-@select dbname=*
-@ends
-@exit	
