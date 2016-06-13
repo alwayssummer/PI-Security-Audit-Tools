@@ -1,6 +1,0 @@
-@mode list
-@table pi_gen,pitimeout
-@ostr name,value
-@select name=EditDays
-@ends
-@exit
