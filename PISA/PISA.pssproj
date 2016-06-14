@@ -27,16 +27,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Scripts\" />
     <Folder Include="piconfig\" />
+    <Folder Include="Scripts\PISYSAUDIT\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PISA.tests.ps1" />
     <Compile Include="PISYSAUDIT.psd1" />
-    <Compile Include="PISYSAUDITCHECKLIB1.psm1" />
-    <Compile Include="PISYSAUDITCHECKLIB2.psm1" />
-    <Compile Include="PISYSAUDITCHECKLIB3.psm1" />
-    <Compile Include="PISYSAUDITCHECKLIB4.psm1" />
-    <Compile Include="PISYSAUDITCORE.psm1" />
+    <Compile Include="Scripts\CheckProcessPrivilege.ps1" />
+    <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB1.psm1" />
+    <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB2.psm1" />
+    <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB3.psm1" />
+    <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB4.psm1" />
+    <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCORE.psm1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="piconfig\CheckAutoTrustConfig.dif" />

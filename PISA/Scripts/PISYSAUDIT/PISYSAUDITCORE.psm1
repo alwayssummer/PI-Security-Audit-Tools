@@ -36,7 +36,7 @@
 #	PISysAuditShowUI
 #	PISysAuditPIConfigExec
 #	PIConfigScriptPath
-#	BinPath
+#	ScriptsPath
 #	PasswordPath
 #	PISysAuditInitialized
 #	PISysAuditCachedSecurePWD
@@ -50,28 +50,29 @@ function GetFunctionName
 
 function SetFolders
 {
-	# Retrieve the folder from which this script is called ..\bin and split the path
-	# to remove the bin part.	
+	# Retrieve the folder from which this script is called ..\Scripts and split the path
+	# to remove the Scripts part.	
 	$modulePath = $PSScriptRoot
 	
 	# ..\
-	# ..\bin
-	# ..\bin\PISYSAUDIT
+	# ..\Scripts
+	# ..\Scripts\PISYSAUDIT
 	# ..\export
 	# ..\piconfig
 	# ..\pwd	
-	$binPath = Split-Path $modulePath
-	$rootPath = Split-Path $binPath				
+	$scriptsPath = Split-Path $modulePath
+	$rootPath = Split-Path $scriptsPath				
 	$exportPath = Join-Path -Path $rootPath -ChildPath "Export"	
-	$scriptPath = Join-Path -Path $rootPath -ChildPath "piconfig"
+	$picnfgPath = Join-Path -Path $rootPath -ChildPath "piconfig"
 	$pwdPath = Join-Path -Path $rootPath -ChildPath "pwd"		
 	$logFile = Join-Path -Path $rootPath -ChildPath "PISystemAudit.log"		
-	
+
+
 	# Store them at within the global scope range.	
-	New-Variable -Name "BinPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $binPath			
+	New-Variable -Name "ScriptsPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $scriptsPath			
 	New-Variable -Name "PasswordPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $pwdPath
 	New-Variable -Name "ExportPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $exportPath
-	New-Variable -Name "PIConfigScriptPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $scriptPath
+	New-Variable -Name "PIConfigScriptPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $picnfgPath
 	New-Variable -Name "PISystemAuditLogFile" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $logFile		
 }
 
@@ -2259,9 +2260,9 @@ PROCESS
 			# Set Paths
 			#......................................................................................
 			# Get the bin path.
-			$binPath = (Get-Variable "BinPath" -Scope "Global").Value																			
+			$scriptsPath = (Get-Variable "ScriptsPath" -Scope "Global").Value																			
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $binPath -ChildPath "netsh_output.txt"                                 
+			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "netsh_output.txt"                                 
 			# Set the path to netsh CLU.
 			$windowsFolder = Get-PISysAudit_EnvVariable "WINDIR"
 			$netshExec = Join-Path -Path $windowsFolder -ChildPath "System32\netsh.exe"                                 						
@@ -2458,8 +2459,8 @@ PROCESS
 		}		
 
 		# Set the path to the inner script.
-		$binPath = (Get-Variable "BinPath" -Scope "Global").Value														
-		$checkProcessPrivilegePSScript = Join-Path -Path $binPath -ChildPath "CheckProcessPrivilege.ps1"																											
+		$scriptsPath = (Get-Variable "scriptsPath" -Scope "Global").Value														
+		$checkProcessPrivilegePSScript = Join-Path -Path $scriptsPath -ChildPath "CheckProcessPrivilege.ps1"																											
 		#......................................................................................
 		# Verbose only if Debug Level is 2+
 		#......................................................................................
@@ -2769,13 +2770,13 @@ PROCESS
 			# Return the error message.		
 			$msgTemplate = "A path was specified with your script file and this feature is not supported. You need to specify the file name only containing" `
 								+ " your script under the {0} folder"
-			$msg = [string]::Format($msgTemplate, $scriptPath)
+			$msg = [string]::Format($msgTemplate, $picnfgPath)
 			Write-PISysAudit_LogMessage $msg "Error" $fn
 			return $null
 		}				
 		
 		# Get the script path.
-		$scriptPath = (Get-Variable "PIConfigScriptPath" -Scope "Global").Value								
+		$picnfgPath = (Get-Variable "PIConfigScriptPath" -Scope "Global").Value								
 		
 		if($LocalComputer)
 		{										
@@ -2783,7 +2784,7 @@ PROCESS
 			# Set Paths
 			#......................................................................................			
             # Get the bin path.
-			$binPath = (Get-Variable "BinPath" -Scope "Global").Value
+			$scriptsPath = (Get-Variable "scriptsPath" -Scope "Global").Value
 			# Set the path to reach out the piconfig.exe CLU.												
 			$piconfigExec = (Get-Variable "PISysAuditPIConfigExec" -Scope "Global").Value			
 			
@@ -2791,22 +2792,22 @@ PROCESS
 			# Verbose at Debug Level 1+
 			# Show some extra messages.
 			# ............................................................................................................			
-			$msgTemplate = "binPath = {0}, piconfigExec = {1}"
-			$msg = [string]::Format($msgTemplate, $binPath, $piconfigExec)
+			$msgTemplate = "scriptsPath = {0}, piconfigExec = {1}"
+			$msg = [string]::Format($msgTemplate, $scriptsPath, $piconfigExec)
 			Write-PISysAudit_LogMessage $msg "Debug" $fn -dbgl $DBGLevel -rdbgl 1
 		
 			# Set the input for the CLU.			
 			if($UseAdhocScript)
 			{
 				# Set the path for the .dif file containing the script for piconfig.exe
-				$PIConfigInputFilePath = Join-Path -Path $binPath -ChildPath "input.dif"         								
+				$PIConfigInputFilePath = Join-Path -Path $scriptsPath -ChildPath "input.dif"         								
 				# Create the input file.
 				Out-File -FilePath $PIConfigInputFilePath -InputObject $PIConfigScript -Encoding ASCII
 			}
 			else
 			{
 				# Set the path for the .dif file containing the script for piconfig.exe				
-				$PIConfigInputFilePath = Join-Path -Path $scriptPath -ChildPath $File								
+				$PIConfigInputFilePath = Join-Path -Path $picnfgPath -ChildPath $File								
 				
 				# Validate that the .dif file specified exists.
 				if((Test-Path $PIConfigInputFilePath) -eq $false)
@@ -2820,7 +2821,7 @@ PROCESS
 			}
 			
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $binPath -ChildPath "piconfig_output.txt"					
+			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output.txt"					
 						
 			# Start a piconfig as a local session.
 			# As the command is local to the PI Server it will make use of Named Pipe.
@@ -2844,7 +2845,7 @@ PROCESS
 			# Set Paths
 			#......................................................................................
 			# Get the bin path.
-			$binPath = (Get-Variable "BinPath" -Scope "Global").Value
+			$scriptsPath = (Get-Variable "ScriptsPath" -Scope "Global").Value
 			# Set the path to reach out the piconfig.exe CLU.												
 			$piconfigExec = (Get-Variable "PISysAuditPIConfigExec" -Scope "Global").Value			
 									
@@ -2852,22 +2853,22 @@ PROCESS
 			# Verbose at Debug Level 1+
 			# Show some extra messages.
 			# ............................................................................................................			
-			$msgTemplate = "binPath = {0}, piconfigExec = {1}"
-			$msg = [string]::Format($msgTemplate, $binPath, $piconfigExec)
+			$msgTemplate = "scriptsPath = {0}, piconfigExec = {1}"
+			$msg = [string]::Format($msgTemplate, $scriptsPath, $piconfigExec)
 			Write-PISysAudit_LogMessage $msg "Debug" $fn -dbgl $DBGLevel -rdbgl 1
 			
 			# Set the input for the CLU.
 			if($UseAdhocScript)
 			{
 				# Set the path for the .dif file containing the script for piconfig.exe
-				$PIConfigInputFilePath = Join-Path -Path $binPath -ChildPath "input.dif"         
+				$PIConfigInputFilePath = Join-Path -Path $scriptsPath -ChildPath "input.dif"         
 				# Create the input file.
 				Out-File -FilePath $PIConfigInputFilePath -InputObject $PIConfigScript -Encoding ASCII
 			}
 			else
 			{
 				# Set the path for the .dif file containing the script for piconfig.exe				
-				$PIConfigInputFilePath = Join-Path -Path $scriptPath -ChildPath $File				
+				$PIConfigInputFilePath = Join-Path -Path $picnfgPath -ChildPath $File				
 				
 				# Validate that the .dif file specified exists.
 				if((Test-Path $PIConfigInputFilePath) -eq $false)
@@ -2885,7 +2886,7 @@ PROCESS
 			$argList1 = [string]::Format(" -Node `"{0}`" -Windows", $RemoteComputerName)					
 			$argList2 = [string]::Format(" -Node `"{0}`" -Trust", $RemoteComputerName)					
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $binPath -ChildPath "piconfig_output.txt"														
+			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output.txt"														
 			
 			#......................................................................................
 			# Start a piconfig remote session.
@@ -4164,6 +4165,7 @@ Set-Alias pwdondisk New-PISysAudit_PasswordOnDisk
 # Export Module Member
 # ........................................................................
 # <Do not remove>
+Export-ModuleMember SetFolders
 Export-ModuleMember Initialize-PISysAudit
 Export-ModuleMember Set-PISysAudit_SaltKey
 Export-ModuleMember Set-PISysAudit_EnvVariable
