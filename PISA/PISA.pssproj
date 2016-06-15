@@ -46,6 +46,7 @@
     <Content Include="piconfig\CheckEditDays.dif" />
     <Content Include="piconfig\CheckExpensiveQuery.dif" />
     <Content Include="piconfig\CheckPIAdminTrustsDisabled.dif" />
+    <Content Include="piconfig\CheckPIServerAuthPolicy.dif" />
     <Content Include="piconfig\CheckPIServerDBSecurity_PIWorldReadAccess.dif" />
     <Content Include="piconfig\CheckPIWorldReadAccess.dif" />
   </ItemGroup>

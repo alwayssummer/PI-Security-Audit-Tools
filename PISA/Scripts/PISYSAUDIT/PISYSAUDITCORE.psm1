@@ -2259,7 +2259,7 @@ PROCESS
 			#......................................................................................
 			# Set Paths
 			#......................................................................................
-			# Get the bin path.
+			# Get the Scripts path.
 			$scriptsPath = (Get-Variable "ScriptsPath" -Scope "Global").Value																			
 			# Set the output for the CLU.
 			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "netsh_output.txt"                                 
@@ -2783,7 +2783,7 @@ PROCESS
 			#......................................................................................
 			# Set Paths
 			#......................................................................................			
-            # Get the bin path.
+            # Get the Scripts path.
 			$scriptsPath = (Get-Variable "scriptsPath" -Scope "Global").Value
 			# Set the path to reach out the piconfig.exe CLU.												
 			$piconfigExec = (Get-Variable "PISysAuditPIConfigExec" -Scope "Global").Value			
@@ -2844,7 +2844,7 @@ PROCESS
 			#......................................................................................
 			# Set Paths
 			#......................................................................................
-			# Get the bin path.
+			# Get the Scripts path.
 			$scriptsPath = (Get-Variable "ScriptsPath" -Scope "Global").Value
 			# Set the path to reach out the piconfig.exe CLU.												
 			$piconfigExec = (Get-Variable "PISysAuditPIConfigExec" -Scope "Global").Value			
@@ -3893,7 +3893,7 @@ PROCESS
 		# Get the current timestamp for naming the file uniquely.
 		$ts = ([Datetime]::Now).ToString("yyyyMMdd_HHmmss")		
 
-		# Get the bin path.
+		# Get the Scripts path.
 		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value														
 			
 		# Output to log file.			
@@ -4165,7 +4165,6 @@ Set-Alias pwdondisk New-PISysAudit_PasswordOnDisk
 # Export Module Member
 # ........................................................................
 # <Do not remove>
-Export-ModuleMember SetFolders
 Export-ModuleMember Initialize-PISysAudit
 Export-ModuleMember Set-PISysAudit_SaltKey
 Export-ModuleMember Set-PISysAudit_EnvVariable

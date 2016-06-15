@@ -1,0 +1,6 @@
+@mode list
+@table pi_gen,pitimeout
+@ostr value
+@select name=Server_AuthenticationPolicy
+@ends
+@exit	
