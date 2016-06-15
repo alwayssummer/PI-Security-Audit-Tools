@@ -50,6 +50,7 @@ function Get-PISysAudit_FunctionsFromLibrary2
 	$listOfFunctions.Add("Get-PISysAudit_CheckEditDays", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckAutoTrustConfig", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckExpensiveQueryProtection", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckExplicitLoginDisabled",1)
 			
 	# Return the list.
 	return $listOfFunctions	
@@ -695,6 +696,75 @@ END {}
 #***************************
 }
 
+
+# ........................................................................
+# Add your cmdlet after this section. Don't forget to add an intruction
+# to export them at the bottom of this script.
+# ........................................................................
+function Get-PISysAudit_CheckExplicitLoginDisabled
+{
+<#  
+.SYNOPSIS
+AU20007 - Check if the explicit login is disabled
+.DESCRIPTION
+Audit ID: AU20007
+Audit Check Name: Explicit login disabled
+Category: <Category>
+Compliance: Value must be greater than 3
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{		
+		# Execute the PIConfig script.
+		$outputFileContent = Invoke-PISysAudit_PIConfigScript -f "CheckPIServerAuthPolicy.dif" `
+																-lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel						
+		
+		# Validate rules
+		$ServerAuthPolicy = $outputFileContent[0]
+		if($ServerAuthPolicy -lt 3){$result = $false} else {$result =$true}
+
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU20007" `
+										-ain "Explicit login disabled" -aiv $result `
+										-Group1 "PI System" -Group2 "PI Data Archive" `
+										-Severity "Severe"								
+}
+
+END {}
+#***************************
+#End of exported function
+#***************************
+}
+
+
 # ........................................................................
 # Add your cmdlet after this section. Don't forget to add an intruction
 # to export them at the bottom of this script.
@@ -768,6 +838,7 @@ Export-ModuleMember Get-PISysAudit_CheckPIServerDBSecurity_PIWorldReadAccess
 Export-ModuleMember Get-PISysAudit_CheckEditDays
 Export-ModuleMember Get-PISysAudit_CheckAutoTrustConfig
 Export-ModuleMember Get-PISysAudit_CheckExpensiveQueryProtection
+Export-ModuleMember Get-PISysAudit_CheckExplicitLoginDisabled
 # </Do not remove>
 
 # ........................................................................
