@@ -35,6 +35,7 @@
     <Compile Include="PISA.tests.ps1" />
     <Compile Include="PISYSAUDIT.psd1" />
     <Compile Include="Scripts\CheckProcessPrivilege.ps1" />
+    <Compile Include="Scripts\Examples.ps1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB1.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB2.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB3.psm1" />
