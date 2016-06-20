@@ -369,9 +369,10 @@ PROCESS
 		# Warn if 3.4.380.36 or 3.4.385.59 version	
 		$result = $true
 		$warningMessage = ""
+		$upgradeMessage = "Upgrading to 3.4.400.1162 is recommended."
 		if ($installVersionInt64 -lt 3438036) { $result = $false}
-		if ($installVersionInt64 -eq 3438036) { $result = $false; $warningMessage = "Upgrading to 3.4.390.16 is recommended." }
-		if ($installVersionInt64 -eq 3438559) { $result = $false; $warningMessage = "Upgrading to 3.4.390.16 is recommended." }		
+		if ($installVersionInt64 -ge 3438036 -and $installVersionInt64 -lt 344001162 ) { $result = $false; $warningMessage = $upgradeMessage }
+		if ($installVersionInt64 -lt 344001162) { $result = $false; $warningMessage = $upgradeMessage }		
 	}
 	catch
 	{ $Result = "N/A" }	
