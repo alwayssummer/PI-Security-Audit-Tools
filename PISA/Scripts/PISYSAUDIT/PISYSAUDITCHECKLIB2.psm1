@@ -51,6 +51,7 @@ function Get-PISysAudit_FunctionsFromLibrary2
 	$listOfFunctions.Add("Get-PISysAudit_CheckAutoTrustConfig", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckExpensiveQueryProtection", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckExplicitLoginDisabled",1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckPIAdminUsage",1)
 			
 	# Return the list.
 	return $listOfFunctions	
@@ -709,7 +710,7 @@ AU20007 - Check if the explicit login is disabled
 .DESCRIPTION
 Audit ID: AU20007
 Audit Check Name: Explicit login disabled
-Category: <Category>
+Category: Severe
 Compliance: Value must be greater than 3
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
@@ -743,7 +744,7 @@ PROCESS
 																-lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel						
 		
 		# Validate rules
-		$ServerAuthPolicy = $outputFileContent[0]
+		$ServerAuthPolicy = $outputFileContent
 		if($ServerAuthPolicy -lt 3){$result = $false} else {$result =$true}
 
 	}
@@ -759,6 +760,85 @@ PROCESS
 }
 
 END {}
+#***************************
+#End of exported function
+#***************************
+}
+
+
+# ........................................................................
+# Add your cmdlet after this section. Don't forget to add an intruction
+# to export them at the bottom of this script.
+# ........................................................................
+function Get-PISysAudit_CheckPIAdminUsage
+{
+<#  
+.SYNOPSIS
+AU20008 - Check if piadmin is not used
+.DESCRIPTION
+Audit ID: AU20008
+Audit Check Name: piadmin is not used
+Category: Severe
+Compliance: Value must be empty
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{		
+		# Execute the PIConfig scripts.
+		$outputFileContentTrust = Invoke-PISysAudit_PIConfigScript -f "CheckPIAdminUsageInTrusts.dif" `
+																-lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel	
+																
+		$outputFileContentMapping = Invoke-PISysAudit_PIConfigScript -f "CheckPIAdminUsageInMappings.dif" `
+																-lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel						
+																																
+		# Validate rules
+		#Check is piadmin is used in any mappings or trusts. If it is, list them in the output
+		
+		if(($outputFileContentTrust) -or ($outputFileContentMapping))
+		{
+			$result = $false 
+			$message = "Trust(s) that present weaknesses: " + $outputFileContentTrust
+			$message+= "`nMapping(s) that present weaknesses: " + $outputFileContentMapping
+		} else {$result =$true}
+			
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU20008" `
+										-ain "piadmin is not used" -aiv $result `
+										-msg  $message `
+										-Group1 "PI System" -Group2 "PI Data Archive" `
+										-Severity "Severe"								
+}
+
+END {}
+
 #***************************
 #End of exported function
 #***************************
@@ -839,6 +919,7 @@ Export-ModuleMember Get-PISysAudit_CheckEditDays
 Export-ModuleMember Get-PISysAudit_CheckAutoTrustConfig
 Export-ModuleMember Get-PISysAudit_CheckExpensiveQueryProtection
 Export-ModuleMember Get-PISysAudit_CheckExplicitLoginDisabled
+Export-ModuleMember Get-PISysAudit_CheckPIAdminUsage
 # </Do not remove>
 
 # ........................................................................
