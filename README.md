@@ -19,7 +19,8 @@ AU20002	- PI Admin Trusts Disabled
 AU20003	- PI Data Archive Subsystem Version  	
 AU20004	- Edit Days  
 AU20005	- Auto Trust Configuration	 
-AU20006	- Expensive Query Protection  	
+AU20006	- Expensive Query Protection
+AU20007 - Check if explicit login is disabled
 AU30001	- PI AF Server Service Account  
 AU30002	- Impersonation mode for AF Data Sets  
 AU30003	- PI AF Server Service Access  
@@ -33,15 +34,16 @@ AU40004	- SQL Server OLE Automation Procedures
 
 SETUP INSTRUCTIONS:  
 The PISysAudit module does not require installation; you only need to decompress the package. You will need to import the module from the extracted location in order to use it. The file structure is the following:  
-  * bin = Contains command line utilities or PS scripts needed by the PS module
-  * bin\pisysaudit = Contains the PS module definition
-  * export = Contains the generated reports
-  * pwd = Contains saved password files using strong encryption
+  * PISA = Contains the module definition.
+  * PISA\piconfig = Contains the piconfig scripts leveraged by the PI Data Archive validation checks.
+  * PISA\Scripts = Contains command line utilities or PS scripts needed by the PS module
+  * PISA\export = Contains the generated reports
+  * PISA\pwd = Contains saved password files using strong encryption
   
-For example, if you have decompressed the package inside your user folder (C:\users\<user>\documents\pisysaudit v1.0.0.8), you need to import the module the following:  
+For example, if you have decompressed the package inside your user folder (C:\users\<user>\documents\PISA), you need to import the module the following:  
   
 ```
-  Import-Module "C:\users\<user>\documents\pisysaudit v1.0.0.8\bin\pisysaudit"
+  Import-Module "C:\users\<user>\documents\PISA\pisysaudit"
 ```
 
 USAGE EXAMPLES:  
