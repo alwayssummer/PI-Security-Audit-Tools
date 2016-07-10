@@ -78,17 +78,17 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 	::MACHINE::
 
 		AU10001 - Domain Membership Check  
-			Validation Check: verifies that the machine is a member of an Active Directory Domain.   
-			For Compliance: join the machine to an Active Directory Domain.  Use of a domain is 
+			VALIDATION CHECK: verifies that the machine is a member of an Active Directory Domain.   
+			FOR COMPLIANCE: join the machine to an Active Directory Domain.  Use of a domain is 
 			encouraged as AD provides Kerberos authentication and is our best available technology 
 			for securing a PI System.  Furthermore, the implementation of transport security in the 
 			PI System relies on Windows Integrated Security and AD to automatically enable higher 
 			strength ciphers.
 
 		AU10002 - OS SKU   
-			Validation Check: verifies that the OS Stock Keeping Unit (SKU) is appropriate for 
+			VALIDATION CHECK: verifies that the OS Stock Keeping Unit (SKU) is appropriate for 
 			production use.    
-			For Compliance: SKU should match one of the following: 12, 13, 14, 29, 39, 40, 41 or 42.  
+			FOR COMPLIANCE: SKU should match one of the following: 12, 13, 14, 29, 39, 40, 41 or 42.  
 			These correspond to the following display names: 
 				12 - Server Datacenter (core installation) 
 				13 - Server Standard (core installation) 
@@ -102,8 +102,8 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 			installation of Windows Server.
 
 		AU10003 - Validate if Windows firewall is enabled    
-			Validation Check: verifies that the Windows host based firewall is enabled.  
-			For Compliance: enable the Windows firewall.  A firewall's effectiveness is heavily
+			VALIDATION CHECK: verifies that the Windows host based firewall is enabled.  
+			FOR COMPLIANCE: enable the Windows firewall.  A firewall's effectiveness is heavily
 			dependent on the configuration.  For PI specific port requirements, see: 
 			https://techsupport.osisoft.com/Troubleshooting/KB/KB01162.
 			For more general information on the Windows firewall, see "Windows Firewall with 
@@ -113,105 +113,112 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 	::PI DATA ARCHIVE::
 
 		AU20001 - PI Data Archive Table Security  
-			Validation Check: examines the database security of the PI Data Archive and flags any 
+			VALIDATION CHECK: examines the database security of the PI Data Archive and flags any 
 			ACLs that contain access for PIWorld as weak. 
-			For Compliance: remove PIWorld access from all database security ACLs.  Note that prior
+			FOR COMPLIANCE: remove PIWorld access from all database security ACLs.  Note that prior
 			removing PIWorld access, you need to evaluate which applications are relying on that 
 			access so that you can grant those applications access explicitly.  
 
 		AU20002 - PI Admin Trusts Disabled 
-			Validation Check: verifies that the piadmin PI User cannot be used in a PI Trust.   
-			For Compliance: disable Trusts with piadmin.  This can be done by checking "User 
+			VALIDATION CHECK: verifies that the piadmin PI User cannot be used in a PI Trust.   
+			FOR COMPLIANCE: disable Trusts with piadmin.  This can be done by checking "User 
 			cannot be used in a Trust" in the Properties menu for the piadmin PI User.  To access
 			this menu open use the Idenitities, Users, & Groups plugin in PI SMT, navigate to the 
 			PI User tab, right click the piadmin entry and select Properties in the context menu.
 
 		AU20003 - PI Data Archive Subsystem Version      
-			Validation Check: verifies that the PI Data Archive is using the most recent release.   
-			For Compliance: upgrade the PI Data Archive to the latest version, PI Data Archive 
+			VALIDATION CHECK: verifies that the PI Data Archive is using the most recent release.   
+			FOR COMPLIANCE: upgrade the PI Data Archive to the latest version, PI Data Archive 
 			2016 (3.4.400.1162).  For more information, see the "Upgrade a PI Data Archive Server" 
 			section of the PI Data Archive Installation and Upgrade Guide, Live Library: 
 			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD. 
  
 		AU20004 - Edit Days   
-			Validation Check: verified that Edit Days is set. 
-			For Compliance: set to a value greater than zero.  EditDays defines the number of past 
+			VALIDATION CHECK: verified that Edit Days is set. 
+			FOR COMPLIANCE: set to a value greater than zero.  EditDays defines the number of past 
 			days where events can be modified in the Snapshot or Archive databases. A zero value means 
 			no time check is done.  For instructions to set EditDays, see "Modify the EditDays tuning 
 			parameter" section in the PI Data Archive System Management Guide:
 			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399. 
  
 		AU20005 - Auto Trust Configuration    
-			Validation Check: verifies that the autotrustconfig tuning parameter is set to create 
+			VALIDATION CHECK: verifies that the autotrustconfig tuning parameter is set to create 
 			either no trusts or a trust for the loopback automatically (127.0.0.1). 
-			For Compliance: set the autotrustconfig tuning parameter to a value of 0 (do not 
+			FOR COMPLIANCE: set the autotrustconfig tuning parameter to a value of 0 (do not 
 			automatically create any PI Trust entries) or 1 (create the trust entry for the loopback 
 			IP address 127.0.0.1 only). 
  
 		AU20006 - Expensive Query Protection 
-			Validation Check: verify that the PI Data Archive has protection against expensive queries. 
-			For Compliance: set the archive_maxqueryexecutionsec tuning parameter to a value between 60 
+			VALIDATION CHECK: verify that the PI Data Archive has protection against expensive queries. 
+			FOR COMPLIANCE: set the archive_maxqueryexecutionsec tuning parameter to a value between 60 
 			and 300.  For more information on this parameter and other that can protect against expensive 
 			queries, see the knowledgebase article 3224OSI8 
 			https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8  
  
 		AU20007 - Check if explicit login is disabled 
-			Validation Check: verifies that explicit login is disabled as an authentication protocol.    
-			For Compliance: set the tuning parameter Server_AuthenticationPolicy to a value greater than 3.  
+			VALIDATION CHECK: verifies that explicit login is disabled as an authentication protocol.    
+			FOR COMPLIANCE: set the tuning parameter Server_AuthenticationPolicy to a value greater than 3.  
 			This is equivalent to the third notch, "Disable explicit login", or higher on the Security 
 			Settings plugin in PI SMT.    
  
 	::PI AF Server::
  
 		AU30001 - PI AF Server Service Account   
-			Validation Check: verifies that the AF Server application service is not running as the account 
+			VALIDATION CHECK: verifies that the AF Server application service is not running as the account 
 			Local System. 
-			For Compliance: run the AF Server Application service as a user other than Local System.  In 
+			FOR COMPLIANCE: run the AF Server Application service as a user other than Local System.  In 
 			order to change the user that the service is running as, open control panel, go to Programs, 
 			Programs and Features, select the entry for the PI AF Server and click Change.  This will 
 			launch the installer where you will be given the option to change configuration settings, 
 			including the service account.
  
 		AU30002 - Impersonation mode for AF Data Sets   
-			Validation Check:  verifies the impersonation mode for external data tables. 
-			For Compliance: set the Configuration Setting ExternalDataTablesAllowNonImpersonatedUsers to 
+			VALIDATION CHECK:  verifies the impersonation mode for external data tables. 
+			FOR COMPLIANCE: set the Configuration Setting ExternalDataTablesAllowNonImpersonatedUsers to 
 			false, thereby requiring impersonation for access to external tables.  This setting can be 
 			changed by running the AFDiag utility with the /ExternalDataTablesAllowNonImpersonatedUsers- 
 			flag.  For more information, see "AFDiag utility parameters" in the PI Live Library. 
 			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
  
 		AU30003 - PI AF Server Service Access   
-			Validation Check: verifies that the PI AF application server service does not have excessive 
-			rights.  For Compliance: ensure that the account does not have the following privileges: 
+			VALIDATION CHECK: verifies that the PI AF application server service does not have excessive 
+			rights.  
+			FOR COMPLIANCE: ensure that the account does not have the following privileges: 
 			SeDebugPrivilege, SeTakeOwnershipPrivilege and SeTcbPrivilege.  For information on these 
 			rights and how to set them, see "User Rights" on TechNet:
 			https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx.
 
+		AU30004 - PI AF Server Plugin Verify Level Check   
+			VALIDATION CHECK: verifies that PI AF requires plugins to be validated. 
+			FOR COMPLIANCE: set the Configuration Setting PlugInVerifyLevel to RequireSigned or 
+			RequireSignedTrustedProvider.  This can be done with AFDiag /PluginVerifyLevel:<Level>.
+			For more information, see "AFDiag utility parameters" in the PI Live Library. 
+			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F. 
+
 	::SQL Server::
  
 		AU40001 - SQL Server xp_CmdShell      
-			Validation Check: verifies that SQL Server does not have xp_CmdShell enabled. 
-			For Compliance: disable xp_CmdShell configuration option.  This option can be configured 
+			VALIDATION CHECK: verifies that SQL Server does not have xp_CmdShell enabled. 
+			FOR COMPLIANCE: disable xp_CmdShell configuration option.  This option can be configured 
 			using the Policy-Based Management or the sp_configure stored procedure.  For more 
 			information, see: 
 			https://msdn.microsoft.com/en-us/library/ms190693.aspx.
  
 		AU40002 - SQL Server Adhoc Queries    
-			Validation Check: verifies that SQL Server does not have Ad Hoc Distributed Queries enabled.    
-			For Compliance: disable Ad Hoc Distributed Queries configuration option.  This option can be 
+			VALIDATION CHECK: verifies that SQL Server does not have Ad Hoc Distributed Queries enabled.    
+			FOR COMPLIANCE: disable Ad Hoc Distributed Queries configuration option.  This option can be 
 			configured using the Policy-Based Management or the sp_configure stored procedure. For more 
 			information, see: https://msdn.microsoft.com/en-us/library/ms187569.aspx.
  
- 
 		AU40003 - SQL Server DB Mail XPs      
-			Validation Check: verifies that SQL Server does not have Ad Hoc Distributed Queries enabled. 
-			For Compliance: disable Database Mail XPs configuration option.  This option can be configured 
+			VALIDATION CHECK: verifies that SQL Server does not have Ad Hoc Distributed Queries enabled. 
+			FOR COMPLIANCE: disable Database Mail XPs configuration option.  This option can be configured 
 			using the Policy-Based Management or the sp_configure stored procedure. For more information, 
 			see: https://msdn.microsoft.com/en-us/library/ms191189.aspx.
  
 		AU40004 - SQL Server OLE Automation Procedures   
-			Validation Check: verifies that SQL Server does not have OLE Automation Procedures enabled. 
-			For Compliance: disable the OLE Automation Procedures configuration option.  This option can 
+			VALIDATION CHECK: verifies that SQL Server does not have OLE Automation Procedures enabled. 
+			FOR COMPLIANCE: disable the OLE Automation Procedures configuration option.  This option can 
 			be configured using the Policy-Based Management or the sp_configure stored procedure. For 
 			more information, see: https://msdn.microsoft.com/en-us/library/ms191188.aspx.
         

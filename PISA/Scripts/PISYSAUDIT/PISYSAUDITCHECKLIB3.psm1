@@ -46,7 +46,8 @@ function Get-PISysAudit_FunctionsFromLibrary3
 	[System.Collections.HashTable]$listOfFunctions = @{}	
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServiceConfiguredAccount", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPImpersonationModeForAFDataSets", 1)
-	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)			
+	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)			
 	
 	# Return the list.
 	return $listOfFunctions
@@ -316,6 +317,77 @@ END {}
 #***************************
 }
 
+function Get-PISysAudit_CheckPlugInVerifyLevel
+{
+<#  
+.SYNOPSIS
+AU30004 - PI AF Server Plugin Verify Level Check
+.DESCRIPTION
+Audit ID: AU30004
+Audit Check Name: PI AF Server Plugin Verify Level Check
+Category: Low
+Compliance: Should be either RequireSigned or RequireSignedTrustedProvider.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{						
+		# Invoke the afdiag.exe command.		
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		
+		# Read each line to find the one containing the token to replace.
+		# Check if the value is false = compliant, true it is not compliant
+		$result = $true
+		foreach($line in $outputFileContent)
+		{								
+			if($line.Contains("PlugInVerifyLevel"))
+			{								
+				if($line.Contains("AllowUnsigned") -or $line.Contains("None")) { $result = $false }
+				break
+			}						
+		}				
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30004" `
+										-ain "PI AF Server Plugin Verify Level Check" -aiv $result `
+										-Group1 "PI AF Server" `
+										-Severity "Moderate"
+										
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
 # ........................................................................
 # Add your cmdlet after this section. Don't forget to add an intruction
 # to export them at the bottom of this script.
@@ -386,6 +458,7 @@ Export-ModuleMember Get-PISysAudit_FunctionsFromLibrary3
 Export-ModuleMember Get-PISysAudit_CheckPIAFServiceConfiguredAccount
 Export-ModuleMember Get-PISysAudit_CheckPImpersonationModeForAFDataSets
 Export-ModuleMember Get-PISysAudit_CheckPIAFServicePrivileges
+Export-ModuleMember Get-PISysAudit_CheckPlugInVerifyLevel
 # </Do not remove>
 
 # ........................................................................
