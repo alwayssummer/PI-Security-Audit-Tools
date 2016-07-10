@@ -73,6 +73,12 @@ You get more details by invoking the help with the Get-Help cmdlet like the foll
     Get-Help piaudit  
 ```
     
+For full contextual help, giving examples and a detailed description of each audit check and remediations for failed checks, use the following:
+
+```
+    Get-Help about_PISYSAUDIT
+```
+
 You can also find several examples of commands and syntaxes for this module within examples.ps1 file.  
 
 
