@@ -4,10 +4,11 @@
 # You can download Pester from http://go.microsoft.com/fwlink/?LinkID=534084
 #
 
-Describe "Get-Function" {
+Describe "Get-PISysAudit_CheckExplicitLoginDisabled" {
 	Context "Function Exists" {
 		It "Should Return" {
 	
 		}
 	}
 }
+

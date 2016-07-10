@@ -32,6 +32,9 @@
     <Folder Include="Scripts\PISYSAUDIT\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DebugScript.ps1" />
+    <Compile Include="piconfig\CheckPIAdminUsageInMappings.dif" />
+    <Compile Include="piconfig\CheckPIAdminUsageInTrusts.dif" />
     <Compile Include="PISA.tests.ps1" />
     <Compile Include="PISYSAUDIT.psd1" />
     <Compile Include="Scripts\CheckProcessPrivilege.ps1" />

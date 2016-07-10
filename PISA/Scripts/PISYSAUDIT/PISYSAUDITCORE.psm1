@@ -2814,16 +2814,28 @@ PROCESS
 					Write-PISysAudit_LogMessage $msg "Error" $fn
 					return $null
 				}
+
+				
+
 			}
 			
-			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output.txt"					
-						
+			# Construct new input file for the CLU
+			# Set the PIconfig output
+			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output.txt"
+			$inputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_input.dif"
+
+			Clear-Content $outputFilePath
+			Clear-Content $inputFilePath
+
+			Out-File -FilePath $inputFilePath -InputObject ("@outp " + $outputFilePath) -Encoding ASCII	
+			Add-Content -Path $inputFilePath -Value (Get-Content $PIConfigInputFilePath)			
+
 			# Start a piconfig as a local session.
 			# As the command is local to the PI Server it will make use of Named Pipe.
 			Start-Process -FilePath $PIConfigExec `
-				-RedirectStandardInput $PIConfigInputFilePath `
-				-RedirectStandardOutput $outputFilePath -Wait -NoNewWindow
+				-RedirectStandardInput $inputFilePath `
+				-Wait -NoNewWindow			
+				
 				
 			# Read the content.
 			$outputFileContent = Get-Content -Path $outputFilePath
@@ -2866,6 +2878,7 @@ PROCESS
 				# Set the path for the .dif file containing the script for piconfig.exe				
 				$PIConfigInputFilePath = Join-Path -Path $picnfgPath -ChildPath $File				
 				
+
 				# Validate that the .dif file specified exists.
 				if((Test-Path $PIConfigInputFilePath) -eq $false)
 				{
