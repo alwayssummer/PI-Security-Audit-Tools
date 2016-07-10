@@ -27,6 +27,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="en-US\" />
+    <Folder Include="en-US\Documents\" />
     <Folder Include="Scripts\" />
     <Folder Include="piconfig\" />
     <Folder Include="Scripts\PISYSAUDIT\" />
@@ -46,6 +48,7 @@
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCORE.psm1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="en-US\about_PISYSAUDIT.help.txt" />
     <Content Include="piconfig\CheckAutoTrustConfig.dif" />
     <Content Include="piconfig\CheckEditDays.dif" />
     <Content Include="piconfig\CheckExpensiveQuery.dif" />
