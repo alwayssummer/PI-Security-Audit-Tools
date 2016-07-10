@@ -2551,18 +2551,16 @@ PROCESS
 			#......................................................................................
 			# Set Paths
 			#......................................................................................
-			# Get the PI folder.
-			$PIServer_path = Get-PISysAudit_EnvVariable "PISERVER"			
-			# Set the ADM folder.
-            $PIServer_ADM_path = Join-Path -Path $PIServer_path -ChildPath "ADM"
-            # Set the PIPC folder (64 bit).		
+			# Set the PIPC folder (64 bit).		
 			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64"
 			# Set the PIPC\AF folder (64 bit).		
 			$PIHome_AF_path = Join-Path -Path $PIHome_path -ChildPath "AF"
+			# Set the PIPC\log folder (64 bit).
+			$PIHome_Log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 		    # Set the path to reach out the afdiag.exe CLU.
 			$AFDiagExec = Join-Path -Path $PIHome_AF_path -ChildPath "afdiag.exe"                                   			
 			# Set the output for the CLU.
-            $outputFilePath = Join-Path -Path $PIServer_ADM_path -ChildPath "afdiag_output.txt"                                 
+            $outputFilePath = Join-Path -Path $PIHome_Log_path -ChildPath "afdiag_output.txt"                                 
 			
 			#......................................................................................
 			# Delete any residual output file.
@@ -2574,7 +2572,7 @@ PROCESS
 			#......................................................................................
 			Start-Process -FilePath $AFDiagExec `
 							-RedirectStandardOutput $outputFilePath `
-							-Wait -NoNewWindow
+							-Wait -NoNewWindow -WorkingDirectory $PIHome_AF_path
 			
 			#......................................................................................
 			# Read the content.
@@ -2590,15 +2588,13 @@ PROCESS
 		{																	
 			#......................................................................................
 			# Set Paths
-			#......................................................................................
-			# Get the PI folder.
-			$PIServer_path = Get-PISysAudit_EnvVariable "PISERVER" -lc $false -rcn $RemoteComputerName											           
-			# Set the ADM folder.
-			$PIServer_ADM_path = Join-Path -Path $PIServer_path -ChildPath "adm"							
+			#......................................................................................						
 			# Set the PIPC folder (64 bit).		
-			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64"
+			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $false -rcn $RemoteComputerName
 			# Set the PIPC\AF folder (64 bit).		
 			$PIHome_AF_path = Join-Path -Path $PIHome_path -ChildPath "AF"
+			# Set the PIPC\log folder (64 bit).
+			$PIHome_Log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 			# Set the path to reach out the piversion.exe CLU.
 			$afdiagExec = Join-Path -Path $PIHome_AF_path -ChildPath "afdiag.exe"			                                       						
 			# Set the path to reach out the AFService executable.
@@ -2607,7 +2603,7 @@ PROCESS
 			$argListTemplate = "'/ExeFile:`"{0}`"'"
 			$argList = [string]::Format($ArgListTemplate, $pathToService)                            					                                      
 			# Set the output for the CLU.
-            $outputFilePath = Join-Path -Path $PIServer_ADM_path -ChildPath "afdiag_output.txt"
+            $outputFilePath = Join-Path -Path $PIHome_Log_path -ChildPath "afdiag_output.txt"
 
 			#......................................................................................			
 			# Delete (remotely) any residual output file.

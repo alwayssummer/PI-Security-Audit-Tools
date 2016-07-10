@@ -181,7 +181,7 @@ PROCESS
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
-			if($line.Contains("ExternalDataTables"))
+			if($line.Contains("ExternalDataTablesAllowNonImpersonatedUsers"))
 			{								
 				if($line.Contains("True")) { $result = $false }
 				break
