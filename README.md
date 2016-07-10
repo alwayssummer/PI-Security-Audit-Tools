@@ -1,4 +1,4 @@
-# PI-System-Audit-Tools
+# PI-Security-Audit-Tools
 
 ## Contents
 This project is a framework to baseline the security configuration of your PI System. This tool framework is built as a PowerShell module containing cmdlets to perform different calls to collect the data from the security settings of different requested PI System components.
@@ -24,6 +24,7 @@ AU20007 - Check if explicit login is disabled
 AU30001	- PI AF Server Service Account  
 AU30002	- Impersonation mode for AF Data Sets  
 AU30003	- PI AF Server Service Access  
+AU30004 - PI AF Server Plugin Verify Level Check
 AU40001	- SQL Server xp_CmdShell	 
 AU40002	- SQL Server Adhoc Queries	 
 AU40003	- SQL Server DB Mail XPs	 
