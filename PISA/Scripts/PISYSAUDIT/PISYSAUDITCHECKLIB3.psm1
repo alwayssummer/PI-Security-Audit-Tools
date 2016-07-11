@@ -47,7 +47,8 @@ function Get-PISysAudit_FunctionsFromLibrary3
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServiceConfiguredAccount", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPImpersonationModeForAFDataSets", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)
-	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)			
+	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)	
+	$listOfFunctions.Add("Get-PISysAudit_CheckFileExtensionWhitelist", 1)		
 	
 	# Return the list.
 	return $listOfFunctions
@@ -325,7 +326,7 @@ AU30004 - PI AF Server Plugin Verify Level Check
 .DESCRIPTION
 Audit ID: AU30004
 Audit Check Name: PI AF Server Plugin Verify Level Check
-Category: Low
+Category: Moderate
 Compliance: Should be either RequireSigned or RequireSignedTrustedProvider.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
@@ -376,6 +377,102 @@ PROCESS
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30004" `
 										-ain "PI AF Server Plugin Verify Level Check" -aiv $result `
+										-Group1 "PI AF Server" `
+										-Severity "Moderate"
+										
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckFileExtensionWhitelist
+{
+<#  
+.SYNOPSIS
+AU30005 - PI AF Server File Extension Whitelist
+.DESCRIPTION
+Audit ID: AU30005
+Audit Check Name: PI AF Server File Extension Whitelist
+Category: Moderate
+Compliance: Should only include the file extensions: docx:xlsx:csv:pdf:txt:rtf:jpg:jpeg:png:svg:tiff:gif or a subset thereof.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{						
+		# Invoke the afdiag.exe command.		
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		
+		# Read each line to find the one containing the token to replace.
+		# Check if the value is false = compliant, true it is not compliant
+		$result = $true
+		foreach($line in $outputFileContent)
+		{								
+			# Locate FileExtensions parameter
+			if($line.Contains("FileExtensions"))
+			{								
+				# Master whitelist of approved extensions
+				[System.Collections.ArrayList] $allowedExtensions = 'docx','xlsx','csv','pdf','txt','rtf','jpg','jpeg','png','svg','tiff','gif'
+				# Extract configured whitelist from parameter value
+				[string] $extensionList = $line.Split('=')[1].TrimStart()
+				[string[]] $extensions = $extensionList.Split(':')
+				# Loop through the configured extensions
+				foreach($extension in $extensions) 
+				{ 
+					# Assume extension is a violation until proven compliant
+					$result = $false
+					# As soon as the extension is found in the master list, we move to the next one
+					foreach($allowedExtension in $allowedExtensions)
+					{
+						if($extension -eq $allowedExtension) 
+						{ 
+							$result = $true
+							# There should not be duplicates so we don't need include that extension in further iterations
+							$allowedExtensions.Remove($extension)
+							break
+						}
+						else {$result = $false}
+					}
+					# If we detect any rogue extension, the validation check fails, no need to look further
+					if($result -eq $false) {break}
+				} 
+				break
+			}						
+		}				
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30005" `
+										-ain "PI AF Server File Extension Whitelist" -aiv $result `
 										-Group1 "PI AF Server" `
 										-Severity "Moderate"
 										
@@ -459,6 +556,7 @@ Export-ModuleMember Get-PISysAudit_CheckPIAFServiceConfiguredAccount
 Export-ModuleMember Get-PISysAudit_CheckPImpersonationModeForAFDataSets
 Export-ModuleMember Get-PISysAudit_CheckPIAFServicePrivileges
 Export-ModuleMember Get-PISysAudit_CheckPlugInVerifyLevel
+Export-ModuleMember Get-PISysAudit_CheckFileExtensionWhitelist
 # </Do not remove>
 
 # ........................................................................

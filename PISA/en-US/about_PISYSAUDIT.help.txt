@@ -194,6 +194,14 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 			RequireSignedTrustedProvider.  This can be done with AFDiag /PluginVerifyLevel:<Level>.
 			For more information, see "AFDiag utility parameters" in the PI Live Library. 
 			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F. 
+		
+		AU30005 - PI AF Server File Extension Whitelist   
+			VALIDATION CHECK: verifies file extension whitelist for PI AF. 
+			FOR COMPLIANCE: set the Configuration Setting FileExtensions to only include the file 
+			extensions: docx:xlsx:csv:pdf:txt:rtf:jpg:jpeg:png:svg:tiff:gif or a subset thereof.
+			This can be done with AFDiag /FileExtensions:<ExtensionList>.  For more information, 
+			see "AFDiag utility parameters" in the PI Live Library. 
+			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
 
 	::SQL Server::
  
