@@ -2406,7 +2406,7 @@ Return the access token (security) of a process or service.
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
-		[alias("pv")]		
+		[alias("priv")]		
 		[ValidateSet(
 			"All","SeAssignPrimaryTokenPrivilege", "SeAuditPrivilege", "SeBackupPrivilege", 
 			"SeChangeNotifyPrivilege", "SeCreateGlobalPrivilege", "SeCreatePagefilePrivilege", 

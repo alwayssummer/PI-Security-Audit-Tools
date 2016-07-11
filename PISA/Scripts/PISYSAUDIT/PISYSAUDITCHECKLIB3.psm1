@@ -254,7 +254,7 @@ PROCESS
 		$warningMessage = ""
 		
 		# Get the service account.
-		$listOfPrivileges = Get-PISysAudit_CheckPrivilege -lc $LocalComputer -rcn $RemoteComputerName -pv "All" -sn "AFService" -dbgl $DBGLevel					
+		$listOfPrivileges = Get-PISysAudit_CheckPrivilege -lc $LocalComputer -rcn $RemoteComputerName -priv "All" -sn "AFService" -dbgl $DBGLevel					
 		
 		# Read each line to find granted privileges.		
 		foreach($line in $listOfPrivileges)

@@ -7,20 +7,23 @@
 # * Description:  External command.
 # * Authors:  Jim Davidson, Bryan Owen and Mathieu Hamel from OSIsoft.
 # * Structure:
-#
-# * DISCLAIMER: This sample code is provided to members of the 
-# * OSIsoft Users Community (http://community.osisoft.com) 
-# * and is subject to the OSIsoft Users Community End-User License Agreement,
-# * found at ...
+# *
+# * Copyright 2016 OSIsoft, LLC
+# * Licensed under the Apache License, Version 2.0 (the "License");
+# * you may not use this file except in compliance with the License.
+# * You may obtain a copy of the License at
 # * 
-# * All sample code is provided by OSIsoft for illustrative purposes only.
-# * These examples have not been thoroughly tested under all conditions.
-# * OSIsoft provides no guarantee nor implies any reliability, 
-# * serviceability, or function of these programs.
-# * ALL PROGRAMS CONTAINED HEREIN ARE PROVIDED TO YOU "AS IS" 
-# * WITHOUT ANY WARRANTIES OF ANY KIND. ALL WARRANTIES INCLUDING 
-# * THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY
-# * AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY DISCLAIMED.
+# *   <http://www.apache.org/licenses/LICENSE-2.0>
+# * 
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS,
+# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# * See the License for the specific language governing permissions and
+# * limitations under the License.
+# *
+# * Modifications copyright (C) <YYYY> <Name>, <Org>
+# * <Description of modification>
+# *
 # ************************************************************************
 # Version History:
 # ------------------------------------------------------------------------
