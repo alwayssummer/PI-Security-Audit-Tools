@@ -154,8 +154,8 @@ PROCESS
 	try
 	{						
 		# Invoke the afdiag.exe command.		
-		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-	
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+		
 		#.................................
 		# Validate rules
 		# (Do not remove)
@@ -355,11 +355,10 @@ PROCESS
 	
 	try
 	{						
-		# Invoke the afdiag.exe command.		
-		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-		
+		# Read the afdiag.exe command output.
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+
 		# Read each line to find the one containing the token to replace.
-		# Check if the value is false = compliant, true it is not compliant
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
@@ -426,11 +425,10 @@ PROCESS
 	
 	try
 	{						
-		# Invoke the afdiag.exe command.		
-		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-		
+		# Read the afdiag.exe command output.		
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+
 		# Read each line to find the one containing the token to replace.
-		# Check if the value is false = compliant, true it is not compliant
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
@@ -441,28 +439,31 @@ PROCESS
 				[System.Collections.ArrayList] $allowedExtensions = 'docx','xlsx','csv','pdf','txt','rtf','jpg','jpeg','png','svg','tiff','gif'
 				# Extract configured whitelist from parameter value
 				[string] $extensionList = $line.Split('=')[1].TrimStart()
-				[string[]] $extensions = $extensionList.Split(':')
-				# Loop through the configured extensions
-				foreach($extension in $extensions) 
-				{ 
-					# Assume extension is a violation until proven compliant
-					$result = $false
-					# As soon as the extension is found in the master list, we move to the next one
-					foreach($allowedExtension in $allowedExtensions)
-					{
-						if($extension -eq $allowedExtension) 
-						{ 
-							$result = $true
-							# There should not be duplicates so we don't need include that extension in further iterations
-							$allowedExtensions.Remove($extension)
-							break
+				if($extensionList -ne "")
+				{
+					[string[]] $extensions = $extensionList.Split(':')
+					# Loop through the configured extensions
+					foreach($extension in $extensions) 
+					{ 
+						# Assume extension is a violation until proven compliant
+						$result = $false
+						# As soon as the extension is found in the master list, we move to the next one
+						foreach($allowedExtension in $allowedExtensions)
+						{
+							if($extension -eq $allowedExtension) 
+							{ 
+								$result = $true
+								# There should not be duplicates so we don't need include that extension in further iterations
+								$allowedExtensions.Remove($extension)
+								break
+							}
+							else {$result = $false}
 						}
-						else {$result = $false}
-					}
-					# If we detect any rogue extension, the validation check fails, no need to look further
-					if($result -eq $false) {break}
-				} 
-				break
+						# If we detect any rogue extension, the validation check fails, no need to look further
+						if($result -eq $false) {break}
+					} 
+					break
+				}
 			}						
 		}				
 	}
