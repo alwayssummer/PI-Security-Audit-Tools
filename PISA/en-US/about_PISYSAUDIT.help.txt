@@ -203,6 +203,12 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 			see "AFDiag utility parameters" in the PI Live Library. 
 			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
 
+		AU30006 - PI AF Server Version
+			VALIDATION CHECK: verifies PI AF Server version. 
+			FOR COMPLIANCE: upgrade to the latest version of PI AF Server.  For more information, 
+			see "PI AF Server upgrades" in the PI Live Library. 
+			https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6.
+
 	::SQL Server::
  
 		AU40001 - SQL Server xp_CmdShell      

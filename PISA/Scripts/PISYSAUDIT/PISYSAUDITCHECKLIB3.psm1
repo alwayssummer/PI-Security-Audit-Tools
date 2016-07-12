@@ -48,7 +48,8 @@ function Get-PISysAudit_FunctionsFromLibrary3
 	$listOfFunctions.Add("Get-PISysAudit_CheckPImpersonationModeForAFDataSets", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)	
-	$listOfFunctions.Add("Get-PISysAudit_CheckFileExtensionWhitelist", 1)		
+	$listOfFunctions.Add("Get-PISysAudit_CheckFileExtensionWhitelist", 1)	
+	$listOfFunctions.Add("Get-PISysAudit_CheckAFServerVersion", 1)	
 	
 	# Return the list.
 	return $listOfFunctions
@@ -61,7 +62,7 @@ function Get-PISysAudit_CheckPIAFServiceConfiguredAccount
 AU30001 - PI AF Server Service Account Check
 .DESCRIPTION
 Audit ID: AU30001
-Audit Check Name: PI AF Server Service Account Check
+Audit Check Name: PI AF Server Service Account
 Category: Severe
 Compliance: Should not be executed with LocalSystem, all other accounts
 are considered good.
@@ -104,7 +105,7 @@ PROCESS
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30001" `
-										-ain "Configured Account Check" -aiv $result `
+										-ain "Configured Account" -aiv $result `
 										-Group1 "PI AF Server" `
 										-Severity "Severe"
 }
@@ -325,7 +326,7 @@ function Get-PISysAudit_CheckPlugInVerifyLevel
 AU30004 - PI AF Server Plugin Verify Level Check
 .DESCRIPTION
 Audit ID: AU30004
-Audit Check Name: PI AF Server Plugin Verify Level Check
+Audit Check Name: PI AF Server Plugin Verify Level
 Category: Moderate
 Compliance: Should be either RequireSigned or RequireSignedTrustedProvider.
 #>
@@ -375,7 +376,7 @@ PROCESS
 	# Define the results in the audit table			
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30004" `
-										-ain "PI AF Server Plugin Verify Level Check" -aiv $result `
+										-ain "PI AF Server Plugin Verify Level" -aiv $result `
 										-Group1 "PI AF Server" `
 										-Severity "Moderate"
 										
@@ -486,6 +487,81 @@ END {}
 #***************************
 }
 
+function Get-PISysAudit_CheckAFServerVersion
+{
+<#  
+.SYNOPSIS
+AU30006 - PI AF Server Version
+.DESCRIPTION
+Audit ID: AU30006
+Audit Check Name: PI AF Server Version Check
+Category: Moderate
+Compliance: Using latest version of PI AF.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{						
+		# Read the afdiag.exe command output.
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+
+		# Read each line to find the one containing the token to replace.
+		$result = $true
+		foreach($line in $outputFileContent)
+		{								
+			if($line.Contains("Version"))
+			{								
+				$installationVersion = $line.Split('=').TrimStart()
+				$installVersionTokens = $installationVersion.Split(".")[1]
+				# Form an integer value with all the version tokens.
+				[string]$temp = $InstallVersionTokens[0] + $installVersionTokens[1] + $installVersionTokens[2] + $installVersionTokens[3]
+				$installVersionInt64 = [Convert]::ToInt64($temp)
+				if($installationVersion -lt 2800000){$result = $false}
+				break
+			}						
+		}				
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30006" `
+										-ain "PI AF Server Version" -aiv $result `
+										-Group1 "PI AF Server" `
+										-Severity "Moderate"
+										
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
 # ........................................................................
 # Add your cmdlet after this section. Don't forget to add an intruction
 # to export them at the bottom of this script.
@@ -558,6 +634,7 @@ Export-ModuleMember Get-PISysAudit_CheckPImpersonationModeForAFDataSets
 Export-ModuleMember Get-PISysAudit_CheckPIAFServicePrivileges
 Export-ModuleMember Get-PISysAudit_CheckPlugInVerifyLevel
 Export-ModuleMember Get-PISysAudit_CheckFileExtensionWhitelist
+Export-ModuleMember Get-PISysAudit_CheckAFServerVersion
 # </Do not remove>
 
 # ........................................................................
