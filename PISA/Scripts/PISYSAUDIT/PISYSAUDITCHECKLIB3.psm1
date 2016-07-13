@@ -533,12 +533,12 @@ PROCESS
 		{								
 			if($line.Contains("Version"))
 			{								
-				$installationVersion = $line.Split('=').TrimStart()
-				$installVersionTokens = $installationVersion.Split(".")[1]
+				$installVersion = $line.Split('=').TrimStart()[1]
+				$installVersionTokens = $installVersion.Split(".")
 				# Form an integer value with all the version tokens.
 				[string]$temp = $InstallVersionTokens[0] + $installVersionTokens[1] + $installVersionTokens[2] + $installVersionTokens[3]
 				$installVersionInt64 = [Convert]::ToInt64($temp)
-				if($installationVersion -lt 2800000){$result = $false}
+				if($installVersionInt64 -lt 2800000){$result = $false}
 				break
 			}						
 		}				

@@ -42,6 +42,7 @@ RUNNING THE PI SECURITY AUDIT SCRIPTS
 	$cpt = piauditparams $cpt "myPI" "PIAFServer"
 	$cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" 
 	# -IntegratedSecurity $false -user "sa" -pf "p1.dat"
+	$cpt = piauditparams $cpt "myPI" "PICoresightServer"
 	piaudit -cpt $cpt
 
 	# Example 3
@@ -54,6 +55,7 @@ RUNNING THE PI SECURITY AUDIT SCRIPTS
 	$cpt = piauditparams $cpt "myPI" "PIAFServer"
 	$cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" `
 	-IntegratedSecurity $false -user "sa" -pf "p1.dat"
+	$cpt = piauditparams $cpt "myPI" "PICoresightServer"
 	piaudit -cpt $cpt
 
 	# Example 4
@@ -63,6 +65,7 @@ RUNNING THE PI SECURITY AUDIT SCRIPTS
 	$cpt = piauditparams $cpt "myPI" "PIAFServer"
 	$cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" `
 	-IntegratedSecurity $false -user "sa"
+	$cpt = piauditparams $cpt "myPI" "PICoresightServer"
 	piaudit -cpt $cpt
 
 	# Example 5
@@ -236,6 +239,14 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 			be configured using the Policy-Based Management or the sp_configure stored procedure. For 
 			more information, see: https://msdn.microsoft.com/en-us/library/ms191188.aspx.
         
+	::PI Coresight Server::
+ 
+		AU50001 - PI Coresight Version
+			VALIDATION CHECK: verifies PI Coresight version. 
+			FOR COMPLIANCE: upgrade to the latest version of PI Coresight.  For more information, 
+			see "Upgrade a PI Coresight installation" in the PI Live Library. 
+			https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-8D4F039D8DA6.
+
 EXTENSIBILITY
 
 	The PI Security Audit Scripts are modular and have templates to facilitate 
