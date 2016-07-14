@@ -3142,7 +3142,7 @@ PROCESS
 			Add-Content -Path $inputFilePath -Value (Get-Content $PIConfigInputFilePath)			
 
 			# Start a piconfig as a local session.
-			# As the command is local to the PI Server it will make use of Named Pipe.
+			# As the command is local to the PI Data Archive it will make use of Named Pipe.
 			Start-Process -FilePath $PIConfigExec `
 				-RedirectStandardInput $inputFilePath `
 				-Wait -NoNewWindow			
@@ -4414,7 +4414,7 @@ PROCESS
 	StartComputerAudit $auditHashTable $uniqueComputerParamsTable -dbgl $DBGLevel					
 	
 	# ....................................................................................
-	# Perform Checks on PI Server, PI AF Server, SQL Server, etc.
+	# Perform Checks on PI Data Archive, PI AF Server, SQL Server, etc.
 	# ....................................................................................						
 	foreach($item in $ComputerParamsTable.GetEnumerator())
 	{
