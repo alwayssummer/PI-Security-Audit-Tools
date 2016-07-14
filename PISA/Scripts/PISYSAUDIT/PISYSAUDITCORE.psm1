@@ -3676,7 +3676,7 @@ $cpt = New-PISysAuditComputerParams -cpt $cpt -cn "MyPIServer" -type "pi"
 The -cpt will use the hashtable of parameters to know how to audit
 The -dbgl switch sets the debug level to 2 (full debugging)
 .LINK
-http://community.osisoft.com
+https://pisquare.osisoft.com
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(											
@@ -3995,7 +3995,7 @@ New-PISysAuditReport -cpt $cpt -dbgl 2
 -- See Example 1 for explanations of switch -cpt
 -- The -dbgl switch sets the debug level to 2 (full debugging)
 .LINK
-http://community.osisoft.com
+https://pisquare.osisoft.com
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(											

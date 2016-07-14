@@ -702,6 +702,9 @@ END {}
 # Add your cmdlet after this section. Don't forget to add an intruction
 # to export them at the bottom of this script.
 # ........................................................................
+
+
+
 function Get-PISysAudit_CheckExplicitLoginDisabled
 {
 <#  
@@ -766,10 +769,6 @@ END {}
 }
 
 
-# ........................................................................
-# Add your cmdlet after this section. Don't forget to add an intruction
-# to export them at the bottom of this script.
-# ........................................................................
 function Get-PISysAudit_CheckPIAdminUsage
 {
 <#  
@@ -833,6 +832,65 @@ PROCESS
 										-at $AuditTable "AU20008" `
 										-ain "piadmin is not used" -aiv $result `
 										-msg  $message `
+										-Group1 "PI System" -Group2 "PI Data Archive" `
+										-Severity "Severe"								
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckTrusts
+{
+<#  
+.SYNOPSIS
+AU20009 - Trusts checkup
+.DESCRIPTION
+Audit ID: AU20009
+Audit Check Name: Trusts checkup
+Category: Severe
+Compliance: Any existing trusts should be only for PI API connections. These trusts should at a minimum be 2+ (app name specified). Warnings for open trusts.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{		
+		# Execute the PIConfig scripts.
+				
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU20009" `
+										-ain "AU20009" -aiv $result `
+										-msg "<Message>" `
 										-Group1 "PI System" -Group2 "PI Data Archive" `
 										-Severity "Severe"								
 }

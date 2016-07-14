@@ -9,8 +9,8 @@
 # * Structure:
 #
 # * DISCLAIMER: This sample code is provided to members of the 
-# * OSIsoft Users Community (http://community.osisoft.com) 
-# * and is subject to the OSIsoft Users Community End-User License Agreement,
+# * OSIsoft PI Square Community (https://pisquare.osisoft.com) 
+# * and is subject to the OSIsoft PI Square Community End-User License Agreement,
 # * found at ...
 # * 
 # * All sample code is provided by OSIsoft for illustrative purposes only.
