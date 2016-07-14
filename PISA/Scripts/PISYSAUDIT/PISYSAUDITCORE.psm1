@@ -1992,22 +1992,17 @@ PROCESS
 	
 	try
 	{
+		$scriptBlockCmdTemplate = "(Get-ItemProperty -Path `"{0}`" -Name `"{1}`").{1}"
+		$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $RegKeyPath, $Attribute)
+		$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
 		# Execute the Get-ItemProperty cmdlet method locally or remotely via the Invoke-Command cmdlet.
 		if($LocalComputer)
 		{						
 			# To only obtain the property of the registry key, it is easier to use a dynamic script.			
-			$scriptBlockCmdTemplate = "(Get-ItemProperty -Path `"{0}`" -Name `"{1}`").{1}"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $RegKeyPath, $Attribute)
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
 			$value = Invoke-Command -ScriptBlock $scriptBlock			
 		}
 		else
-		{	
-			# To avoid DCOM to be used with WMI calls, use PS Remoting technique to wrap
-			# the WMI call.			
-			$scriptBlockCmdTemplate = "(Get-ItemProperty -Path `"{0}`" -Name `"{1}`").{1}"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $RegKeyPath, $Attribute)
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
+		{			
 			$value = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
 		}
 	
@@ -2510,11 +2505,11 @@ PROCESS
 			# Set Paths
 			#......................................................................................
 			# Get the PI folder.
-			$PIServer_path = Get-PISysAudit_EnvVariable "PISERVER" -lc $false -rcn $RemoteComputerName											           
+			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $false -rcn $RemoteComputerName											           
 			# Set the ADM folder.
-			$PIServer_ADM_path = Join-Path -Path $PIServer_path -ChildPath "adm"
+			$PIHome_log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $PIServer_ADM_path -ChildPath "netsh_output.txt"                                 			
+			$outputFilePath = Join-Path -Path $PIHome_log_path -ChildPath "netsh_output.txt"                                 			
 			# Set the path to netsh CLU.
 			$windowsFolder = Get-PISysAudit_EnvVariable "WINDIR" -lc $false -rcn $RemoteComputerName											           
 			$netshExec = Join-Path -Path $windowsFolder -ChildPath "System32\netsh.exe"                                 						
@@ -2596,6 +2591,66 @@ PROCESS
 		
 		# Return the error message.
 		Write-PISysAudit_LogMessage "A problem occured when calling the netsh command." "Error" $fn -eo $_
+		return $null
+	}
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_AppLockerState
+{
+<#
+.SYNOPSIS
+(Core functionality) Get the state of AppLocker.
+.DESCRIPTION
+Get the state of AppLocker.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(		
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS		
+{		
+	$fn = GetFunctionName
+	
+	try
+	{									
+		$scriptBlockCmd = " if(`$PSVersionTable.PSVersion.Major -ge 3) [Get-AppLockerPolicy -Effective -XML] else [`$null] "
+		$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")	
+		$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
+		if($LocalComputer)
+		{			                    			
+			$appLockerPolicy = Invoke-Command -ScriptBlock $scriptBlock
+		}
+		else
+		{                            				
+			$appLockerPolicy = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
+		}
+		
+		# Return the content.
+		return $appLockerPolicy
+	}
+	catch
+	{
+		
+		# Return the error message.
+		Write-PISysAudit_LogMessage "A problem occured while retrieving the AppLocker configuration." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -4524,6 +4579,7 @@ Export-ModuleMember Get-PISysAudit_InstalledComponents
 Export-ModuleMember Get-PISysAudit_InstalledKBs
 Export-ModuleMember Get-PISysAudit_InstalledWin32Features
 Export-ModuleMember Get-PISysAudit_FirewallState
+Export-ModuleMember Get-PISysAudit_AppLockerState
 Export-ModuleMember Get-PISysAudit_WindowsFeature
 Export-ModuleMember Invoke-PISysAudit_AFDiagCommand
 Export-ModuleMember Invoke-PISysAudit_PIConfigScript

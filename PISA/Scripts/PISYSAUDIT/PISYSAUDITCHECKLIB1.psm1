@@ -47,6 +47,8 @@ function Get-PISysAudit_FunctionsFromLibrary1
 	$listOfFunctions.Add("Get-PISysAudit_CheckDomainMemberShip", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckOSSKU", 1)
 	$listOfFunctions.Add("Get-PISysAudit_FirewallEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_AppLockerEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_UACEnabled", 1)
 			
 	# Return the list.
 	return $listOfFunctions
@@ -301,7 +303,7 @@ PROCESS
 {					
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{				
 		# Read the registry key.
@@ -323,14 +325,180 @@ PROCESS
 		if($validationCounter -eq 3) { $result = $true } else { $result = $false }							
 	}
 	catch
-	{ $result = "N/A" }	
+	{ 
+		$result = "N/A" 
+		$msg = "The validation did not complete successfully."
+	}	
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU10003" `
 										-ain "Firewall Enabled" -aiv $result `
+										-MessageList $msg `
 										-Group1 "Machine" -Group2 "Firewall" `
 										-Severity "Moderate"																				 
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_AppLockerEnabled
+{
+<#  
+.SYNOPSIS
+AU10004 - AppLocker Enabled
+.DESCRIPTION
+Audit ID: AU10004
+Audit Check Name: AppLocker Enabled
+Category: Moderate
+Compliance: Application Identity service should be running and policy configured to enforce.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS
+{					
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{				
+		$result = $false
+		# Read the AppLocker policy.
+		[xml] $appLockerPolicy = Get-PISysAudit_AppLockerState -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		if($appLockerPolicy -ne $null)
+		{
+			if($(Select-Xml -xml $appLockerPolicy -XPath "//RuleCollection[@Type='Exe']").Node.EnforcementMode -eq "Enabled" -and `
+				$(Select-Xml -xml $appLockerPolicy -XPath "//RuleCollection[@Type='Msi']").Node.EnforcementMode -eq "Enabled")
+			{$result = $true}
+			else
+			{
+				$msg = "Applocker is not configured to enforce."
+			}
+		}
+	}
+	catch
+	{ 
+		$result = "N/A";
+		$msg = "The validation did not complete successfully."
+	}	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU10004" `
+										-ain "AppLocker Enabled" -aiv $result `
+										-MessageList $msg `
+										-Group1 "Machine" -Group2 "AppLocker" `
+										-Severity "Moderate"																				 
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_UACEnabled
+{
+<#  
+.SYNOPSIS
+AU10005 - UAC Enabled
+.DESCRIPTION
+Audit ID: AU10005
+Audit Check Name: UAC Enabled
+Category: Moderate
+Compliance: UAC should be enabled.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS
+{					
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	$severity = "Unkown"
+
+	try
+	{				
+		$result = $true
+		$uacKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\system"
+		$defaultEnabledUACFeatures = "EnableLUA", "ConsentPromptBehaviorAdmin", "EnableInstallerDetection", "PromptOnSecureDesktop", "EnableSecureUIAPaths"
+		
+		# Loop through key default enabled UAC features
+		$tmpmsg = "Some default UAC features are disabled: "
+		foreach ($uacFeature in $defaultEnabledUACFeatures) 
+		{
+			if ($(Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -RegKeyPath $uacKeyPath -Attribute $uacFeature) -eq 0)
+			{
+				$result = $false
+				$severity = "Moderate"
+				$tmpmsg += $uacFeature + "; "
+			}
+		}
+		
+		if(!$result)
+		{$msg = $tmpmsg}
+
+		$additionalUACFeature = "ValidateAdminCodeSignatures"
+		# If the default features are enabled, check for additional feature for added security
+		if ($result -and ($(Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -RegKeyPath $uacKeyPath -Attribute $additionalUACFeature) -eq 0))
+		{
+			$result = $false
+			$msg = "Recommended UAC feature {0} diasabled."
+			$msg = [string]::Format($msg, $additionalUACFeature)
+			$severity = "Low"
+		}	
+	}
+	catch
+	{ 
+		$result = "N/A"
+		$msg = "The validation did not complete successfully."
+	}	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU10005" `
+										-ain "UAC Enabled" -aiv $result `
+										-MessageList $msg `
+										-Group1 "Machine" -Group2 "UAC" `
+										-Severity $severity																				 
 }
 
 END {}
@@ -410,6 +578,8 @@ Export-ModuleMember Get-PISysAudit_FunctionsFromLibrary1
 Export-ModuleMember Get-PISysAudit_CheckDomainMemberShip
 Export-ModuleMember Get-PISysAudit_CheckOSSKU
 Export-ModuleMember Get-PISysAudit_FirewallEnabled
+Export-ModuleMember Get-PISysAudit_AppLockerEnabled
+Export-ModuleMember Get-PISysAudit_UACEnabled
 # </Do not remove>
 
 # ........................................................................

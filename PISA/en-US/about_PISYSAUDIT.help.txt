@@ -102,7 +102,9 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 				41 - Server Enterprise without Hyper-V (core installation) 
 				42 - Microsoft Hyper-V Server
 			These SKUs were chosen to highlight the reduced attack surface area of a core 
-			installation of Windows Server.
+			installation of Windows Server.  For more on the advantages of Windows Server Core, 
+			please see:
+			https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx
 
 		AU10003 - Validate if Windows firewall is enabled    
 			VALIDATION CHECK: verifies that the Windows host based firewall is enabled.  
@@ -112,6 +114,26 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 			For more general information on the Windows firewall, see "Windows Firewall with 
 			Advanced Security Overview" on TechNet: 
 			https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx.
+
+		AU10004 - AppLocker Enabled
+			VALIDATION CHECK: verifies that AppLocker is enabled.  
+			FOR COMPLIANCE: set AppLocker to Enforce mode after establishing a policy.  For a 
+			primer on running AppLocker on a PI Data Archive, see:
+			https://techsupport.osisoft.com/Troubleshooting/KB/KB00994
+
+		AU10005 - UAC Enabled
+			VALIDATION CHECK: verifies that UAC is enabled.  More precisely, it verifies the 
+			following default features: 
+				EnableLUA
+				ConsentPromptBehaviorAdmin
+				EnableInstallerDetection
+				PromptOnSecureDesktop
+				EnableSecureUIAPaths
+			Additionally, a check is performed for the feature ValidateAdminCodeSignatures.  
+			Lower severity is assigned if this is the only feature disabled.
+			FOR COMPLIANCE: enable the flagged UAC features.  For more information on specific
+			UAC features, see:
+			https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx.
 
 	::PI DATA ARCHIVE::
 
@@ -162,7 +184,16 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 			VALIDATION CHECK: verifies that explicit login is disabled as an authentication protocol.    
 			FOR COMPLIANCE: set the tuning parameter Server_AuthenticationPolicy to a value greater than 3.  
 			This is equivalent to the third notch, "Disable explicit login", or higher on the Security 
-			Settings plugin in PI SMT.    
+			Settings plugin in PI SMT.  For more information, see "Security Best Practice #2" and "Security 
+			Best Practice #3" in KB00833.
+			https://techsupport.osisoft.com/Troubleshooting/KB/KB00833
+			
+		 AU20008 - Check if piadmin is not used 
+			VALIDATION CHECK: verifies that piadmin is not used in trusts or mappings.    
+			FOR COMPLIANCE: replace any trusts or mappings that use piadmin with a mapping or trust to a
+			PI Identity with appropriate privilege for the applications that will use it.  For more 
+			information, see "Security Best Practice" #4 in KB00833:
+			https://techsupport.osisoft.com/Troubleshooting/KB/KB00833.
  
 	::PI AF Server::
  
