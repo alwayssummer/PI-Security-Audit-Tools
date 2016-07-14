@@ -3197,7 +3197,7 @@ PROCESS
 			Add-Content -Path $inputFilePath -Value (Get-Content $PIConfigInputFilePath)			
 
 			# Start a piconfig as a local session.
-			# As the command is local to the PI Server it will make use of Named Pipe.
+			# As the command is local to the PI Data Archive it will make use of Named Pipe.
 			Start-Process -FilePath $PIConfigExec `
 				-RedirectStandardInput $inputFilePath `
 				-Wait -NoNewWindow			
@@ -4038,7 +4038,7 @@ $cpt = New-PISysAuditComputerParams -cpt $cpt -cn "MyPIServer" -type "pi"
 The -cpt will use the hashtable of parameters to know how to audit
 The -dbgl switch sets the debug level to 2 (full debugging)
 .LINK
-http://community.osisoft.com
+https://pisquare.osisoft.com
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(											
@@ -4379,7 +4379,7 @@ New-PISysAuditReport -cpt $cpt -dbgl 2
 -- See Example 1 for explanations of switch -cpt
 -- The -dbgl switch sets the debug level to 2 (full debugging)
 .LINK
-http://community.osisoft.com
+https://pisquare.osisoft.com
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(											
@@ -4469,7 +4469,7 @@ PROCESS
 	StartComputerAudit $auditHashTable $uniqueComputerParamsTable -dbgl $DBGLevel					
 	
 	# ....................................................................................
-	# Perform Checks on PI Server, PI AF Server, SQL Server, etc.
+	# Perform Checks on PI Data Archive, PI AF Server, SQL Server, etc.
 	# ....................................................................................						
 	foreach($item in $ComputerParamsTable.GetEnumerator())
 	{
