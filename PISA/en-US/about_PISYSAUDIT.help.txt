@@ -14,7 +14,7 @@ LONG DESCRIPTION
 	A series of PowerShell script files (*.psm1) form a single module named PI System Audit 
 	Module (or PISysAudit Module) once loaded. You will find one core script containing the 
 	collection logic and four library scripts containing the validation logic for different 
-	topics such as best practices to harden the machine, PI Server, etc. The module exposes 
+	topics such as best practices to harden the machine, PI Data Archive, etc. The module exposes 
 	several cmdlets either used for the internal logic or the external interface with the 
 	end-user.
 
@@ -23,7 +23,7 @@ LONG DESCRIPTION
 	perform many tasks. This allows being compatible with many versions of the PI System.
 
 	The current version of the PISysAudit module implements 16 validations covering: 
-	machine (AU1XXXX), PI Server (AU2XXXX), PI AF Server (AU3XXXX) and SQL Server (AU4XXXX) 
+	machine (AU1XXXX), PI Data Archive (AU2XXXX), PI AF Server (AU3XXXX) and SQL Server (AU4XXXX) 
 	best practices with the PI System.	
         
 RUNNING THE PI SECURITY AUDIT SCRIPTS
