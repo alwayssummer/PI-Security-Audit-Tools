@@ -1,4 +1,4 @@
-# PI-System-Audit-Tools
+# PI-Security-Audit-Tools
 
 ## Contents
 This project is a framework to baseline the security configuration of your PI System. This tool framework is built as a PowerShell module containing cmdlets to perform different calls to collect the data from the security settings of different requested PI System components.
@@ -7,7 +7,7 @@ A series of PowerShell script files (*.psm1) form a single module named PI Syste
 
 The PI System Audit Module (PISysAudit) requires PowerShell version 2 and later, it can be executed locally or remotely and make use of existing command line utilities to perform many tasks. This allows being compatible with many versions of the PI System.  
 
-The current version of the PISysAudit module implements 16 validations covering machine (AU1XXXX), PI Server (AU2XXXX), PI AF Server (AU3XXXX) and SQL Server (AU4XXXX) best practices with the PI System.  
+The current version of the PISysAudit module implements validations covering machine (AU1XXXX), PI Server (AU2XXXX), PI AF Server (AU3XXXX), SQL Server (AU4XXXX) and PI Coresight (AU5XXXX) best practices with the PI System.  
  
 _Validations:_
 ```
@@ -19,10 +19,14 @@ AU20002	- PI Admin Trusts Disabled
 AU20003	- PI Data Archive Subsystem Version  	
 AU20004	- Edit Days  
 AU20005	- Auto Trust Configuration	 
-AU20006	- Expensive Query Protection  	
+AU20006	- Expensive Query Protection
+AU20007 - Check if explicit login is disabled
 AU30001	- PI AF Server Service Account  
 AU30002	- Impersonation mode for AF Data Sets  
 AU30003	- PI AF Server Service Access  
+AU30004 - PI AF Server Plugin Verify Level
+AU30005 - PI AF Server File Extension Whitelist
+AU30006 - PI AF Server Version
 AU40001	- SQL Server xp_CmdShell	 
 AU40002	- SQL Server Adhoc Queries	 
 AU40003	- SQL Server DB Mail XPs	 
@@ -33,15 +37,16 @@ AU40004	- SQL Server OLE Automation Procedures
 
 SETUP INSTRUCTIONS:  
 The PISysAudit module does not require installation; you only need to decompress the package. You will need to import the module from the extracted location in order to use it. The file structure is the following:  
-  * bin = Contains command line utilities or PS scripts needed by the PS module
-  * bin\pisysaudit = Contains the PS module definition
-  * export = Contains the generated reports
-  * pwd = Contains saved password files using strong encryption
+  * PISA = Contains the module definition.
+  * PISA\piconfig = Contains the piconfig scripts leveraged by the PI Data Archive validation checks.
+  * PISA\Scripts = Contains command line utilities or PS scripts needed by the PS module
+  * PISA\export = Contains the generated reports
+  * PISA\pwd = Contains saved password files using strong encryption
   
-For example, if you have decompressed the package inside your user folder (C:\users\<user>\documents\pisysaudit v1.0.0.8), you need to import the module the following:  
+For example, if you have decompressed the package inside your user folder (C:\users\<user>\documents\PISA), you need to import the module the following:  
   
 ```
-  Import-Module "C:\users\<user>\documents\pisysaudit v1.0.0.8\bin\pisysaudit"
+  Import-Module "C:\users\<user>\documents\PISA\pisysaudit"
 ```
 
 USAGE EXAMPLES:  
@@ -60,8 +65,9 @@ Use the commands below to launch the audit with two PI Servers, one AF Server an
 ```
     $cpt = piauditparams $null "Computer1" "PIServer"  
     $cpt = piauditparams $cpt "Computer2" "PIServer"  
-    $cpt = piauditparams $cpt "Computer3" "PIAFServer"  
-    $cpt = piauditparams $cpt "Computer4" "SQLServer" -InstanceName "sqlexpress"  
+    $cpt = piauditparams $cpt "Computer3" "PIAFServer"
+    $cpt = piauditparams $cpt "Computer4" "PICoresightServer"
+    $cpt = piauditparams $cpt "Computer5" "SQLServer" -InstanceName "sqlexpress"  
     piaudit -cpt $cpt  
 ```
 
@@ -71,6 +77,12 @@ You get more details by invoking the help with the Get-Help cmdlet like the foll
     Get-Help piaudit  
 ```
     
+For full contextual help, giving examples and a detailed description of each audit check and remediations for failed checks, use the following:
+
+```
+    Get-Help about_PISYSAUDIT
+```
+
 You can also find several examples of commands and syntaxes for this module within examples.ps1 file.  
 
 

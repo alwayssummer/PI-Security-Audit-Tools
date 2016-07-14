@@ -12,6 +12,7 @@ piaudit
 $cpt = piauditparams $null "myPI" "PIServer"
 $cpt = piauditparams $cpt "myPI" "PIAFServer"
 $cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" # -IntegratedSecurity $false -user "sa" -pf "p1.dat"
+$cpt = piauditparams $cpt "myPI" "PICoresightServer"
 piaudit -cpt $cpt
 
 # Example 3
@@ -23,6 +24,7 @@ pwdondisk
 $cpt = piauditparams $null "myPI" "PIServer"
 $cpt = piauditparams $cpt "myPI" "PIAFServer"
 $cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" -IntegratedSecurity $false -user "sa" -pf "p1.dat"
+$cpt = piauditparams $cpt "myPI" "PICoresightServer"
 piaudit -cpt $cpt
 
 # Example 4
@@ -31,6 +33,7 @@ piaudit -cpt $cpt
 $cpt = piauditparams $null "myPI" "PIServer"
 $cpt = piauditparams $cpt "myPI" "PIAFServer"
 $cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" -IntegratedSecurity $false -user "sa"
+$cpt = piauditparams $cpt "myPI" "PICoresightServer"
 piaudit -cpt $cpt
 
 # Example 5

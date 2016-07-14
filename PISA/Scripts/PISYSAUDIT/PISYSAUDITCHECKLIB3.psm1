@@ -46,7 +46,10 @@ function Get-PISysAudit_FunctionsFromLibrary3
 	[System.Collections.HashTable]$listOfFunctions = @{}	
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServiceConfiguredAccount", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPImpersonationModeForAFDataSets", 1)
-	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)			
+	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)	
+	$listOfFunctions.Add("Get-PISysAudit_CheckFileExtensionWhitelist", 1)	
+	$listOfFunctions.Add("Get-PISysAudit_CheckAFServerVersion", 1)	
 	
 	# Return the list.
 	return $listOfFunctions
@@ -59,7 +62,7 @@ function Get-PISysAudit_CheckPIAFServiceConfiguredAccount
 AU30001 - PI AF Server Service Account Check
 .DESCRIPTION
 Audit ID: AU30001
-Audit Check Name: PI AF Server Service Account Check
+Audit Check Name: PI AF Server Service Account
 Category: Severe
 Compliance: Should not be executed with LocalSystem, all other accounts
 are considered good.
@@ -102,7 +105,7 @@ PROCESS
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30001" `
-										-ain "Configured Account Check" -aiv $result `
+										-ain "Configured Account" -aiv $result `
 										-Group1 "PI AF Server" `
 										-Severity "Severe"
 }
@@ -152,8 +155,8 @@ PROCESS
 	try
 	{						
 		# Invoke the afdiag.exe command.		
-		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-	
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+		
 		#.................................
 		# Validate rules
 		# (Do not remove)
@@ -181,7 +184,7 @@ PROCESS
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
-			if($line.Contains("ExternalDataTables"))
+			if($line.Contains("ExternalDataTablesAllowNonImpersonatedUsers"))
 			{								
 				if($line.Contains("True")) { $result = $false }
 				break
@@ -252,7 +255,7 @@ PROCESS
 		$warningMessage = ""
 		
 		# Get the service account.
-		$listOfPrivileges = Get-PISysAudit_CheckPrivilege -lc $LocalComputer -rcn $RemoteComputerName -pv "All" -sn "AFService" -dbgl $DBGLevel					
+		$listOfPrivileges = Get-PISysAudit_CheckPrivilege -lc $LocalComputer -rcn $RemoteComputerName -priv "All" -sn "AFService" -dbgl $DBGLevel					
 		
 		# Read each line to find granted privileges.		
 		foreach($line in $listOfPrivileges)
@@ -307,6 +310,249 @@ PROCESS
 										-msg $warningMessage `
 										-Group1 "PI AF Server" `
 										-Severity "Severe"																					
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckPlugInVerifyLevel
+{
+<#  
+.SYNOPSIS
+AU30004 - PI AF Server Plugin Verify Level Check
+.DESCRIPTION
+Audit ID: AU30004
+Audit Check Name: PI AF Server Plugin Verify Level
+Category: Moderate
+Compliance: Should be either RequireSigned or RequireSignedTrustedProvider.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{						
+		# Read the afdiag.exe command output.
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+
+		# Read each line to find the one containing the token to replace.
+		$result = $true
+		foreach($line in $outputFileContent)
+		{								
+			if($line.Contains("PlugInVerifyLevel"))
+			{								
+				if($line.Contains("AllowUnsigned") -or $line.Contains("None")) { $result = $false }
+				break
+			}						
+		}				
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30004" `
+										-ain "PI AF Server Plugin Verify Level" -aiv $result `
+										-Group1 "PI AF Server" `
+										-Severity "Moderate"
+										
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckFileExtensionWhitelist
+{
+<#  
+.SYNOPSIS
+AU30005 - PI AF Server File Extension Whitelist
+.DESCRIPTION
+Audit ID: AU30005
+Audit Check Name: PI AF Server File Extension Whitelist
+Category: Moderate
+Compliance: Should only include the file extensions: docx:xlsx:csv:pdf:txt:rtf:jpg:jpeg:png:svg:tiff:gif or a subset thereof.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{						
+		# Read the afdiag.exe command output.		
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+
+		# Read each line to find the one containing the token to replace.
+		$result = $true
+		foreach($line in $outputFileContent)
+		{								
+			# Locate FileExtensions parameter
+			if($line.Contains("FileExtensions"))
+			{								
+				# Master whitelist of approved extensions
+				[System.Collections.ArrayList] $allowedExtensions = 'docx','xlsx','csv','pdf','txt','rtf','jpg','jpeg','png','svg','tiff','gif'
+				# Extract configured whitelist from parameter value
+				[string] $extensionList = $line.Split('=')[1].TrimStart()
+				if($extensionList -ne "")
+				{
+					[string[]] $extensions = $extensionList.Split(':')
+					# Loop through the configured extensions
+					foreach($extension in $extensions) 
+					{ 
+						# Assume extension is a violation until proven compliant
+						$result = $false
+						# As soon as the extension is found in the master list, we move to the next one
+						foreach($allowedExtension in $allowedExtensions)
+						{
+							if($extension -eq $allowedExtension) 
+							{ 
+								$result = $true
+								# There should not be duplicates so we don't need include that extension in further iterations
+								$allowedExtensions.Remove($extension)
+								break
+							}
+							else {$result = $false}
+						}
+						# If we detect any rogue extension, the validation check fails, no need to look further
+						if($result -eq $false) {break}
+					} 
+					break
+				}
+			}						
+		}				
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30005" `
+										-ain "PI AF Server File Extension Whitelist" -aiv $result `
+										-Group1 "PI AF Server" `
+										-Severity "Moderate"
+										
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckAFServerVersion
+{
+<#  
+.SYNOPSIS
+AU30006 - PI AF Server Version
+.DESCRIPTION
+Audit ID: AU30006
+Audit Check Name: PI AF Server Version Check
+Category: Moderate
+Compliance: Using latest version of PI AF.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{						
+		# Read the afdiag.exe command output.
+		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
+
+		# Read each line to find the one containing the token to replace.
+		$result = $true
+		foreach($line in $outputFileContent)
+		{								
+			if($line.Contains("Version"))
+			{								
+				$installVersion = $line.Split('=').TrimStart()[1]
+				$installVersionTokens = $installVersion.Split(".")
+				# Form an integer value with all the version tokens.
+				[string]$temp = $InstallVersionTokens[0] + $installVersionTokens[1] + $installVersionTokens[2] + $installVersionTokens[3]
+				$installVersionInt64 = [Convert]::ToInt64($temp)
+				if($installVersionInt64 -lt 2800000){$result = $false}
+				break
+			}						
+		}				
+	}
+	catch
+	{ $result = "N/A" }	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30006" `
+										-ain "PI AF Server Version" -aiv $result `
+										-Group1 "PI AF Server" `
+										-Severity "Moderate"
+										
 }
 
 END {}
@@ -386,6 +632,9 @@ Export-ModuleMember Get-PISysAudit_FunctionsFromLibrary3
 Export-ModuleMember Get-PISysAudit_CheckPIAFServiceConfiguredAccount
 Export-ModuleMember Get-PISysAudit_CheckPImpersonationModeForAFDataSets
 Export-ModuleMember Get-PISysAudit_CheckPIAFServicePrivileges
+Export-ModuleMember Get-PISysAudit_CheckPlugInVerifyLevel
+Export-ModuleMember Get-PISysAudit_CheckFileExtensionWhitelist
+Export-ModuleMember Get-PISysAudit_CheckAFServerVersion
 # </Do not remove>
 
 # ........................................................................
