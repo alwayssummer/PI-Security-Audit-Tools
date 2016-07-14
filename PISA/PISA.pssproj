@@ -27,6 +27,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="en-US\" />
     <Folder Include="Scripts\" />
     <Folder Include="piconfig\" />
     <Folder Include="Scripts\PISYSAUDIT\" />
@@ -38,13 +39,16 @@
     <Compile Include="PISA.tests.ps1" />
     <Compile Include="PISYSAUDIT.psd1" />
     <Compile Include="Scripts\CheckProcessPrivilege.ps1" />
+    <Compile Include="Scripts\Examples.ps1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB1.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB2.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB3.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB4.psm1" />
+    <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB5.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCORE.psm1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="en-US\about_PISYSAUDIT.help.txt" />
     <Content Include="piconfig\CheckAutoTrustConfig.dif" />
     <Content Include="piconfig\CheckEditDays.dif" />
     <Content Include="piconfig\CheckExpensiveQuery.dif" />
