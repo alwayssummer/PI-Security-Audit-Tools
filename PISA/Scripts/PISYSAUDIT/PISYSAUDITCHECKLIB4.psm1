@@ -102,7 +102,7 @@ PROCESS
 {	
 	# Get and store the function Name.
 	$fn = GetFunctionName	
-	
+	$msg = ""
 	try
 	{											
 		# Build and execute the query.			
@@ -117,17 +117,25 @@ PROCESS
 		if($value -eq $null)
 		{
 			# Return the error message.
-			$msg = "A problem occured during the processing of SQL Server Server checks (logon issue, communication problem, etc.)"					
+			$msg = "A problem occured during the processing of the validation check (logon issue, communication problem, etc.)"					
 			Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 			$result = "N/A"
 		}				
-		elseif($value -eq 0) { $result = $true }
-		else { $result = $true }	
+		elseif($value -eq 0) 
+		{ 
+			$result = $true 
+			$msg = "xp_cmdshell disabled."
+		}
+		else 
+		{ 
+			$result = $false
+			$msg = "xp_cmdshell enabled." 
+		}	
 	}
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of SQL Server Server checks"					
+		$msg = "A problem occured during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -135,6 +143,7 @@ PROCESS
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU40001" `
+										-msg $msg `
 										-ain "SQL Server xp_CmdShell Check" -aiv $result `
 										-Group1 "Machine" -Group2 "SQL Server" `
 										-Severity "Severe"
@@ -196,7 +205,7 @@ PROCESS
 {	
 	# Get and store the function Name.
 	$fn = GetFunctionName
-
+	$msg = ""
 	try
 	{											
 		# Build and execute the query.			
@@ -211,17 +220,25 @@ PROCESS
 		if($value -eq $null)
 		{
 			# Return the error message.
-			$msg = "A problem occured during the processing of SQL Server Server checks (logon issue, communication problem, etc.)"					
+			$msg = "A problem occured during the processing of the validation check (logon issue, communication problem, etc.)"					
 			Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 			$result = "N/A"
 		}				
-		elseif($value -eq 0) { $result = $true }
-		else { $result = $true }	
+		elseif($value -eq 0) 
+		{ 
+			$result = $true 
+			$msg = "Ad Hoc Distributed Queries disabled."
+		}
+		else 
+		{ 
+			$result = $false
+			$msg = "Ad Hoc Distributed Queries enabled."
+		}	
 	}
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of SQL Server Server checks"					
+		$msg = "A problem occured during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -229,6 +246,7 @@ PROCESS
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU40002" `
+										-msg $msg `
 										-ain "SQL Server Adhoc Queries Check" -aiv $result `
 										-Group1 "Machine" -Group2 "SQL Server" `
 										-Severity "Severe"
@@ -290,7 +308,7 @@ PROCESS
 {	
 	# Get and store the function Name.
 	$fn = GetFunctionName
-
+	$msg = ""
 	try
 	{											
 		# Build and execute the query.			
@@ -305,17 +323,25 @@ PROCESS
 		if($value -eq $null)
 		{
 			# Return the error message.
-			$msg = "A problem occured during the processing of SQL Server Server checks (logon issue, communication problem, etc.)"					
+			$msg = "A problem occured during the processing of the validation check (logon issue, communication problem, etc.)"					
 			Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 			$result = "N/A"
 		}				
-		elseif($value -eq 0) { $result = $true }
-		else { $result = $true }
+		elseif($value -eq 0) 
+		{ 
+			$result = $true 
+			$msg = "Database Mail XPs disabled."
+		}
+		else 
+		{ 
+			$result = $false
+			$msg = "Database Mail XPs enabled."
+		}
 	}
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of SQL Server Server checks"					
+		$msg = "A problem occured during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -323,6 +349,7 @@ PROCESS
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU40003" `
+										-msg $msg `
 										-ain "SQL Server DB Mail XPs Check" -aiv $result `
 										-Group1 "Machine" -Group2 "SQL Server" `
 										-Severity "Severe"
@@ -384,7 +411,7 @@ PROCESS
 {	
 	# Get and store the function Name.
 	$fn = GetFunctionName
-
+	$msg = ""
 	try
 	{											
 		# Build and execute the query.			
@@ -399,17 +426,25 @@ PROCESS
 		if($value -eq $null)
 		{
 			# Return the error message.
-			$msg = "A problem occured during the processing of SQL Server Server checks (logon issue, communication problem, etc.)"					
+			$msg = "A problem occured during the processing of the validation check (logon issue, communication problem, etc.)"					
 			Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 			$result = "N/A"
 		}				
-		elseif($value -eq 0) { $result = $true }
-		else { $result = $true }	
+		elseif($value -eq 0) 
+		{
+			$result = $true 
+			$msg = "Ole Automation Procedures disabled."
+		}
+		else 
+		{ 
+			$result = $false
+			$msg = "Ole Automation Procedures enabled."
+		}	
 	}
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of SQL Server Server checks"					
+		$msg = "A problem occured during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -418,6 +453,7 @@ PROCESS
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU40004" `
 										-ain "SQL Server OLE Automation Procedures Check" -aiv $result `
+										-msg $msg `
 										-Group1 "Machine" -Group2 "SQL Server" `
 										-Severity "Severe"
 										
@@ -482,19 +518,24 @@ PROCESS
 {	
 	# Get and store the function Name.
 	$fn = GetFunctionName
-
+	$msg = ""
 try
 	{		
 		# Enter routine.			
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 			
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU3xxxx" `
 										-ain "<Name>" -aiv $result `
-										-msg "<Message>" `
+										-msg $msg `
 										-Group1 "<Category 1>" -Group2 "<Category 2>" -Group3 "<Category 3>" -Group4 "<Category 4>"`
 										-Severity "<Severity>"
 }
