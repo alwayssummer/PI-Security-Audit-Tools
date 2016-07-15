@@ -97,7 +97,16 @@ PROCESS
 		$value = Get-PISysAudit_ServiceLogOnAccount "afservice" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel				
 		
 		# Check if the value is <> LocalSystem		
-		if($value.ToLower() -eq "localsystem") { $result =  $false } else { $result = $true }				
+		if($value.ToLower() -eq "localsystem") 
+		{
+			$result =  $false 
+			$msg = "AFService is running as Local System"
+		} 
+		else 
+		{ 
+			$result = $true 
+			$msg = "AFService is not running as Local System"
+		}				
 	}
 	catch
 	{
@@ -190,12 +199,17 @@ PROCESS
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
-			if($line.Contains("ExternalDataTablesAllowNonImpersonatedUsers"))
+			if($line.ToLower().Contains("externaldatatablesallownonimpersonatedusers"))
 			{								
-				if($line.Contains("True")) { $result = $false }
+				if($line.ToLower().Contains("true")) 
+				{ 
+					$result = $false
+					$msg = "Non Impersonated Users are allowed for external tables." 
+				}
 				break
 			}						
-		}				
+		}
+		if($result){$msg = "Non Impersonated Users are not allowed for external tables."}				
 	}
 	catch
 	{
@@ -295,9 +309,9 @@ PROCESS
 				
 				# Store the privilege found that might compromise security.
 				if($securityWeaknessCounter -eq 1)
-				{ $warningMessage = $line.ToUpper() }
+				{ $msg = $line.ToUpper() }
 				else
-				{ $warningMessage = $warningMessage + ", " + $line.ToUpper() }
+				{ $msg = $msg + ", " + $line.ToUpper() }
 			}					
 		}
 		
@@ -306,12 +320,15 @@ PROCESS
 		{
 			$result = $false
 			if($securityWeaknessCounter -eq 1)
-			{ $warningMessage = "The following privilege: " + $warningMessage + " is enabled." }
+			{ $msg = "The following privilege: " + $msg + " is enabled." }
 			else
-			{ $warningMessage = "The following privileges: " + $warningMessage + " are enabled." }
+			{ $msg = "The following privileges: " + $msg + " are enabled." }
 		}
-		else { $result = $true }
-		$msg = $warningMessage
+		else 
+		{ 
+			$result = $true 
+			$msg = "No weaknesses were detected."
+		}
 	}
 	catch
 	{
@@ -381,12 +398,17 @@ PROCESS
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
-			if($line.Contains("PlugInVerifyLevel"))
+			if($line.ToLower().Contains("pluginverifylevel"))
 			{								
-				if($line.Contains("AllowUnsigned") -or $line.Contains("None")) { $result = $false }
+				if($line.ToLower().Contains("allowunsigned") -or $line.ToLower().Contains("none")) 
+				{ 
+					$result = $false 
+					$msg = "Unsigned plugins are permitted."
+				}
 				break
 			}						
-		}				
+		}	
+		if($result){$msg = "Signatures are required for plugins."}			
 	}
 	catch
 	{
@@ -400,6 +422,7 @@ PROCESS
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30004" `
 										-ain "PI AF Server Plugin Verify Level" -aiv $result `
+										-msg $msg `
 										-Group1 "PI AF Server" `
 										-Severity "Moderate"
 										
@@ -457,7 +480,7 @@ PROCESS
 		foreach($line in $outputFileContent)
 		{								
 			# Locate FileExtensions parameter
-			if($line.Contains("FileExtensions"))
+			if($line.ToLower().Contains("fileextensions"))
 			{								
 				# Master whitelist of approved extensions
 				[System.Collections.ArrayList] $allowedExtensions = 'docx','xlsx','csv','pdf','txt','rtf','jpg','jpeg','png','svg','tiff','gif'
@@ -493,8 +516,8 @@ PROCESS
 					if($result){$msg = "No non-compliant extensions identified."}
 					break
 				}
-			}	
-			break					
+				break
+			}						
 		}				
 	}
 	catch
