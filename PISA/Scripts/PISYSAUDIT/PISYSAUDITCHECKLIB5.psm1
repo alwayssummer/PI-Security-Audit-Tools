@@ -120,7 +120,7 @@ PROCESS
 									-at $AuditTable "AU50001" `
 									-msg $msg `
 									-ain "PI Coresight Version" -aiv $result `
-									-Group1 "PI Coresight" `
+									-Group1 "PI System" -Group2 "PI Coresight" `
 									-Severity "Moderate"																																																
 
 }

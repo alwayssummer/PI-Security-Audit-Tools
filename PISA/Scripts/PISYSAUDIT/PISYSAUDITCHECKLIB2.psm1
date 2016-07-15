@@ -299,7 +299,7 @@ PROCESS
 										-at $AuditTable "AU20002" `
 										-ain "PI Admin Trusts Disabled" -aiv $result `
 										-msg $msg `
-										-Group1 "PI System" -Group2 "Trusts" `
+										-Group1 "PI System" -Group2 "Authentication" `
 										-Severity "Severe"																		
 }
 
@@ -411,7 +411,7 @@ PROCESS
 										-at $AuditTable "AU20003" `
 										-ain "PI Data Archive SubSystem Versions" -aiv $result `
 										-msg $msg `
-										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI SubSystems" `
+										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI Subsystems" `
 										-Severity $Severity									
 }
 
@@ -639,7 +639,7 @@ PROCESS
 										-at $AuditTable "AU20005" `
 										-ain "Auto Trust Configuration" -aiv $result `
 										-msg $msg `
-										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "Trusts" `
+										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "Authentication" `
 										-Severity "Severe"	
 										
 }
@@ -790,7 +790,7 @@ PROCESS
 										-at $AuditTable "AU20006" `
 										-ain "Expensive Query Protection" -aiv $result `
 										-msg $msg `
-										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI Archive SubSystem" `
+										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI Archive Subsystem" `
 										-Severity "Severe"																		
 }
 

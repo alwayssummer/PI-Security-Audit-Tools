@@ -367,7 +367,7 @@ PROCESS
 										-at $AuditTable "AU10003" `
 										-ain "Firewall Enabled" -aiv $result `
 										-msg $msg `
-										-Group1 "Machine" -Group2 "Firewall" `
+										-Group1 "Machine" -Group2 "Policy" `
 										-Severity "Moderate"																				 
 }
 
@@ -449,7 +449,7 @@ PROCESS
 										-at $AuditTable "AU10004" `
 										-ain "AppLocker Enabled" -aiv $result `
 										-msg $msg `
-										-Group1 "Machine" -Group2 "AppLocker" `
+										-Group1 "Machine" -Group2 "Policy" `
 										-Severity "Moderate"																				 
 }
 
@@ -540,7 +540,7 @@ PROCESS
 										-at $AuditTable "AU10005" `
 										-ain "UAC Enabled" -aiv $result `
 										-msg $msg `
-										-Group1 "Machine" -Group2 "UAC" `
+										-Group1 "Machine" -Group2 "Policy" `
 										-Severity $severity																				 
 }
 

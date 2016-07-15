@@ -4262,9 +4262,9 @@ function Write-PISysAuditReport
 {
 <#
 .SYNOPSIS
-(Core functionality) Create an audit object and place it inside a hash table object.
+(Core functionality) Writes a report of all checks performed.
 .DESCRIPTION
-Create an audit object and place it inside a hash table object.
+Writes a concise CSV report of all checks performed and optionally a detailed HTML report.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(
@@ -4276,6 +4276,10 @@ param(
 		[alias("obf")]
 		[boolean]
 		$ObfuscateSensitiveData = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dtl")]
+		[boolean]
+		$DetailReport = $true,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("dbgl")]
 		[int]
@@ -4294,11 +4298,12 @@ PROCESS
 		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value														
 			
 		# Output to log file.			
-		# Create the log file in the same folder as the script.
-		$fileName = "PISystemAudit_" + 	$ts + ".csv"	
+		# Create the log file in the same folder as the script. 
+		$fileName = "PISecurityAudit_" + $ts + ".csv"
+
 		$fileToExport = Join-Path -Path $exportPath -ChildPath $fileName
 		
-		# Build a collection for output to a .csv file.
+		# Build a collection for output.
 		$results = @()	
 		foreach($item in $AuditHashTable.GetEnumerator())			
 		{
@@ -4319,12 +4324,77 @@ PROCESS
 			# Add to collection.
 			$results += $item.Value	
 		}
-
-		# Export to .csv but sort by the column first.
-		$results | Select-Object * | Sort ID | Export-CSV -Path $fileToExport -Encoding ASCII -NoType
+		
+		
+			# Export to .csv but sort by the ID column first.
+			$results = $results | Select-Object * | Sort ID 
+			$results | Export-Csv -Path $fileToExport -Encoding ASCII -NoType
+		
+		if($DetailReport){
 			
+			$fileName = "PISecurityAudit_DetailReport_" + $ts + ".html" 
+
+			$fileToExport = Join-Path -Path $exportPath -ChildPath $fileName
+
+			$header = @"
+			<html><head><meta name="viewport" content="width=device-width" />
+			<style type="text/css">
+			h2 {font: 18px verdana; font-family: verdana; font-weight: bold}
+			body {font: 12px verdana} a {font: 12px verdana}
+			.summarytable {border-width: 1px; border-collapse: collapse }
+			.summaryheader {font: 12px verdana; font-weight: bold; background-color: lightblue}
+			.summaryrow {font: 12px verdana}
+			.row {vertical-align: top; height:auto !important;}
+			</style></head><body><h2>AUDIT SUMMARY<h2>
+"@
+			# Header for the summary table.
+			$tableHeader = @"
+			<table border="1" class="summarytable" style="align:left;"><tr class="summaryheader">
+			<td>ID</td>
+			<td>Server</td>
+			<td>Validation Check</td>
+			<td>Result</td> 
+			<td>Severity</td>
+			<td>Message</td>
+			<td>Category</td> 
+			<td>Area</td>
+			<tr>
+"@
+			$reportHTML = $header + $tableHeader
+			$fails = @()
+			foreach($result in $results) 
+			{
+				$highlight = ""
+				if($result.AuditItemValue.ToLower() -eq "fail"){
+					if($result.Severity.ToLower() -eq "critical") {$highlight = "bgcolor=`"red`"" }
+					elseif($result.Severity.ToLower() -eq "severe") { $highlight = "bgcolor=`"orange`"" }
+					else { $highlight = "bgcolor=`"yellow`"" }
+					$fails += $result
+				}
+				$tableRow = @"
+				<tr class="summaryrow" {8}>
+				<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{7}</td>
+				<td>{4}</td><td>{5}</td><td>{6}</td>
+"@ 
+				$tableRow = [string]::Format($tableRow, $result.ID,$result.ServerName, $result.AuditItemName, 
+												$result.AuditItemValue, $result.MessageList, $result.Group1,
+												$result.Group2, $result.Severity, $highlight)
+				$reportHTML += $tableRow
+			}
+			$tableFooterHTML = "</table><br/>"
+			$reportHTML += $tableFooterHTML
+			
+
+			# Add footer to report.
+			$footerHTML = "</body></html>"
+			$reportHTML += $footerHTML 
+			
+			# Print report to file.
+			$reportHTML | Out-File $fileToExport
+		}
 		# Return the report name.
 		return $fileName
+		
 	}
 	catch
 	{
@@ -4393,7 +4463,11 @@ param(
 		$ObfuscateSensitiveData = $true,				
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]				
 		[boolean]
-		$ShowUI = $true,				
+		$ShowUI = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dtl")]
+		[boolean]
+		$DetailReport = $true,				
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]		
 		[alias("dbgl")]
 		[int]
@@ -4492,7 +4566,7 @@ PROCESS
 	# ....................................................................................		
 	$ActivityMsg = "Generate report"
 	if($ShowUI) { Write-Progress -activity $ActivityMsg -Status "in progress..." }
-	$reportName = Write-PISysAuditReport $auditHashTable -obf $ObfuscateSensitiveData -dbgl $DBGLevel
+	$reportName = Write-PISysAuditReport $auditHashTable -obf $ObfuscateSensitiveData -dtl $DetailReport -dbgl $DBGLevel
 	if($ShowUI) { Write-Progress -activity $ActivityMsg -Status $statusMsgCompleted -completed }
 	
 	# ............................................................................................................

@@ -121,7 +121,7 @@ PROCESS
 										-at $AuditTable "AU30001" `
 										-msg $msg `
 										-ain "Configured Account" -aiv $result `
-										-Group1 "PI AF Server" `
+										-Group1 "PI System" -Group2 "PI AF Server" `
 										-Severity "Severe"
 }
 
@@ -224,7 +224,7 @@ PROCESS
 										-at $AuditTable "AU30002" `
 										-ain "Impersonation mode for AF Data Sets" -aiv $result `
 										-msg $msg `
-										-Group1 "PI AF Server" `
+										-Group1 "PI System" -Group2 "PI AF Server" `
 										-Severity "Low"
 										
 }
@@ -343,7 +343,7 @@ PROCESS
 										-at $AuditTable "AU30003" `
 										-ain "PI AF Server Service privileges" -aiv $result `
 										-msg $msg `
-										-Group1 "PI AF Server" `
+										-Group1 "PI System" -Group2 "PI AF Server" `
 										-Severity "Severe"																					
 }
 
@@ -423,7 +423,7 @@ PROCESS
 										-at $AuditTable "AU30004" `
 										-ain "PI AF Server Plugin Verify Level" -aiv $result `
 										-msg $msg `
-										-Group1 "PI AF Server" `
+										-Group1 "PI System" -Group2 "PI AF Server" `
 										-Severity "Moderate"
 										
 }
@@ -533,7 +533,7 @@ PROCESS
 										-at $AuditTable "AU30005" `
 										-ain "PI AF Server File Extension Whitelist" -aiv $result `
 										-msg $msg `
-										-Group1 "PI AF Server" `
+										-Group1 "PI System" -Group2 "PI AF Server" `
 										-Severity "Moderate"
 										
 }
@@ -623,7 +623,7 @@ PROCESS
 										-at $AuditTable "AU30006" `
 										-ain "PI AF Server Version" -aiv $result `
 										-msg $msg `
-										-Group1 "PI AF Server" `
+										-Group1 "PI System" -Group2 "PI AF Server" `
 										-Severity "Moderate"
 										
 }
