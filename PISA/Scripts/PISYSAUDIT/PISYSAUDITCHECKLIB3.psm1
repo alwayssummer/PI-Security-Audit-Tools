@@ -97,14 +97,29 @@ PROCESS
 		$value = Get-PISysAudit_ServiceLogOnAccount "afservice" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel				
 		
 		# Check if the value is <> LocalSystem		
-		if($value.ToLower() -eq "localsystem") { $result =  $false } else { $result = $true }				
+		if($value.ToLower() -eq "localsystem") 
+		{
+			$result =  $false 
+			$msg = "AFService is running as Local System"
+		} 
+		else 
+		{ 
+			$result = $true 
+			$msg = "AFService is not running as Local System"
+		}				
 	}
 	catch
-	{ $result = "N/A" }
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30001" `
+										-msg $msg `
 										-ain "Configured Account" -aiv $result `
 										-Group1 "PI AF Server" `
 										-Severity "Severe"
@@ -184,20 +199,31 @@ PROCESS
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
-			if($line.Contains("ExternalDataTablesAllowNonImpersonatedUsers"))
+			if($line.ToLower().Contains("externaldatatablesallownonimpersonatedusers"))
 			{								
-				if($line.Contains("True")) { $result = $false }
+				if($line.ToLower().Contains("true")) 
+				{ 
+					$result = $false
+					$msg = "Non Impersonated Users are allowed for external tables." 
+				}
 				break
 			}						
-		}				
+		}
+		if($result){$msg = "Non Impersonated Users are not allowed for external tables."}				
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
 	
 	# Define the results in the audit table			
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30002" `
 										-ain "Impersonation mode for AF Data Sets" -aiv $result `
+										-msg $msg `
 										-Group1 "PI AF Server" `
 										-Severity "Low"
 										
@@ -245,7 +271,7 @@ PROCESS
 {				
 	# Get and store the function Name.
 	$fn = GetFunctionName
-
+	$msg = ""
 	try
 	{										
 		# Initialize objects.
@@ -283,9 +309,9 @@ PROCESS
 				
 				# Store the privilege found that might compromise security.
 				if($securityWeaknessCounter -eq 1)
-				{ $warningMessage = $line.ToUpper() }
+				{ $msg = $line.ToUpper() }
 				else
-				{ $warningMessage = $warningMessage + ", " + $line.ToUpper() }
+				{ $msg = $msg + ", " + $line.ToUpper() }
 			}					
 		}
 		
@@ -294,20 +320,29 @@ PROCESS
 		{
 			$result = $false
 			if($securityWeaknessCounter -eq 1)
-			{ $warningMessage = "The following privilege: " + $warningMessage + " is enabled." }
+			{ $msg = "The following privilege: " + $msg + " is enabled." }
 			else
-			{ $warningMessage = "The following privileges: " + $warningMessage + " are enabled." }
+			{ $msg = "The following privileges: " + $msg + " are enabled." }
 		}
-		else { $result = $true }
+		else 
+		{ 
+			$result = $true 
+			$msg = "No weaknesses were detected."
+		}
 	}
 	catch
-	{ $result = "N/A" }
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table		
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30003" `
 										-ain "PI AF Server Service privileges" -aiv $result `
-										-msg $warningMessage `
+										-msg $msg `
 										-Group1 "PI AF Server" `
 										-Severity "Severe"																					
 }
@@ -353,7 +388,7 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{						
 		# Read the afdiag.exe command output.
@@ -363,20 +398,31 @@ PROCESS
 		$result = $true
 		foreach($line in $outputFileContent)
 		{								
-			if($line.Contains("PlugInVerifyLevel"))
+			if($line.ToLower().Contains("pluginverifylevel"))
 			{								
-				if($line.Contains("AllowUnsigned") -or $line.Contains("None")) { $result = $false }
+				if($line.ToLower().Contains("allowunsigned") -or $line.ToLower().Contains("none")) 
+				{ 
+					$result = $false 
+					$msg = "Unsigned plugins are permitted."
+				}
 				break
 			}						
-		}				
+		}	
+		if($result){$msg = "Signatures are required for plugins."}			
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
 	
 	# Define the results in the audit table			
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30004" `
 										-ain "PI AF Server Plugin Verify Level" -aiv $result `
+										-msg $msg `
 										-Group1 "PI AF Server" `
 										-Severity "Moderate"
 										
@@ -423,7 +469,7 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{						
 		# Read the afdiag.exe command output.		
@@ -434,7 +480,7 @@ PROCESS
 		foreach($line in $outputFileContent)
 		{								
 			# Locate FileExtensions parameter
-			if($line.Contains("FileExtensions"))
+			if($line.ToLower().Contains("fileextensions"))
 			{								
 				# Master whitelist of approved extensions
 				[System.Collections.ArrayList] $allowedExtensions = 'docx','xlsx','csv','pdf','txt','rtf','jpg','jpeg','png','svg','tiff','gif'
@@ -461,20 +507,32 @@ PROCESS
 							else {$result = $false}
 						}
 						# If we detect any rogue extension, the validation check fails, no need to look further
-						if($result -eq $false) {break}
+						if($result -eq $false) 
+						{
+							$msg = "Setting contains non-compliant extenions."
+							break
+						}
 					} 
+					if($result){$msg = "No non-compliant extensions identified."}
 					break
 				}
+				break
 			}						
 		}				
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}		
 	
 	# Define the results in the audit table			
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30005" `
 										-ain "PI AF Server File Extension Whitelist" -aiv $result `
+										-msg $msg `
 										-Group1 "PI AF Server" `
 										-Severity "Moderate"
 										
@@ -521,14 +579,13 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{						
 		# Read the afdiag.exe command output.
 		$outputFileContent = Invoke-PISysAudit_AFDiagCommand -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -oper "Read"
 
 		# Read each line to find the one containing the token to replace.
-		$result = $true
 		foreach($line in $outputFileContent)
 		{								
 			if($line.Contains("Version"))
@@ -538,18 +595,34 @@ PROCESS
 				# Form an integer value with all the version tokens.
 				[string]$temp = $InstallVersionTokens[0] + $installVersionTokens[1] + $installVersionTokens[2] + $installVersionTokens[3]
 				$installVersionInt64 = [Convert]::ToInt64($temp)
-				if($installVersionInt64 -lt 2800000){$result = $false}
+				if($installVersionInt64 -gt 2800000)
+				{
+					$result = $true
+					$msg = "Server version is compliant."
+				}
+				else
+				{
+					$result = $false
+					$msg = "Server version is non-compliant: {0}."
+					$msg = [string]::Format($msg, $installVersion)
+				}
 				break
 			}						
 		}				
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table			
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU30006" `
 										-ain "PI AF Server Version" -aiv $result `
+										-msg $msg `
 										-Group1 "PI AF Server" `
 										-Severity "Moderate"
 										
@@ -600,19 +673,24 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{		
 		# Enter routine.			
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
 	
 	# Define the results in the audit table			
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU3xxxx" `
 										-ain "<Name>" -aiv $result `
-										-msg "<Message>" `
+										-msg $msg `
 										-Group1 "<Category 1>" -Group2 "<Category 2>" -Group3 "<Category 3>" -Group4 "<Category 4>"`
 										-Severity "<Severity>"
 }

@@ -84,6 +84,7 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
+	$msg = ""
 	
 	try
 	{		
@@ -95,15 +96,29 @@ PROCESS
 		# Form an integer value with all the version tokens.
 		[string]$temp = $InstallVersionTokens[0] + $installVersionTokens[1] + $installVersionTokens[2] + $installVersionTokens[3]
 		$installVersionInt64 = [Convert]::ToInt64($temp)
-		if($installVersionInt64 -ge 3004){$result = $true}	
-		else {$result = $false}
+		if($installVersionInt64 -ge 3004)
+		{
+			$result = $true
+			$msg = "Version is compliant."
+		}	
+		else 
+		{
+			$result = $false
+			$msg = "Version is not compliant."
+		}
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 									-at $AuditTable "AU50001" `
+									-msg $msg `
 									-ain "PI Coresight Version" -aiv $result `
 									-Group1 "PI Coresight" `
 									-Severity "Moderate"																																																
@@ -161,12 +176,18 @@ PROCESS
 		# Enter routine.			
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 									-at $AuditTable "AU1xxxx" `
 									-ain "<Name>" -aiv $result `
+									-msg $msg `
 									-Group1 "<Category 1>" -Group2 "<Category 2>" `
 									-Group3 "<Category 3>" -Group4 "<Category 4>" `
 									-Severity "<Severity>"																																																

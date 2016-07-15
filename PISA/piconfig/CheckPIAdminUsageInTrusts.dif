@@ -1,7 +1,9 @@
 *This piconfig script finds all trusts with piadmin user
 *For more information on piconfig see the PI Server reference guide
+@deli ^
+@mode list
 @table pitrust
-@ostr trust,description,domain,osuser,iphost,ipaddr,netmask,appname,piuser,flags
+@ostr trust^piuser
 @sele piuser=piadmin
 @ends
 @exit
