@@ -40,16 +40,16 @@ AU40004	- SQL Server: OLE Automation Procedures
 
 SETUP INSTRUCTIONS:  
 The PISysAudit module does not require installation; you only need to extract the package. You will need to import the module from the extracted location in order to use it. The file structure is the following:  
-  * PISA = Contains the module definition.
-  * PISA\piconfig = Contains the piconfig scripts leveraged by the PI Data Archive validation checks.
-  * PISA\Scripts = Contains command line utilities or PS scripts needed by the PS module
-  * PISA\export = Contains the generated reports
-  * PISA\pwd = Contains saved password files using strong encryption
+  * PISecurityAudit = Contains the module definition.
+  * PISecurityAudit\piconfig = Contains the piconfig scripts leveraged by the PI Data Archive validation checks.
+  * PISecurityAudit\Scripts = Contains command line utilities or PS scripts needed by the PS module
+  * PISecurityAudit\export = Contains the generated reports
+  * PISecurityAudit\pwd = Contains saved password files using strong encryption
   
-For example, if you have decompressed the package inside your user folder (C:\users\<user>\documents\PISA), you need to import the module the following:  
+For example, if you have decompressed the package inside your user folder (C:\users\<user>\documents\PISecurityAudit), you need to import the module the following:  
   
 ```
-  Import-Module "C:\users\<user>\documents\PISA\pisysaudit"
+  Import-Module "C:\users\<user>\documents\PISecurityAudit\pisysaudit"
 ```
 
 USAGE EXAMPLES:  
@@ -86,7 +86,7 @@ For full contextual help, giving examples and a description of each audit check,
     Get-Help about_PISYSAUDIT
 ```
 
-You can also find several examples of commands and syntaxes for this module within examples.ps1 file (located in the ..\PISA\Scripts folder).  
+You can also find several examples of commands and syntaxes for this module within examples.ps1 file (located in the ..\PISecurityAudit\Scripts folder).  
 
 Check out the Wiki for tutorials and more information on the project:
       https://github.com/osisoft/PI-Security-Audit-Tools/wiki
