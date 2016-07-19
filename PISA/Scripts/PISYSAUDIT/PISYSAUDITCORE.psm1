@@ -4296,11 +4296,9 @@ PROCESS
 
 		# Get the Scripts path.
 		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value														
-			
-		# Output to log file.			
+						
 		# Create the log file in the same folder as the script. 
 		$fileName = "PISecurityAudit_" + $ts + ".csv"
-
 		$fileToExport = Join-Path -Path $exportPath -ChildPath $fileName
 		
 		# Build a collection for output.
@@ -4325,10 +4323,9 @@ PROCESS
 			$results += $item.Value	
 		}
 		
-		
-			# Export to .csv but sort by the ID column first.
-			$results = $results | Select-Object * | Sort ID 
-			$results | Export-Csv -Path $fileToExport -Encoding ASCII -NoType
+		# Export to .csv but sort by the ID column first.
+		$results = $results | Select-Object * | Sort ID 
+		$results | Export-Csv -Path $fileToExport -Encoding ASCII -NoType
 		
 		if($DetailReport){
 			
@@ -4336,6 +4333,7 @@ PROCESS
 
 			$fileToExport = Join-Path -Path $exportPath -ChildPath $fileName
 
+			# Header for the report. 
 			$header = @"
 			<html><head><meta name="viewport" content="width=device-width" />
 			<style type="text/css">
@@ -4344,23 +4342,24 @@ PROCESS
 			.summarytable {border-width: 1px; border-collapse: collapse }
 			.summaryheader {font: 12px verdana; font-weight: bold; background-color: lightblue}
 			.summaryrow {font: 12px verdana}
-			.row {vertical-align: top; height:auto !important;}
-			</style></head><body><h2>AUDIT SUMMARY<h2>
+			.recommentations {font: 12px verdana}
+			</style></head><body><h2>AUDIT SUMMARY</h2>
 "@
 			# Header for the summary table.
 			$tableHeader = @"
 			<table border="1" class="summarytable" style="align:left;"><tr class="summaryheader">
 			<td>ID</td>
 			<td>Server</td>
-			<td>Validation Check</td>
+			<td>Validation</td>
 			<td>Result</td> 
 			<td>Severity</td>
 			<td>Message</td>
 			<td>Category</td> 
-			<td>Area</td>
-			<tr>
+			<td>Area</td><tr>
 "@
 			$reportHTML = $header + $tableHeader
+			
+			# Construct table and color code the rows by result and severity.
 			$fails = @()
 			foreach($result in $results) 
 			{
@@ -4381,12 +4380,55 @@ PROCESS
 												$result.Group2, $result.Severity, $highlight)
 				$reportHTML += $tableRow
 			}
+			# Add footer to the table.
 			$tableFooterHTML = "</table><br/>"
 			$reportHTML += $tableFooterHTML
 			
-
+			if($fails.Count -gt 0){
+				$fails = $fails | select ID -unique
+				# Recommendations section
+				$recommendationsHTML = "<div class=`"recommendations`">"
+				$recommendationsHTML += "<h2>Recommendations for failed verification checks:</h2>"
+				foreach($fail in $fails) 
+				{
+					switch ($fail.ID) 
+					{
+						"AU10001" {$AuditFunctionName = "Get-PISysAudit_CheckDomainMemberShip"; break}
+						"AU10002" {$AuditFunctionName = "Get-PISysAudit_CheckOSSKU"; break}
+						"AU10003" {$AuditFunctionName = "Get-PISysAudit_CheckFirewallEnabled"; break}
+						"AU10004" {$AuditFunctionName = "Get-PISysAudit_CheckAppLockerEnabled"; break}
+						"AU10005" {$AuditFunctionName = "Get-PISysAudit_CheckUACEnabled"; break}
+						"AU20001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminTrustsDisabled"; break}
+						"AU20002" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerSubSysVersions"; break}
+						"AU20003" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerDBSecurity_PIWorldReadAccess"; break}
+						"AU20004" {$AuditFunctionName = "Get-PISysAudit_CheckEditDays"; break}
+						"AU20005" {$AuditFunctionName = "Get-PISysAudit_CheckAutoTrustConfig"; break}
+						"AU20006" {$AuditFunctionName = "Get-PISysAudit_CheckExpensiveQueryProtection"; break}
+						"AU20007" {$AuditFunctionName = "Get-PISysAudit_CheckExplicitLoginDisabled"; break}
+						"AU20008" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminUsage"; break}
+						"AU20009" {break} # Check not yet implemented
+						"AU30001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServiceConfiguredAccount"; break}
+						"AU30002" {$AuditFunctionName = "Get-PISysAudit_CheckPImpersonationModeForAFDataSets"; break}
+						"AU30003" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServicePrivileges"; break}
+						"AU30004" {$AuditFunctionName = "Get-PISysAudit_CheckPlugInVerifyLevel"; break}
+						"AU30005" {$AuditFunctionName = "Get-PISysAudit_CheckFileExtensionWhitelist"; break}
+						"AU30006" {$AuditFunctionName = "Get-PISysAudit_CheckAFServerVersion"; break}
+						"AU40001" {$AuditFunctionName = "Get-PISysAudit_CheckSQLXPCommandShell"; break}
+						"AU40002" {$AuditFunctionName = "Get-PISysAudit_CheckSQLAdHocQueries"; break}
+						"AU40003" {$AuditFunctionName = "Get-PISysAudit_CheckSQLDBMailXPs"; break}
+						"AU40004" {$AuditFunctionName = "Get-PISysAudit_CheckSQLOLEAutomationProcs"; break}
+						"AU50001" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightVersion"; break}
+					
+						default {break}
+					}
+					$recommendationInfo = Get-Help $AuditFunctionName
+					$recommendation = "<b>{0}</b><br/>{1}<br/>"
+					$recommendationsHTML += [string]::Format($recommendation, $recommendationInfo.Synopsis, $recommendationInfo.Description.Text)
+				}
+				$reportHTML += $recommendationsHTML
+			}
 			# Add footer to report.
-			$footerHTML = "</body></html>"
+			$footerHTML = "</div></body></html>"
 			$reportHTML += $footerHTML 
 			
 			# Print report to file.

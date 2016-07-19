@@ -63,10 +63,11 @@ function Get-PISysAudit_CheckPIServerDBSecurity_PIWorldReadAccess
 .SYNOPSIS
 AU20001 - PI Data Archive Table Security Check
 .DESCRIPTION
-Audit ID: AU20001
-Audit Check Name: PI Data Archive Table Security
-Category: Moderate
-Compliance: Should be part of a domain.
+VALIDATION: examines the database security of the PI Data Archive and flags any 
+ACLs that contain access for PIWorld as weak. <br/>
+COMPLIANCE: remove PIWorld access from all database security ACLs.  Note that prior
+removing PIWorld access, you need to evaluate which applications are relying on that 
+access so that you can grant those applications access explicitly. 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -210,10 +211,11 @@ function Get-PISysAudit_CheckPIAdminTrustsDisabled
 .SYNOPSIS
 AU20002 - PI Admin Trusts Disabled Check
 .DESCRIPTION
-Audit ID: AU20002
-Audit Check Name: PI Admin Trusts Disabled
-Category: Severe
-Compliance: Trust login should be disabled.
+VALIDATION: verifies that the piadmin PI User cannot be used in a PI Trust. <br/>
+COMPLIANCE: disable Trusts with piadmin.  This can be done by checking "User 
+cannot be used in a Trust" in the Properties menu for the piadmin PI User.  To access
+this menu open use the Idenitities, Users, & Groups plugin in PI SMT, navigate to the 
+PI User tab, right click the piadmin entry and select Properties in the context menu.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -316,10 +318,11 @@ function Get-PISysAudit_CheckPIServerSubSysVersions
 .SYNOPSIS
 AU20003 - PI Data Archive SubSystem Version Check
 .DESCRIPTION
-Audit ID: AU20003
-Audit Check Name: PI Data Archive SubSystem Version
-Category: Severe
-Compliance: Version should be higher than 3.4.380.36.
+VALIDATION: verifies that the PI Data Archive is using the most recent release. <br/>  
+COMPLIANCE: upgrade the PI Data Archive to the latest version, PI Data Archive 
+2016 (3.4.400.1162).  For more information, see the "Upgrade a PI Data Archive Server" 
+section of the PI Data Archive Installation and Upgrade Guide, Live Library: <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD. 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -428,10 +431,12 @@ function Get-PISysAudit_CheckEditDays
 .SYNOPSIS
 AU20004 - Check Edit Days
 .DESCRIPTION
-Audit ID: AU20004
-Audit Check Name: Edit Days
-Category: Moderate
-Compliance: Greater than zero is a pass.
+VALIDATION: verified that Edit Days is set. <br/>
+COMPLIANCE: set to a value greater than zero.  EditDays defines the number of past 
+days where events can be modified in the Snapshot or Archive databases. A zero value means 
+no time check is done.  For instructions to set EditDays, see "Modify the EditDays tuning 
+parameter" section in the PI Data Archive System Management Guide:<br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -531,10 +536,11 @@ function Get-PISysAudit_CheckAutoTrustConfig
 .SYNOPSIS
 AU20005 - Auto Trust Configuration
 .DESCRIPTION
-Audit ID: AU20005
-Audit Check Name: Auto Trust Configuration
-Category: Moderate
-Compliance: Should be part of a domain.
+VALIDATION: verifies that the autotrustconfig tuning parameter is set to create 
+either no trusts or a trust for the loopback automatically (127.0.0.1). <br/>
+COMPLIANCE: set the autotrustconfig tuning parameter to a value of 0 (do not 
+automatically create any PI Trust entries) or 1 (create the trust entry for the loopback 
+IP address 127.0.0.1 only). 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -657,10 +663,11 @@ function Get-PISysAudit_CheckExpensiveQueryProtection
 .SYNOPSIS
 AU20006 - Expensive Query Protection Check
 .DESCRIPTION
-Audit ID: AU20006
-Audit Check Name: Expensive Query Protection
-Category: Severe
-Compliance: Value must be between 60 and 300.
+VALIDATION: verify that the PI Data Archive has protection against expensive queries. <br/>
+COMPLIANCE: set the archive_maxqueryexecutionsec tuning parameter to a value between 60 
+and 300.  For more information on this parameter and other that can protect against expensive 
+queries, see the knowledgebase article 3224OSI8 <br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8  
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -807,10 +814,12 @@ function Get-PISysAudit_CheckExplicitLoginDisabled
 .SYNOPSIS
 AU20007 - Check if the explicit login is disabled
 .DESCRIPTION
-Audit ID: AU20007
-Audit Check Name: Explicit login disabled
-Category: Severe
-Compliance: Value must be greater than 3
+VALIDATION: verifies that explicit login is disabled as an authentication protocol. <br/>  
+COMPLIANCE: set the tuning parameter Server_AuthenticationPolicy to a value greater than 3.  
+This is equivalent to the third notch, "Disable explicit login", or higher on the Security 
+Settings plugin in PI SMT.  For more information, see "Security Best Practice #2" and "Security 
+Best Practice #3" in KB00833. <br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/KB00833
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -900,10 +909,11 @@ function Get-PISysAudit_CheckPIAdminUsage
 .SYNOPSIS
 AU20008 - Check if piadmin is not used
 .DESCRIPTION
-Audit ID: AU20008
-Audit Check Name: piadmin is not used
-Category: Severe
-Compliance: Value must be empty
+VALIDATION: verifies that piadmin is not used in trusts or mappings. <br/>
+COMPLIANCE: replace any trusts or mappings that use piadmin with a mapping or trust to a
+PI Identity with appropriate privilege for the applications that will use it.  For more 
+information, see "Security Best Practice" #4 in KB00833: <br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/KB00833.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -1072,10 +1082,8 @@ function Get-PISysAudit_TemplateAU2xxxx
 .SYNOPSIS
 AU2xxxx - <Name>
 .DESCRIPTION
-Audit ID: AU2xxxx
-Audit Check Name: <Name>
-Category: <Category>
-Compliance: <Enter what it needs to be compliant>
+VERIFICATION: <Enter what the verification checks>
+COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							

@@ -46,9 +46,9 @@ function Get-PISysAudit_FunctionsFromLibrary1
 	[System.Collections.HashTable]$listOfFunctions = @{}	
 	$listOfFunctions.Add("Get-PISysAudit_CheckDomainMemberShip", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckOSSKU", 1)
-	$listOfFunctions.Add("Get-PISysAudit_FirewallEnabled", 1)
-	$listOfFunctions.Add("Get-PISysAudit_AppLockerEnabled", 1)
-	$listOfFunctions.Add("Get-PISysAudit_UACEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckFirewallEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckAppLockerEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckUACEnabled", 1)
 			
 	# Return the list.
 	return $listOfFunctions
@@ -60,10 +60,12 @@ function Get-PISysAudit_CheckDomainMemberShip
 .SYNOPSIS
 AU10001 - Domain Membership Check
 .DESCRIPTION
-Audit ID: AU10001
-Audit Check Name: Domain Membership Check
-Category: Moderate
-Compliance: Should be part of a domain.
+VALIDATION: verifies that the machine is a member of an Active Directory Domain.<br/>  
+COMPLIANCE: join the machine to an Active Directory Domain.  Use of a domain is 
+encouraged as AD provides Kerberos authentication and is our best available technology 
+for securing a PI System.  Furthermore, the implementation of transport security in the 
+PI System relies on Windows Integrated Security and AD to automatically enable higher 
+strength ciphers.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -138,11 +140,14 @@ function Get-PISysAudit_CheckOSSKU
 <#  
 .SYNOPSIS
 AU10002 - Operating System SKU
-.DESCRIPTION
-Audit ID: AU10002
-Audit Check Name: Operating System SKU
-Category: Moderate
-Compliance: SKU should match one of these: 12, 13, 14, 29, 39, 40, 41 or 42
+.DESCRIPTION   
+VALIDATION: verifies that the OS Stock Keeping Unit (SKU) is appropriate for 
+production use.<br/>
+COMPLIANCE: SKU should match one of the following: 12, 13, 14, 29, 39, 40, 41 or 42.  
+These SKUs were chosen to highlight the reduced attack surface area of a core 
+installation of Windows Server.  For more on the advantages of Windows Server Core, 
+please see:<br/>
+https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -290,16 +295,19 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_FirewallEnabled
+function Get-PISysAudit_CheckFirewallEnabled
 {
 <#  
 .SYNOPSIS
 AU10003 - Firewall Enabled
 .DESCRIPTION
-Audit ID: AU10003
-Audit Check Name: Firewall Enabled
-Category: Moderate
-Compliance: Should be part set to on.
+VALIDATION: verifies that the Windows host based firewall is enabled.<br/> 
+COMPLIANCE: enable the Windows firewall.  A firewall's effectiveness is heavily
+dependent on the configuration.  For PI specific port requirements, see:<br/> 
+https://techsupport.osisoft.com/Troubleshooting/KB/KB01162.
+For more general information on the Windows firewall, see "Windows Firewall with 
+Advanced Security Overview" on TechNet:<br/>
+https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -378,16 +386,16 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_AppLockerEnabled
+function Get-PISysAudit_CheckAppLockerEnabled
 {
 <#  
 .SYNOPSIS
 AU10004 - AppLocker Enabled
 .DESCRIPTION
-Audit ID: AU10004
-Audit Check Name: AppLocker Enabled
-Category: Moderate
-Compliance: Application Identity service should be running and policy configured to enforce.
+VALIDATION: verifies that AppLocker is enabled.<br/>  
+COMPLIANCE: set AppLocker to Enforce mode after establishing a policy.  For a 
+primer on running AppLocker on a PI Data Archive, see:<br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/KB00994
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -460,16 +468,20 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_UACEnabled
+function Get-PISysAudit_CheckUACEnabled
 {
 <#  
 .SYNOPSIS
 AU10005 - UAC Enabled
 .DESCRIPTION
-Audit ID: AU10005
-Audit Check Name: UAC Enabled
-Category: Moderate
-Compliance: UAC should be enabled.
+VALIDATION: verifies that UAC is enabled.  More precisely, it verifies the 
+following default features: EnableLUA, ConsentPromptBehaviorAdmin, 
+EnableInstallerDetection, PromptOnSecureDesktop and EnableSecureUIAPaths.
+Additionally, a check is performed for the feature ValidateAdminCodeSignatures.  
+Lower severity is assigned if this is the only feature disabled.<br/>
+COMPLIANCE: enable the flagged UAC features.  For more information on specific
+UAC features, see:<br/>
+https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -561,10 +573,8 @@ function Get-PISysAudit_TemplateAU1xxxx
 .SYNOPSIS
 AU1xxxx - <Name>
 .DESCRIPTION
-Audit ID: AU1xxxx
-Audit Check Name: <Name>
-Category: <Category>
-Compliance: <Enter what it needs to be compliant>
+VERIFICATION: <Enter what the verification checks>
+COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -626,9 +636,9 @@ END {}
 Export-ModuleMember Get-PISysAudit_FunctionsFromLibrary1
 Export-ModuleMember Get-PISysAudit_CheckDomainMemberShip
 Export-ModuleMember Get-PISysAudit_CheckOSSKU
-Export-ModuleMember Get-PISysAudit_FirewallEnabled
-Export-ModuleMember Get-PISysAudit_AppLockerEnabled
-Export-ModuleMember Get-PISysAudit_UACEnabled
+Export-ModuleMember Get-PISysAudit_CheckFirewallEnabled
+Export-ModuleMember Get-PISysAudit_CheckAppLockerEnabled
+Export-ModuleMember Get-PISysAudit_CheckUACEnabled
 # </Do not remove>
 
 # ........................................................................

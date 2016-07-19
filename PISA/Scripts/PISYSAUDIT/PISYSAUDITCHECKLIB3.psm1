@@ -61,11 +61,13 @@ function Get-PISysAudit_CheckPIAFServiceConfiguredAccount
 .SYNOPSIS
 AU30001 - PI AF Server Service Account Check
 .DESCRIPTION
-Audit ID: AU30001
-Audit Check Name: PI AF Server Service Account
-Category: Severe
-Compliance: Should not be executed with LocalSystem, all other accounts
-are considered good.
+VALIDATION: verifies that the AF Server application service is not running as the account 
+Local System. <br/>
+COMPLIANCE: run the AF Server Application service as a user other than Local System.  In 
+order to change the user that the service is running as, open control panel, go to Programs, 
+Programs and Features, select the entry for the PI AF Server and click Change.  This will 
+launch the installer where you will be given the option to change configuration settings, 
+including the service account.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -138,10 +140,12 @@ function Get-PISysAudit_CheckPImpersonationModeForAFDataSets
 .SYNOPSIS
 AU30002 - Impersonation mode for AF Data Sets Check
 .DESCRIPTION
-Audit ID: AU30002
-Audit Check Name: Impersonation mode for AF Data Sets
-Category: Low
-Compliance: Should be false.
+VALIDATION:  verifies the impersonation mode for external data tables. <br/>
+COMPLIANCE: set the Configuration Setting ExternalDataTablesAllowNonImpersonatedUsers to 
+false, thereby requiring impersonation for access to external tables.  This setting can be 
+changed by running the AFDiag utility with the /ExternalDataTablesAllowNonImpersonatedUsers- 
+flag.  For more information, see "AFDiag utility parameters" in the PI Live Library. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -242,11 +246,12 @@ function Get-PISysAudit_CheckPIAFServicePrivileges
 .SYNOPSIS
 AU30003 - PI AF Server Service Access Check
 .DESCRIPTION
-Audit ID: AU30003
-Audit Check Name: PI AF Server Service Access Check
-Category: Severe
-Compliance: Should not contain SeDebugPrivilege, SeTakeOwnershipPrivilege, SeTcbPrivilege privileges to
-considered good.
+VALIDATION: verifies that the PI AF application server service does not have excessive 
+rights. <br/>
+COMPLIANCE: ensure that the account does not have the following privileges: 
+SeDebugPrivilege, SeTakeOwnershipPrivilege and SeTcbPrivilege.  For information on these 
+rights and how to set them, see "User Rights" on TechNet: <br/>
+https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -360,10 +365,11 @@ function Get-PISysAudit_CheckPlugInVerifyLevel
 .SYNOPSIS
 AU30004 - PI AF Server Plugin Verify Level Check
 .DESCRIPTION
-Audit ID: AU30004
-Audit Check Name: PI AF Server Plugin Verify Level
-Category: Moderate
-Compliance: Should be either RequireSigned or RequireSignedTrustedProvider.
+VALIDATION: verifies that PI AF requires plugins to be validated. <br/>
+COMPLIANCE: set the Configuration Setting PlugInVerifyLevel to RequireSigned or 
+RequireSignedTrustedProvider.  This can be done with AFDiag /PluginVerifyLevel:<Level>.
+For more information, see "AFDiag utility parameters" in the PI Live Library. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -441,10 +447,12 @@ function Get-PISysAudit_CheckFileExtensionWhitelist
 .SYNOPSIS
 AU30005 - PI AF Server File Extension Whitelist
 .DESCRIPTION
-Audit ID: AU30005
-Audit Check Name: PI AF Server File Extension Whitelist
-Category: Moderate
-Compliance: Should only include the file extensions: docx:xlsx:csv:pdf:txt:rtf:jpg:jpeg:png:svg:tiff:gif or a subset thereof.
+VALIDATION: verifies file extension whitelist for PI AF. <br/>
+COMPLIANCE: set the Configuration Setting FileExtensions to only include the file 
+extensions: docx:xlsx:csv:pdf:txt:rtf:jpg:jpeg:png:svg:tiff:gif or a subset thereof.
+This can be done with AFDiag /FileExtensions:<ExtensionList>.  For more information, 
+see "AFDiag utility parameters" in the PI Live Library. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -551,10 +559,10 @@ function Get-PISysAudit_CheckAFServerVersion
 .SYNOPSIS
 AU30006 - PI AF Server Version
 .DESCRIPTION
-Audit ID: AU30006
-Audit Check Name: PI AF Server Version Check
-Category: Moderate
-Compliance: Using latest version of PI AF.
+VALIDATION: verifies PI AF Server version. <br/>
+COMPLIANCE: upgrade to the latest version of PI AF Server.  For more information, 
+see "PI AF Server upgrades" in the PI Live Library. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -645,10 +653,8 @@ function Get-PISysAudit_TemplateAU3xxxx
 .SYNOPSIS
 AU3xxxx - <Name>
 .DESCRIPTION
-Audit ID: AU3xxxx
-Audit Check Name: <Name>
-Category: <Category>
-Compliance: <Enter what it needs to be compliant>
+VERIFICATION: <Enter what the verification checks>
+COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
