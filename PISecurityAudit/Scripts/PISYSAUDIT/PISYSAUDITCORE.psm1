@@ -57,12 +57,17 @@ function SetFolders
 	# ..\
 	# ..\Scripts
 	# ..\Scripts\PISYSAUDIT
-	# ..\export
+	# ..\Export
 	# ..\piconfig
 	# ..\pwd	
 	$scriptsPath = Split-Path $modulePath
 	$rootPath = Split-Path $scriptsPath				
-	$exportPath = Join-Path -Path $rootPath -ChildPath "Export"	
+	
+	$exportPath = Join-Path -Path $rootPath -ChildPath "Export"
+	if (!(Test-Path $exportPath)){
+	New-Item $exportPath -type directory
+	}
+
 	$picnfgPath = Join-Path -Path $rootPath -ChildPath "piconfig"
 	$pwdPath = Join-Path -Path $rootPath -ChildPath "pwd"		
 	$logFile = Join-Path -Path $rootPath -ChildPath "PISystemAudit.log"		
