@@ -1,0 +1,6 @@
+@mode list
+@table piserver
+@ostr name,isavailable
+@select name=*
+@ends
+@exit	

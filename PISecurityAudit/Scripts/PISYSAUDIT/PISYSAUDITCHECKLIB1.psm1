@@ -114,7 +114,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occured during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -274,7 +274,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occured during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -365,7 +365,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occured during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -447,7 +447,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occured during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -506,7 +506,7 @@ PROCESS
 {					
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	$severity = "Unkown"
+	$severity = "Unknown"
 
 	try
 	{				
@@ -526,23 +526,27 @@ PROCESS
 			}
 		}
 		
-		if(!$result)
-		{$msg = $tmpmsg}
-
-		$additionalUACFeature = "ValidateAdminCodeSignatures"
-		# If the default features are enabled, check for additional feature for added security
-		if ($result -and ($(Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -RegKeyPath $uacKeyPath -Attribute $additionalUACFeature) -eq 0))
+		# If the default features are enabled, check for additional feature for added security.
+		if($result) 
 		{
-			$result = $false
-			$msg = "Recommended UAC feature {0} disabled."
-			$msg = [string]::Format($msg, $additionalUACFeature)
+			# Assigning lower severity since the default features are in place.
 			$severity = "Low"
-		}	
+			$additionalUACFeature = "ValidateAdminCodeSignatures"
+			if ($(Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -RegKeyPath $uacKeyPath -Attribute $additionalUACFeature) -eq 0)
+			{
+				$result = $false
+				$msg = "Recommended UAC feature {0} disabled."
+				$msg = [string]::Format($msg, $additionalUACFeature)
+			}	
+			else {$msg = "UAC features enabled."}
+		}
+		else
+		{$msg = $tmpmsg}	
 	}
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occured during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -607,7 +611,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occured during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}

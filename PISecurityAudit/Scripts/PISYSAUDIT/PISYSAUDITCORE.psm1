@@ -67,13 +67,12 @@ function SetFolders
 	$pwdPath = Join-Path -Path $rootPath -ChildPath "pwd"		
 	$logFile = Join-Path -Path $rootPath -ChildPath "PISystemAudit.log"		
 
-
 	# Store them at within the global scope range.	
 	New-Variable -Name "ScriptsPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $scriptsPath			
 	New-Variable -Name "PasswordPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $pwdPath
 	New-Variable -Name "ExportPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $exportPath
 	New-Variable -Name "PIConfigScriptPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $picnfgPath
-	New-Variable -Name "PISystemAuditLogFile" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $logFile		
+	New-Variable -Name "PISystemAuditLogFile" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $logFile	
 }
 
 function NewObfuscateValue
@@ -145,7 +144,7 @@ param(
 	$msg4 = ""
 	
 	# Template
-	$msgTemplate1 = "A critical issue was found"
+	$msgTemplate1 = "A severe issue was found"
 	$msgTemplate2 = "A moderate issue was found"
 	$msgTemplate3 = "A low issue was found"
 	$msgTemplate4 = " on {0} server regarding {1} check (ID: {2}). See details on the generated report"
@@ -1057,7 +1056,7 @@ param(
 		# Read from the global constant bag.
 		$ShowUI = (Get-Variable "PISysAuditShowUI" -Scope "Global" -ErrorAction "SilentlyContinue").Value					
 		
-		# Validate the presence of a PI AF Server
+		# Validate the presence of a PI Data Archive
 		if((ValidateIfHasPIDataArchiveRole -lc $ComputerParams.IsLocal -rcn $ComputerParams.ComputerName -dbgl $DBGLevel) -eq $false)
 		{
 			# Return the error message.
@@ -1065,6 +1064,35 @@ param(
 			$msg = [string]::Format($msgTemplate, $ComputerParams.ComputerName)
 			Write-PISysAudit_LogMessage $msg "Warning" $fn
 			return
+		}
+
+		# Verify that the PI Data Archive is accessible over port 5450, if not, checks will not complete
+		try
+		{
+			$testConnection = New-Object net.sockets.tcpclient
+			$testConnection.Connect($ComputerParams.ComputerName, 5450)
+		}
+		catch
+		{
+			# Return the error message.
+			$msgTemplate = "The PI Data Archive {0} is not accessible over port 5450"
+			$msg = [string]::Format($msgTemplate, $ComputerParams.ComputerName)
+			Write-PISysAudit_LogMessage $msg "Warning" $fn
+			return
+		}
+
+		# After we've validated connections over 5450, make sure PI Utilities will be able to connect.
+		if($testConnection.Connected)
+		{
+			$outputFileContent = Invoke-PISysAudit_PIConfigScript -f "CheckPIServerAvailability.dif" `
+																-lc $ComputerParams.IsLocal -rcn $ComputerParams.ComputerName -dbgl $DBGLevel
+			if($outputFileContent -eq $null)
+			{
+				$msgTemplate = "Unable to access the PI Data Archive {0} with piconfig.  Check if there is a valid mapping for your user."
+				$msg = [string]::Format($msgTemplate, $ComputerParams.ComputerName)
+				Write-PISysAudit_LogMessage $msg "Warning" $fn
+				return
+			}
 		}
 		
 		# Get the list of functions to execute.
@@ -2074,9 +2102,7 @@ PROCESS
 			$value = Invoke-Command -ScriptBlock $scriptBlock			
 		}
 		else
-		{	
-			# To avoid DCOM to be used with WMI calls, use PS Remoting technique to wrap
-			# the WMI call.			
+		{			
 			$value = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
 		}
 	
@@ -2504,9 +2530,9 @@ PROCESS
 			#......................................................................................
 			# Set Paths
 			#......................................................................................
-			# Get the PI folder.
-			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $false -rcn $RemoteComputerName											           
-			# Set the ADM folder.
+			# Get the PIHome folder.
+			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME" -lc $false -rcn $RemoteComputerName											           
+			# Set the log folder.
 			$PIHome_log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 			# Set the output for the CLU.
 			$outputFilePath = Join-Path -Path $PIHome_log_path -ChildPath "netsh_output.txt"                                 			
@@ -2896,9 +2922,11 @@ PROCESS
 			# Set Paths
 			#......................................................................................
 			# Set the PIPC folder (64 bit).		
-			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64"
+			$PIHome64_path = Get-PISysAudit_EnvVariable "PIHOME64"
+			# Set the PIPC folder (32 bit).		
+			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME"
 			# Set the PIPC\AF folder (64 bit).		
-			$PIHome_AF_path = Join-Path -Path $PIHome_path -ChildPath "AF"
+			$PIHome_AF_path = Join-Path -Path $PIHome64_path -ChildPath "AF"
 			# Set the PIPC\log folder (64 bit).
 			$PIHome_Log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 		    # Set the path to reach out the afdiag.exe CLU.
@@ -2943,9 +2971,11 @@ PROCESS
 			# Set Paths
 			#......................................................................................						
 			# Set the PIPC folder (64 bit).		
-			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $false -rcn $RemoteComputerName
+			$PIHome64_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $false -rcn $RemoteComputerName
+			# Set the PIPC folder (32 bit).		
+			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME" -lc $false -rcn $RemoteComputerName
 			# Set the PIPC\AF folder (64 bit).		
-			$PIHome_AF_path = Join-Path -Path $PIHome_path -ChildPath "AF"
+			$PIHome_AF_path = Join-Path -Path $PIHome64_path -ChildPath "AF"
 			# Set the PIPC\log folder (64 bit).
 			$PIHome_Log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 			# Set the path to reach out the piversion.exe CLU.
@@ -3300,7 +3330,7 @@ PROCESS
 				if(ValidateFileContent $outputFileContent "no access")
 				{
 					# Return the error message.		
-					$msg = "An authication problem occured to use piconfig.exe"
+					$msg = "An authentication problem occured with piconfig.exe"
 					Write-PISysAudit_LogMessage $msg "Error" $fn
 					return $null		
 				}
@@ -3873,8 +3903,8 @@ PROCESS
 		{ return $null }		
 	}
 		
-	# Get the scalar value returned. This value is stored on first row of the file.
-	return $outputFileContent[$rowToRead]		
+	# Get the scalar value returned. This value is stored on first row of the file.  Trim any whitespace.
+	return $outputFileContent[$rowToRead].TrimEnd()		
 }
 
 END {}
@@ -3942,7 +3972,7 @@ param(
 		$Group4 = "",
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("s")]
-		[ValidateSet("Low", "Moderate", "Severe")]
+		[ValidateSet("Unknown", "Low", "Moderate", "Severe")]
 		[String]
 		$Severity = "Low")
 BEGIN {}
@@ -4182,7 +4212,7 @@ PROCESS
 		Add-Member -InputObject $tempObj -MemberType NoteProperty -Name "SQLServerUserID" -Value $SQLServerUserID
 		Add-Member -InputObject $tempObj -MemberType NoteProperty -Name "PasswordFile" -Value $PasswordFile				
 		
-		# Test if a user name has been passed if Window integrated security if not used
+		# Test if a user name has been passed if Window integrated security is not used
 		if($IntegratedSecurity -eq $false)
 		{
 			if($SQLServerUserID -eq "")
@@ -4199,21 +4229,22 @@ PROCESS
 				Write-PISysAudit_LogMessage $msg "Warning" $fn -sc $true
 				$skipParam = $false
 			}
+			# Read from the global constant bag.		
+			$pwdPath = (Get-Variable "PasswordPath" -Scope "Global").Value			
+			# Set the path.
+			$pwdFile = Join-Path -Path $pwdPath -ChildPath $PasswordFile
+	
+			# Test the password file
+			if((Test-Path $pwdFile) -eq $false)
+			{									
+				$msg = "The password file specified cannot be found. If you haven't defined one" `
+							+ " yet, use the New-PISysAudit_PasswordOnDisk cmdlet to create one. This parameter will be skipped"
+				Write-PISysAudit_LogMessage $msg "Error" $fn -sc $true
+				$skipParam = $true
+			}
 		}
 		
-		# Read from the global constant bag.		
-		$pwdPath = (Get-Variable "PasswordPath" -Scope "Global").Value			
-		# Set the path.
-		$pwdFile = Join-Path -Path $pwdPath -ChildPath $PasswordFile
-	
-		# Test the password file
-		if((Test-Path $pwdFile) -eq $false)
-		{									
-			$msg = "The password file specified cannot be found. If you haven't defined one" `
-						+ " yet, use the New-PISysAudit_PasswordOnDisk cmdlet to create one. This parameter will be skipped"
-			Write-PISysAudit_LogMessage $msg "Error" $fn -sc $true
-			$skipParam = $true
-		}
+		
 	}
 	elseif (($PISystemComponentType.ToLower() -eq "picoresightserver") -or `
 		($PISystemComponentType.ToLower() -eq "picoresight") -or `
@@ -4295,12 +4326,13 @@ PROCESS
 		$ts = ([Datetime]::Now).ToString("yyyyMMdd_HHmmss")		
 
 		# Get the Scripts path.
-		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value														
+		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value	
+		if(!$(Test-Path $exportPath)){New-Item $exportPath -Type Directory}												
 						
 		# Create the log file in the same folder as the script. 
 		$fileName = "PISecurityAudit_" + $ts + ".csv"
 		$fileToExport = Join-Path -Path $exportPath -ChildPath $fileName
-		
+
 		# Build a collection for output.
 		$results = @()	
 		foreach($item in $AuditHashTable.GetEnumerator())			
@@ -4365,8 +4397,8 @@ PROCESS
 			{
 				$highlight = ""
 				if($result.AuditItemValue.ToLower() -eq "fail"){
-					if($result.Severity.ToLower() -eq "critical") {$highlight = "bgcolor=`"red`"" }
-					elseif($result.Severity.ToLower() -eq "severe") { $highlight = "bgcolor=`"orange`"" }
+					if($result.Severity.ToLower() -eq "severe") {$highlight = "bgcolor=`"red`"" }
+					elseif($result.Severity.ToLower() -eq "moderate") { $highlight = "bgcolor=`"orange`"" }
 					else { $highlight = "bgcolor=`"yellow`"" }
 					$fails += $result
 				}
@@ -4388,7 +4420,7 @@ PROCESS
 				$fails = $fails | select ID -unique
 				# Recommendations section
 				$recommendationsHTML = "<div class=`"recommendations`">"
-				$recommendationsHTML += "<h2>Recommendations for failed verification checks:</h2>"
+				$recommendationsHTML += "<h2>Recommendations for failed validations:</h2>"
 				foreach($fail in $fails) 
 				{
 					switch ($fail.ID) 
@@ -4398,9 +4430,9 @@ PROCESS
 						"AU10003" {$AuditFunctionName = "Get-PISysAudit_CheckFirewallEnabled"; break}
 						"AU10004" {$AuditFunctionName = "Get-PISysAudit_CheckAppLockerEnabled"; break}
 						"AU10005" {$AuditFunctionName = "Get-PISysAudit_CheckUACEnabled"; break}
-						"AU20001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminTrustsDisabled"; break}
-						"AU20002" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerSubSysVersions"; break}
-						"AU20003" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerDBSecurity_PIWorldReadAccess"; break}
+						"AU20001" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerDBSecurity_PIWorldReadAccess"; break}
+						"AU20002" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminTrustsDisabled"; break}
+						"AU20003" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerSubSysVersions"; break}
 						"AU20004" {$AuditFunctionName = "Get-PISysAudit_CheckEditDays"; break}
 						"AU20005" {$AuditFunctionName = "Get-PISysAudit_CheckAutoTrustConfig"; break}
 						"AU20006" {$AuditFunctionName = "Get-PISysAudit_CheckExpensiveQueryProtection"; break}
@@ -4674,6 +4706,7 @@ END {}
 # <Do not remove>
 Set-Alias piaudit New-PISysAuditReport
 Set-Alias piauditparams New-PISysAuditComputerParams
+Set-Alias pisysauditparams New-PISysAuditComputerParams
 Set-Alias pwdondisk New-PISysAudit_PasswordOnDisk
 # </Do not remove>
  
@@ -4709,6 +4742,7 @@ Export-ModuleMember New-PISysAuditReport
 Export-ModuleMember Write-PISysAuditReport
 Export-ModuleMember Write-PISysAudit_LogMessage
 Export-ModuleMember -Alias piauditparams
+Export-ModuleMember -Alias pisysauditparams
 Export-ModuleMember -Alias piaudit
 Export-ModuleMember -Alias pwdondisk
 # </Do not remove>
