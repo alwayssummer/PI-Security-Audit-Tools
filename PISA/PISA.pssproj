@@ -46,6 +46,7 @@
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB4.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCHECKLIB5.psm1" />
     <Compile Include="Scripts\PISYSAUDIT\PISYSAUDITCORE.psm1" />
+    <Compile Include="UpdateValidationsInHelp.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="en-US\about_PISYSAUDIT.help.txt" />

@@ -56,10 +56,10 @@ function Get-PISysAudit_CheckCoresightVersion
 .SYNOPSIS
 AU50001 - Check for latest version of Coresight
 .DESCRIPTION
-Audit ID: AU50001
-Audit Check Name: Check for latest version of Coresight
-Category: Severe
-Compliance: use latest version of PI Coresight
+VALIDATION: verifies PI Coresight version.<br/>
+COMPLIANCE: upgrade to the latest version of PI Coresight.  For more information, 
+see "Upgrade a PI Coresight installation" in the PI Live Library.<br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -140,12 +140,10 @@ function Get-PISysAudit_TemplateAU1xxxx
 {
 <#  
 .SYNOPSIS
-AU1xxxx - <Name>
+AU5xxxx - <Name>
 .DESCRIPTION
-Audit ID: AU1xxxx
-Audit Check Name: <Name>
-Category: <Category>
-Compliance: <Enter what it needs to be compliant>
+VERIFICATION: <Enter what the verification checks>
+COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
