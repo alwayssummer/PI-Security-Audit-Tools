@@ -117,7 +117,8 @@ PROCESS
 			# Skip line if not containing the delimiter.
 			if($line.Contains("^"))
 			{             		
-                # Find the delimiter
+                $securityWeakness = $false
+				# Find the delimiter
 				$position = $line.IndexOf("^")			
 				
 				# Specific Database
@@ -138,7 +139,6 @@ PROCESS
                     "pidbsec" { $process = $true }
                     "pids" { $process = $true }
                     "piheadingsets" { $process = $true }
-                    "pibatch" { $process = $true }
                     "pimodules" { $process = $true }
                     "pitransferrecords" { $process = $true }
                     "piuser" { $process = $true }
@@ -170,9 +170,9 @@ PROCESS
 		{
 			$result = $false
 			if($securityWeaknessCounter -eq 1)
-			{ $warningMessage = "The following database: " + $warningMessage + " presents a weakness." }
+			{ $warningMessage = "The following database presents a weakness: " + $warningMessage + "." }
 			else
-			{ $warningMessage = "The following databases: " + $warningMessage + " present weaknesses." }
+			{ $warningMessage = "The following databases present weaknesses: " + $warningMessage + "." }
 		}
 		else 
 		{ 

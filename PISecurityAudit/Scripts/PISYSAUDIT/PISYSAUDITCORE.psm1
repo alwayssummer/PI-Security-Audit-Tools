@@ -4331,8 +4331,7 @@ PROCESS
 		$ts = ([Datetime]::Now).ToString("yyyyMMdd_HHmmss")		
 
 		# Get the Scripts path.
-		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value	
-		if(!$(Test-Path $exportPath)){New-Item $exportPath -Type Directory}												
+		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value												
 						
 		# Create the log file in the same folder as the script. 
 		$fileName = "PISecurityAudit_" + $ts + ".csv"
