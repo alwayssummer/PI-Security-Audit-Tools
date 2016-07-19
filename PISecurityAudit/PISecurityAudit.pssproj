@@ -7,7 +7,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>MyApplication</RootNamespace>
     <AssemblyName>MyApplication</AssemblyName>
-    <Name>PISA</Name>
+    <Name>PISecurityAudit</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,7 +36,7 @@
     <Compile Include="DebugScript.ps1" />
     <Compile Include="piconfig\CheckPIAdminUsageInMappings.dif" />
     <Compile Include="piconfig\CheckPIAdminUsageInTrusts.dif" />
-    <Compile Include="PISA.tests.ps1" />
+    <Compile Include="PISecurityAudit.tests.ps1" />
     <Compile Include="PISYSAUDIT.psd1" />
     <Compile Include="Scripts\CheckProcessPrivilege.ps1" />
     <Compile Include="Scripts\Examples.ps1" />
