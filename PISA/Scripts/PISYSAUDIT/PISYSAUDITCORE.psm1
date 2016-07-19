@@ -1992,22 +1992,17 @@ PROCESS
 	
 	try
 	{
+		$scriptBlockCmdTemplate = "(Get-ItemProperty -Path `"{0}`" -Name `"{1}`").{1}"
+		$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $RegKeyPath, $Attribute)
+		$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
 		# Execute the Get-ItemProperty cmdlet method locally or remotely via the Invoke-Command cmdlet.
 		if($LocalComputer)
 		{						
 			# To only obtain the property of the registry key, it is easier to use a dynamic script.			
-			$scriptBlockCmdTemplate = "(Get-ItemProperty -Path `"{0}`" -Name `"{1}`").{1}"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $RegKeyPath, $Attribute)
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
 			$value = Invoke-Command -ScriptBlock $scriptBlock			
 		}
 		else
-		{	
-			# To avoid DCOM to be used with WMI calls, use PS Remoting technique to wrap
-			# the WMI call.			
-			$scriptBlockCmdTemplate = "(Get-ItemProperty -Path `"{0}`" -Name `"{1}`").{1}"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $RegKeyPath, $Attribute)
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
+		{			
 			$value = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
 		}
 	
@@ -2510,11 +2505,11 @@ PROCESS
 			# Set Paths
 			#......................................................................................
 			# Get the PI folder.
-			$PIServer_path = Get-PISysAudit_EnvVariable "PISERVER" -lc $false -rcn $RemoteComputerName											           
+			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $false -rcn $RemoteComputerName											           
 			# Set the ADM folder.
-			$PIServer_ADM_path = Join-Path -Path $PIServer_path -ChildPath "adm"
+			$PIHome_log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $PIServer_ADM_path -ChildPath "netsh_output.txt"                                 			
+			$outputFilePath = Join-Path -Path $PIHome_log_path -ChildPath "netsh_output.txt"                                 			
 			# Set the path to netsh CLU.
 			$windowsFolder = Get-PISysAudit_EnvVariable "WINDIR" -lc $false -rcn $RemoteComputerName											           
 			$netshExec = Join-Path -Path $windowsFolder -ChildPath "System32\netsh.exe"                                 						
@@ -2596,6 +2591,66 @@ PROCESS
 		
 		# Return the error message.
 		Write-PISysAudit_LogMessage "A problem occured when calling the netsh command." "Error" $fn -eo $_
+		return $null
+	}
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_AppLockerState
+{
+<#
+.SYNOPSIS
+(Core functionality) Get the state of AppLocker.
+.DESCRIPTION
+Get the state of AppLocker.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(		
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS		
+{		
+	$fn = GetFunctionName
+	
+	try
+	{									
+		$scriptBlockCmd = " if(`$PSVersionTable.PSVersion.Major -ge 3) [Get-AppLockerPolicy -Effective -XML] else [`$null] "
+		$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")	
+		$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
+		if($LocalComputer)
+		{			                    			
+			$appLockerPolicy = Invoke-Command -ScriptBlock $scriptBlock
+		}
+		else
+		{                            				
+			$appLockerPolicy = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
+		}
+		
+		# Return the content.
+		return $appLockerPolicy
+	}
+	catch
+	{
+		
+		# Return the error message.
+		Write-PISysAudit_LogMessage "A problem occured while retrieving the AppLocker configuration." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -4207,9 +4262,9 @@ function Write-PISysAuditReport
 {
 <#
 .SYNOPSIS
-(Core functionality) Create an audit object and place it inside a hash table object.
+(Core functionality) Writes a report of all checks performed.
 .DESCRIPTION
-Create an audit object and place it inside a hash table object.
+Writes a concise CSV report of all checks performed and optionally a detailed HTML report.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(
@@ -4221,6 +4276,10 @@ param(
 		[alias("obf")]
 		[boolean]
 		$ObfuscateSensitiveData = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dtl")]
+		[boolean]
+		$DetailReport = $true,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("dbgl")]
 		[int]
@@ -4237,13 +4296,12 @@ PROCESS
 
 		# Get the Scripts path.
 		$exportPath = (Get-Variable "ExportPath" -Scope "Global").Value														
-			
-		# Output to log file.			
-		# Create the log file in the same folder as the script.
-		$fileName = "PISystemAudit_" + 	$ts + ".csv"	
+						
+		# Create the log file in the same folder as the script. 
+		$fileName = "PISecurityAudit_" + $ts + ".csv"
 		$fileToExport = Join-Path -Path $exportPath -ChildPath $fileName
 		
-		# Build a collection for output to a .csv file.
+		# Build a collection for output.
 		$results = @()	
 		foreach($item in $AuditHashTable.GetEnumerator())			
 		{
@@ -4264,12 +4322,121 @@ PROCESS
 			# Add to collection.
 			$results += $item.Value	
 		}
-
-		# Export to .csv but sort by the column first.
-		$results | Select-Object * | Sort ID | Export-CSV -Path $fileToExport -Encoding ASCII -NoType
+		
+		# Export to .csv but sort by the ID column first.
+		$results = $results | Select-Object * | Sort ID 
+		$results | Export-Csv -Path $fileToExport -Encoding ASCII -NoType
+		
+		if($DetailReport){
 			
+			$fileName = "PISecurityAudit_DetailReport_" + $ts + ".html" 
+
+			$fileToExport = Join-Path -Path $exportPath -ChildPath $fileName
+
+			# Header for the report. 
+			$header = @"
+			<html><head><meta name="viewport" content="width=device-width" />
+			<style type="text/css">
+			h2 {font: 18px verdana; font-family: verdana; font-weight: bold}
+			body {font: 12px verdana} a {font: 12px verdana}
+			.summarytable {border-width: 1px; border-collapse: collapse }
+			.summaryheader {font: 12px verdana; font-weight: bold; background-color: lightblue}
+			.summaryrow {font: 12px verdana}
+			.recommentations {font: 12px verdana}
+			</style></head><body><h2>AUDIT SUMMARY</h2>
+"@
+			# Header for the summary table.
+			$tableHeader = @"
+			<table border="1" class="summarytable" style="align:left;"><tr class="summaryheader">
+			<td>ID</td>
+			<td>Server</td>
+			<td>Validation</td>
+			<td>Result</td> 
+			<td>Severity</td>
+			<td>Message</td>
+			<td>Category</td> 
+			<td>Area</td><tr>
+"@
+			$reportHTML = $header + $tableHeader
+			
+			# Construct table and color code the rows by result and severity.
+			$fails = @()
+			foreach($result in $results) 
+			{
+				$highlight = ""
+				if($result.AuditItemValue.ToLower() -eq "fail"){
+					if($result.Severity.ToLower() -eq "critical") {$highlight = "bgcolor=`"red`"" }
+					elseif($result.Severity.ToLower() -eq "severe") { $highlight = "bgcolor=`"orange`"" }
+					else { $highlight = "bgcolor=`"yellow`"" }
+					$fails += $result
+				}
+				$tableRow = @"
+				<tr class="summaryrow" {8}>
+				<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{7}</td>
+				<td>{4}</td><td>{5}</td><td>{6}</td>
+"@ 
+				$tableRow = [string]::Format($tableRow, $result.ID,$result.ServerName, $result.AuditItemName, 
+												$result.AuditItemValue, $result.MessageList, $result.Group1,
+												$result.Group2, $result.Severity, $highlight)
+				$reportHTML += $tableRow
+			}
+			# Add footer to the table.
+			$tableFooterHTML = "</table><br/>"
+			$reportHTML += $tableFooterHTML
+			
+			if($fails.Count -gt 0){
+				$fails = $fails | select ID -unique
+				# Recommendations section
+				$recommendationsHTML = "<div class=`"recommendations`">"
+				$recommendationsHTML += "<h2>Recommendations for failed verification checks:</h2>"
+				foreach($fail in $fails) 
+				{
+					switch ($fail.ID) 
+					{
+						"AU10001" {$AuditFunctionName = "Get-PISysAudit_CheckDomainMemberShip"; break}
+						"AU10002" {$AuditFunctionName = "Get-PISysAudit_CheckOSSKU"; break}
+						"AU10003" {$AuditFunctionName = "Get-PISysAudit_CheckFirewallEnabled"; break}
+						"AU10004" {$AuditFunctionName = "Get-PISysAudit_CheckAppLockerEnabled"; break}
+						"AU10005" {$AuditFunctionName = "Get-PISysAudit_CheckUACEnabled"; break}
+						"AU20001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminTrustsDisabled"; break}
+						"AU20002" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerSubSysVersions"; break}
+						"AU20003" {$AuditFunctionName = "Get-PISysAudit_CheckPIServerDBSecurity_PIWorldReadAccess"; break}
+						"AU20004" {$AuditFunctionName = "Get-PISysAudit_CheckEditDays"; break}
+						"AU20005" {$AuditFunctionName = "Get-PISysAudit_CheckAutoTrustConfig"; break}
+						"AU20006" {$AuditFunctionName = "Get-PISysAudit_CheckExpensiveQueryProtection"; break}
+						"AU20007" {$AuditFunctionName = "Get-PISysAudit_CheckExplicitLoginDisabled"; break}
+						"AU20008" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminUsage"; break}
+						"AU20009" {break} # Check not yet implemented
+						"AU30001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServiceConfiguredAccount"; break}
+						"AU30002" {$AuditFunctionName = "Get-PISysAudit_CheckPImpersonationModeForAFDataSets"; break}
+						"AU30003" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServicePrivileges"; break}
+						"AU30004" {$AuditFunctionName = "Get-PISysAudit_CheckPlugInVerifyLevel"; break}
+						"AU30005" {$AuditFunctionName = "Get-PISysAudit_CheckFileExtensionWhitelist"; break}
+						"AU30006" {$AuditFunctionName = "Get-PISysAudit_CheckAFServerVersion"; break}
+						"AU40001" {$AuditFunctionName = "Get-PISysAudit_CheckSQLXPCommandShell"; break}
+						"AU40002" {$AuditFunctionName = "Get-PISysAudit_CheckSQLAdHocQueries"; break}
+						"AU40003" {$AuditFunctionName = "Get-PISysAudit_CheckSQLDBMailXPs"; break}
+						"AU40004" {$AuditFunctionName = "Get-PISysAudit_CheckSQLOLEAutomationProcs"; break}
+						"AU50001" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightVersion"; break}
+					
+						default {break}
+					}
+					$recommendationInfo = Get-Help $AuditFunctionName
+					$recommendation = "<b>{0}</b><br/>{1}<br/>"
+					$recommendationsHTML += [string]::Format($recommendation, $recommendationInfo.Synopsis, $recommendationInfo.Description.Text)
+				}
+				$reportHTML += $recommendationsHTML
+			}
+			# Add footer to report.
+			$footerHTML = "</div></body></html>"
+			$reportHTML += $footerHTML 
+			
+			# Print report to file.
+			$reportHTML | Out-File $fileToExport
+		}
 		# Return the report name.
 		return $fileName
+		
 	}
 	catch
 	{
@@ -4338,7 +4505,11 @@ param(
 		$ObfuscateSensitiveData = $true,				
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]				
 		[boolean]
-		$ShowUI = $true,				
+		$ShowUI = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dtl")]
+		[boolean]
+		$DetailReport = $true,				
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]		
 		[alias("dbgl")]
 		[int]
@@ -4437,7 +4608,7 @@ PROCESS
 	# ....................................................................................		
 	$ActivityMsg = "Generate report"
 	if($ShowUI) { Write-Progress -activity $ActivityMsg -Status "in progress..." }
-	$reportName = Write-PISysAuditReport $auditHashTable -obf $ObfuscateSensitiveData -dbgl $DBGLevel
+	$reportName = Write-PISysAuditReport $auditHashTable -obf $ObfuscateSensitiveData -dtl $DetailReport -dbgl $DBGLevel
 	if($ShowUI) { Write-Progress -activity $ActivityMsg -Status $statusMsgCompleted -completed }
 	
 	# ............................................................................................................
@@ -4524,6 +4695,7 @@ Export-ModuleMember Get-PISysAudit_InstalledComponents
 Export-ModuleMember Get-PISysAudit_InstalledKBs
 Export-ModuleMember Get-PISysAudit_InstalledWin32Features
 Export-ModuleMember Get-PISysAudit_FirewallState
+Export-ModuleMember Get-PISysAudit_AppLockerState
 Export-ModuleMember Get-PISysAudit_WindowsFeature
 Export-ModuleMember Invoke-PISysAudit_AFDiagCommand
 Export-ModuleMember Invoke-PISysAudit_PIConfigScript

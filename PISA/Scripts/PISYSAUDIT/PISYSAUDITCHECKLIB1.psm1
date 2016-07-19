@@ -46,7 +46,9 @@ function Get-PISysAudit_FunctionsFromLibrary1
 	[System.Collections.HashTable]$listOfFunctions = @{}	
 	$listOfFunctions.Add("Get-PISysAudit_CheckDomainMemberShip", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckOSSKU", 1)
-	$listOfFunctions.Add("Get-PISysAudit_FirewallEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckFirewallEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckAppLockerEnabled", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckUACEnabled", 1)
 			
 	# Return the list.
 	return $listOfFunctions
@@ -58,10 +60,12 @@ function Get-PISysAudit_CheckDomainMemberShip
 .SYNOPSIS
 AU10001 - Domain Membership Check
 .DESCRIPTION
-Audit ID: AU10001
-Audit Check Name: Domain Membership Check
-Category: Moderate
-Compliance: Should be part of a domain.
+VALIDATION: verifies that the machine is a member of an Active Directory Domain.<br/>  
+COMPLIANCE: join the machine to an Active Directory Domain.  Use of a domain is 
+encouraged as AD provides Kerberos authentication and is our best available technology 
+for securing a PI System.  Furthermore, the implementation of transport security in the 
+PI System relies on Windows Integrated Security and AD to automatically enable higher 
+strength ciphers.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -86,7 +90,7 @@ PROCESS
 {					
 	# Get and store the function Name.
 	$fn = GetFunctionName	
-	
+	$msg = ""
 	try
 	{				
 		# Read the registry key.
@@ -96,15 +100,30 @@ PROCESS
 		# Compliance is to have computer belonging to a domain.
 		# If the value is null or empty, it means it is not defined and the result of
 		# the test is False (fail), otherwise it is true (pass).		
-		if(($value -eq $null) -or ($value -eq "")) { $result =  $false } else { $result = $true }
+		if(($value -eq $null) -or ($value -eq "")) 
+		{ 
+			$result =  $false 
+			$msg = "Machine is not a member of an AD Domain."
+		} 
+		else 
+		{ 
+			$result = $true 
+			$msg = "Machine is a member of an AD Domain."
+		}
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU10001" `
 										-ain "Domain Membership Check" -aiv $result `
+										-msg $msg `
 										-Group1 "Machine" -Group2 "Domain" `
 										-Severity "Severe"																				 
 }
@@ -121,11 +140,14 @@ function Get-PISysAudit_CheckOSSKU
 <#  
 .SYNOPSIS
 AU10002 - Operating System SKU
-.DESCRIPTION
-Audit ID: AU10002
-Audit Check Name: Operating System SKU
-Category: Moderate
-Compliance: SKU should match one of these: 12, 13, 14, 29, 39, 40, 41 or 42
+.DESCRIPTION   
+VALIDATION: verifies that the OS Stock Keeping Unit (SKU) is appropriate for 
+production use.<br/>
+COMPLIANCE: SKU should match one of the following: 12, 13, 14, 29, 39, 40, 41 or 42.  
+These SKUs were chosen to highlight the reduced attack surface area of a core 
+installation of Windows Server.  For more on the advantages of Windows Server Core, 
+please see:<br/>
+https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -150,7 +172,7 @@ PROCESS
 {					
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{				
 		# Get the value from the WMI Query
@@ -243,19 +265,25 @@ PROCESS
 
 		# Check if the value is from one in the list			
 		if($sku -match "12|13|14|29|39|40|41|42") { $result =  $true } else { $result = $false }
+
+		# Set a message to return with the audit object.
+		$msgTemplate = "The following product is used: {0}"
+		$msg = [string]::Format($msgTemplate, $productTranscription)
+
 	}
 	catch
-	{ $result = "N/A" }
-	
-	# Set a message to return with the audit object.
-	$msgTemplate = "A {0} product is used."
-	$msg = [string]::Format($msgTemplate, $productTranscription)
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table													
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU10002" `
 										-ain "Operating System SKU" -aiv $result `
-										-MessageList $msg `
+										-msg $msg `
 										-Group1 "Machine" -Group2 "Operating System" `
 										-Severity "Severe"													
 }
@@ -267,16 +295,107 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_FirewallEnabled
+function Get-PISysAudit_CheckFirewallEnabled
 {
 <#  
 .SYNOPSIS
 AU10003 - Firewall Enabled
 .DESCRIPTION
-Audit ID: AU10003
-Audit Check Name: Firewall Enabled
-Category: Moderate
-Compliance: Should be part set to on.
+VALIDATION: verifies that the Windows host based firewall is enabled.<br/> 
+COMPLIANCE: enable the Windows firewall.  A firewall's effectiveness is heavily
+dependent on the configuration.  For PI specific port requirements, see:<br/> 
+https://techsupport.osisoft.com/Troubleshooting/KB/KB01162.
+For more general information on the Windows firewall, see "Windows Firewall with 
+Advanced Security Overview" on TechNet:<br/>
+https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS
+{					
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	$msg = ""
+	try
+	{				
+		# Read the registry key.
+		$outputFileContent = Get-PISysAudit_FirewallState -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		
+		# Read each line to find the state of each profile.	
+		$result = $false		
+		$validationCounter = 0
+		
+		foreach($line in $OutputFileContent)
+		{														
+			if($line.ToLower().Contains("state"))
+			{								
+				if($line.ToLower().Contains("on")) { $validationCounter++ }				
+			}					
+		}
+		
+		# Check if the counter is 3 = compliant, 2 or less it is not compliant
+		if($validationCounter -eq 3) 
+		{ 
+			$result = $true 
+			$msg = "Firewall enabled."
+		} 
+		else 
+		{ 
+			$result = $false 
+			$msg = "Firewall not enabled."
+		}							
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU10003" `
+										-ain "Firewall Enabled" -aiv $result `
+										-msg $msg `
+										-Group1 "Machine" -Group2 "Policy" `
+										-Severity "Moderate"																				 
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckAppLockerEnabled
+{
+<#  
+.SYNOPSIS
+AU10004 - AppLocker Enabled
+.DESCRIPTION
+VALIDATION: verifies that AppLocker is enabled.<br/>  
+COMPLIANCE: set AppLocker to Enforce mode after establishing a policy.  For a 
+primer on running AppLocker on a PI Data Archive, see:<br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/KB00994
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -304,33 +423,137 @@ PROCESS
 	
 	try
 	{				
-		# Read the registry key.
-		$outputFileContent = Get-PISysAudit_FirewallState -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-		
-		# Read each line to find the state of each profile.	
-		$result = $false		
-		$validationCounter = 0
-		
-		foreach($line in $OutputFileContent)
-		{														
-			if($line.ToLower().Contains("state"))
-			{								
-				if($line.ToLower().Contains("on")) { $validationCounter++ }				
-			}					
+		$result = $false
+		# Read the AppLocker policy.
+		[xml] $appLockerPolicy = Get-PISysAudit_AppLockerState -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		if($appLockerPolicy -ne $null)
+		{
+			if($(Select-Xml -xml $appLockerPolicy -XPath "//RuleCollection[@Type='Exe']").Node.EnforcementMode -eq "Enabled" -and `
+				$(Select-Xml -xml $appLockerPolicy -XPath "//RuleCollection[@Type='Msi']").Node.EnforcementMode -eq "Enabled")
+			{
+				$result = $true
+				$msg = "AppLocker is configured to enforce."
+			}
+			else
+			{
+				$msg = "AppLocker is not configured to enforce."
+			}
 		}
-		
-		# Check if the counter is 3 = compliant, 2 or less it is not compliant
-		if($validationCounter -eq 3) { $result = $true } else { $result = $false }							
+		else
+		{
+			$msg = "No AppLocker policy returned."
+		}
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
-										-at $AuditTable "AU10003" `
-										-ain "Firewall Enabled" -aiv $result `
-										-Group1 "Machine" -Group2 "Firewall" `
+										-at $AuditTable "AU10004" `
+										-ain "AppLocker Enabled" -aiv $result `
+										-msg $msg `
+										-Group1 "Machine" -Group2 "Policy" `
 										-Severity "Moderate"																				 
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckUACEnabled
+{
+<#  
+.SYNOPSIS
+AU10005 - UAC Enabled
+.DESCRIPTION
+VALIDATION: verifies that UAC is enabled.  More precisely, it verifies the 
+following default features: EnableLUA, ConsentPromptBehaviorAdmin, 
+EnableInstallerDetection, PromptOnSecureDesktop and EnableSecureUIAPaths.
+Additionally, a check is performed for the feature ValidateAdminCodeSignatures.  
+Lower severity is assigned if this is the only feature disabled.<br/>
+COMPLIANCE: enable the flagged UAC features.  For more information on specific
+UAC features, see:<br/>
+https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS
+{					
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	$severity = "Unkown"
+
+	try
+	{				
+		$result = $true
+		$uacKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\system"
+		$defaultEnabledUACFeatures = "EnableLUA", "ConsentPromptBehaviorAdmin", "EnableInstallerDetection", "PromptOnSecureDesktop", "EnableSecureUIAPaths"
+		
+		# Loop through key default enabled UAC features
+		$tmpmsg = "Some default UAC features are disabled: "
+		foreach ($uacFeature in $defaultEnabledUACFeatures) 
+		{
+			if ($(Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -RegKeyPath $uacKeyPath -Attribute $uacFeature) -eq 0)
+			{
+				$result = $false
+				$severity = "Moderate"
+				$tmpmsg += $uacFeature + "; "
+			}
+		}
+		
+		if(!$result)
+		{$msg = $tmpmsg}
+
+		$additionalUACFeature = "ValidateAdminCodeSignatures"
+		# If the default features are enabled, check for additional feature for added security
+		if ($result -and ($(Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel -RegKeyPath $uacKeyPath -Attribute $additionalUACFeature) -eq 0))
+		{
+			$result = $false
+			$msg = "Recommended UAC feature {0} disabled."
+			$msg = [string]::Format($msg, $additionalUACFeature)
+			$severity = "Low"
+		}	
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU10005" `
+										-ain "UAC Enabled" -aiv $result `
+										-msg $msg `
+										-Group1 "Machine" -Group2 "Policy" `
+										-Severity $severity																				 
 }
 
 END {}
@@ -350,10 +573,8 @@ function Get-PISysAudit_TemplateAU1xxxx
 .SYNOPSIS
 AU1xxxx - <Name>
 .DESCRIPTION
-Audit ID: AU1xxxx
-Audit Check Name: <Name>
-Category: <Category>
-Compliance: <Enter what it needs to be compliant>
+VERIFICATION: <Enter what the verification checks>
+COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -378,18 +599,24 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{		
 		# Enter routine.			
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 									-at $AuditTable "AU1xxxx" `
 									-ain "<Name>" -aiv $result `
+									-msg $msg `
 									-Group1 "<Category 1>" -Group2 "<Category 2>" `
 									-Group3 "<Category 3>" -Group4 "<Category 4>" `
 									-Severity "<Severity>"																																																
@@ -409,7 +636,9 @@ END {}
 Export-ModuleMember Get-PISysAudit_FunctionsFromLibrary1
 Export-ModuleMember Get-PISysAudit_CheckDomainMemberShip
 Export-ModuleMember Get-PISysAudit_CheckOSSKU
-Export-ModuleMember Get-PISysAudit_FirewallEnabled
+Export-ModuleMember Get-PISysAudit_CheckFirewallEnabled
+Export-ModuleMember Get-PISysAudit_CheckAppLockerEnabled
+Export-ModuleMember Get-PISysAudit_CheckUACEnabled
 # </Do not remove>
 
 # ........................................................................

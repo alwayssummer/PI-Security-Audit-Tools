@@ -63,10 +63,11 @@ function Get-PISysAudit_CheckPIServerDBSecurity_PIWorldReadAccess
 .SYNOPSIS
 AU20001 - PI Data Archive Table Security Check
 .DESCRIPTION
-Audit ID: AU20001
-Audit Check Name: PI Data Archive Table Security
-Category: Moderate
-Compliance: Should be part of a domain.
+VALIDATION: examines the database security of the PI Data Archive and flags any 
+ACLs that contain access for PIWorld as weak. <br/>
+COMPLIANCE: remove PIWorld access from all database security ACLs.  Note that prior
+removing PIWorld access, you need to evaluate which applications are relying on that 
+access so that you can grant those applications access explicitly. 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -91,7 +92,7 @@ PROCESS
 {
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{				
 		# Initialize objects.
@@ -159,7 +160,7 @@ PROCESS
 					if($securityWeaknessCounter -eq 1)
 					{ $warningMessage = $dbName }
 					else
-					{ $warningMessage = $warningMessage + ", " + $dbName }
+					{ $warningMessage = $warningMessage + "; " + $dbName }
 				}					
 			}			
 		}	
@@ -173,16 +174,26 @@ PROCESS
 			else
 			{ $warningMessage = "The following databases: " + $warningMessage + " present weaknesses." }
 		}
-		else { $result = $true }	
+		else 
+		{ 
+			$result = $true 
+			$warningMessage = "No databases identified that present a weakness."
+		}	
+		$msg = $warningMessage
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 		
 	# Define the results in the audit table
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20001" `
 										-ain "PI Data Archive Table Security" -aiv $result `
-										-msg $warningMessage `
+										-msg $msg `
 										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "DB Security" `
 										-Severity "Moderate"																		
 }
@@ -200,10 +211,11 @@ function Get-PISysAudit_CheckPIAdminTrustsDisabled
 .SYNOPSIS
 AU20002 - PI Admin Trusts Disabled Check
 .DESCRIPTION
-Audit ID: AU20002
-Audit Check Name: PI Admin Trusts Disabled
-Category: Severe
-Compliance: Trust login should be disabled.
+VALIDATION: verifies that the piadmin PI User cannot be used in a PI Trust. <br/>
+COMPLIANCE: disable Trusts with piadmin.  This can be done by checking "User 
+cannot be used in a Trust" in the Properties menu for the piadmin PI User.  To access
+this menu open use the Idenitities, Users, & Groups plugin in PI SMT, navigate to the 
+PI User tab, right click the piadmin entry and select Properties in the context menu.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -228,7 +240,7 @@ PROCESS
 {
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{							
 		# Initialize objects.
@@ -263,10 +275,24 @@ PROCESS
 		if ( $securityBits -band 16 ) { $securityValidationCounter++ }
 		
 		# Check if the counter is 3 = compliant, 2 or less it is not compliant
-		if($securityValidationCounter -eq 3) { $result = $true } else { $result = $false }	
+		if($securityValidationCounter -eq 3) 
+		{ 
+			$result = $true 
+			$msg = "The piadmin user cannot be assigned to a trust."
+		} 
+		else 
+		{ 
+			$result = $false 
+			$msg = "The piadmin user can be assigned to a trust."
+		}	
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	#......................................
 	# Define the results in the audit table	
@@ -274,7 +300,8 @@ PROCESS
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20002" `
 										-ain "PI Admin Trusts Disabled" -aiv $result `
-										-Group1 "PI System" -Group2 "Trusts" `
+										-msg $msg `
+										-Group1 "PI System" -Group2 "Authentication" `
 										-Severity "Severe"																		
 }
 
@@ -291,10 +318,11 @@ function Get-PISysAudit_CheckPIServerSubSysVersions
 .SYNOPSIS
 AU20003 - PI Data Archive SubSystem Version Check
 .DESCRIPTION
-Audit ID: AU20003
-Audit Check Name: PI Data Archive SubSystem Version
-Category: Severe
-Compliance: Version should be higher than 3.4.380.36.
+VALIDATION: verifies that the PI Data Archive is using the most recent release. <br/>  
+COMPLIANCE: upgrade the PI Data Archive to the latest version, PI Data Archive 
+2016 (3.4.400.1162).  For more information, see the "Upgrade a PI Data Archive Server" 
+section of the PI Data Archive Installation and Upgrade Guide, Live Library: <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD. 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -319,7 +347,8 @@ PROCESS
 {
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
+	$Severity = "Unknown"
 	try
 	{					
 		# Execute the piversion CLU.
@@ -369,22 +398,24 @@ PROCESS
 		# Not compliant if under 3.4.380.36 version
 		# Warn if 3.4.380.36 or 3.4.385.59 version	
 		$result = $true
-		$warningMessage = ""
 		$upgradeMessage = "Upgrading to 3.4.400.1162 is recommended."
-		if ($installVersionInt64 -lt 3438036) { $result = $false}
-		if ($installVersionInt64 -ge 3438036 -and $installVersionInt64 -lt 344001162 ) { $result = $false; $warningMessage = $upgradeMessage }
-		if ($installVersionInt64 -lt 344001162) { $result = $false; $warningMessage = $upgradeMessage }		
+		if ($installVersionInt64 -ge 344001162) { $result = $true; $msg = "Version is compliant"; $Severity = "severe" }
+		elseif ($installVersionInt64 -ge 3438036 -and $installVersionInt64 -lt 344001162 ) { $result = $false; $msg = $upgradeMessage; $Severity = "severe" }	
+		elseif ($installVersionInt64 -lt 3438036) { $result = $false; $msg = $upgradeMessage; $Severity = "critical" }
 	}
 	catch
-	{ $Result = "N/A" }	
+	{ 
+		$result = "N/A" 
+		$msg = "The validation did not complete successfully."
+	}	
 	
 	# Define the results in the audit table
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20003" `
 										-ain "PI Data Archive SubSystem Versions" -aiv $result `
-										-msg $warningMessage `
-										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI SubSystems" `
-										-Severity "Severe"									
+										-msg $msg `
+										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI Subsystems" `
+										-Severity $Severity									
 }
 
 END {}
@@ -400,10 +431,12 @@ function Get-PISysAudit_CheckEditDays
 .SYNOPSIS
 AU20004 - Check Edit Days
 .DESCRIPTION
-Audit ID: AU20004
-Audit Check Name: Edit Days
-Category: Moderate
-Compliance: Greater than zero is a pass.
+VALIDATION: verified that Edit Days is set. <br/>
+COMPLIANCE: set to a value greater than zero.  EditDays defines the number of past 
+days where events can be modified in the Snapshot or Archive databases. A zero value means 
+no time check is done.  For instructions to set EditDays, see "Modify the EditDays tuning 
+parameter" section in the PI Data Archive System Management Guide:<br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -428,7 +461,7 @@ PROCESS
 {					
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{
 		# Execute the PIConfig script.
@@ -453,21 +486,39 @@ PROCESS
 				# Find the delimiter
 				$tokens = $line.Split(",")
 	
-				if($tokens[1] -eq 0) { $result = $false }
-				else { $result = $true }
+				if($tokens[1] -eq 0) 
+				{ 
+					$result = $false 
+					$msg = "EditDays using non-compliant value of 0."
+				}
+				else 
+				{ 
+					$result = $true 
+					$msg = "EditDays specified as a non-zero value."
+				}
 				break								
 			}			
 		}
 		# The default value is set to 0 which is not compliant.
-		if($valueFound -eq $false) { $result = $true }		
+		if($valueFound -eq $false) 
+		{ 
+			$result = $false
+			$msg = "EditDays not specified, using non-compliant default of 0."
+		}		
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 			
 	# Define the results in the audit table												
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20004" `
 										-ain "Edit Days" -aiv $result `
+										-msg $msg `
 										-Group1 "PI System" -Group2 "PI Data Archive" `
 										-Severity "Severe"												
 }
@@ -485,10 +536,11 @@ function Get-PISysAudit_CheckAutoTrustConfig
 .SYNOPSIS
 AU20005 - Auto Trust Configuration
 .DESCRIPTION
-Audit ID: AU20005
-Audit Check Name: Auto Trust Configuration
-Category: Moderate
-Compliance: Should be part of a domain.
+VALIDATION: verifies that the autotrustconfig tuning parameter is set to create 
+either no trusts or a trust for the loopback automatically (127.0.0.1). <br/>
+COMPLIANCE: set the autotrustconfig tuning parameter to a value of 0 (do not 
+automatically create any PI Trust entries) or 1 (create the trust entry for the loopback 
+IP address 127.0.0.1 only). 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -513,7 +565,7 @@ PROCESS
 {					
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{
 		# Execute the PIConfig script.
@@ -545,22 +597,55 @@ PROCESS
 				# 0x08 - Create the trust entry for the short hostname
 				# 0x10 - Create the trust entry for the FQDN hostname
 				# 0x1F - Create the old (pre 3.4.370.x) trust entries
-				if($tokens[1] -le 1) { $result = $true }
-				else { $result = $false }
+
+				switch ($tokens[1])
+				{
+					0   { $description = "Does not automatically create any PI Trust entries."; break; }
+					1   { $description = "Creates the trust entry for the loopback IP address 127.0.0.1"; break; }
+					2   { $description = "Creates the trust entry for the `"localhost`" hostname"; break; }
+					4   { $description = "Creates the trust entry for the IP address"; break; }
+					8   { $description = "Creates the trust entry for the short hostname"; break; }
+					16   { $description = "Creates the trust entry for the FQDN hostname"; break; }
+					32   { $description = "Creates the old (pre 3.4.370.x) trust entries"; break; }
+			
+					default {$description = "Unknown configuration" }
+				}
+
+				if($tokens[1] -le 1) 
+				{ 
+					$result = $true 
+					$msg = "Tuning parameter compliant: {0}"
+				}
+				else 
+				{ 
+					$result = $false
+					$msg = "Tuning parameter not compliant: {0}" 
+				}
+				$msg = [string]::Format($msg, $description)
 				break								
 			}			
 		}
 		# The default value is set to 1 which is compliant.
-		if($valueFound -eq $false) { $result = $true }		
+		if($valueFound -eq $false) 
+		{ 
+			$result = $true 
+			$msg = "Tuning parameter compliant: Create the trust entry for the loopback IP address 127.0.0.1"
+		}		
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 			
 	# Define the results in the audit table			
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20005" `
 										-ain "Auto Trust Configuration" -aiv $result `
-										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "Trusts" `
+										-msg $msg `
+										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "Authentication" `
 										-Severity "Severe"	
 										
 }
@@ -578,10 +663,11 @@ function Get-PISysAudit_CheckExpensiveQueryProtection
 .SYNOPSIS
 AU20006 - Expensive Query Protection Check
 .DESCRIPTION
-Audit ID: AU20006
-Audit Check Name: Expensive Query Protection
-Category: Severe
-Compliance: Value must be between 60 and 300.
+VALIDATION: verify that the PI Data Archive has protection against expensive queries. <br/>
+COMPLIANCE: set the archive_maxqueryexecutionsec tuning parameter to a value between 60 
+and 300.  For more information on this parameter and other that can protect against expensive 
+queries, see the knowledgebase article 3224OSI8 <br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8  
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -606,7 +692,7 @@ PROCESS
 {
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{							
 		# Initialize objects.
@@ -673,13 +759,36 @@ PROCESS
 						
 		# Default value for PI Data Archive prior to 3.4.390.16 was 0
 		# Check if the timeout setting is between 60 and 300.
-		if(($valueFound -eq $false) -and ($installVersionInt64 -lt 3439016)) { $result = $false }
-		elseif(($valueFound -eq $false) -and ($installVersionInt64 -ge 3439016)) { $result = $true }				
-		elseif($valueFound -and ($timeout -ge 60) -and ($timeout -le 300)) { $result = $true }
-		else { $result = $false }	
+		if(($valueFound -eq $false) -and ($installVersionInt64 -lt 3439016)) 
+		{ 
+			$result = $false 
+			$msg = "Using the non-compliant default of 0."
+		}
+		elseif(($valueFound -eq $false) -and ($installVersionInt64 -ge 3439016)) 
+		{ 
+			$result = $true 
+			$msg = "Using the compliant default of 260."
+		}				
+		elseif($valueFound -and ($timeout -ge 60) -and ($timeout -le 300)) 
+		{ 
+			$result = $true 
+			$msg = "Using a compliant value of {0}."
+			$msg = [string]::Format($msg, $timeout)
+		}
+		else 
+		{ 
+			$result = $false 
+			$msg = "Using a non-compliant value of {0}."
+			$msg = [string]::Format($msg, $timeout)
+		}	
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	#......................................
 	# Define the results in the audit table	
@@ -687,7 +796,8 @@ PROCESS
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20006" `
 										-ain "Expensive Query Protection" -aiv $result `
-										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI Archive SubSystem" `
+										-msg $msg `
+										-Group1 "PI System" -Group2 "PI Data Archive" -Group3 "PI Archive Subsystem" `
 										-Severity "Severe"																		
 }
 
@@ -698,24 +808,18 @@ END {}
 #***************************
 }
 
-
-# ........................................................................
-# Add your cmdlet after this section. Don't forget to add an intruction
-# to export them at the bottom of this script.
-# ........................................................................
-
-
-
 function Get-PISysAudit_CheckExplicitLoginDisabled
 {
 <#  
 .SYNOPSIS
 AU20007 - Check if the explicit login is disabled
 .DESCRIPTION
-Audit ID: AU20007
-Audit Check Name: Explicit login disabled
-Category: Severe
-Compliance: Value must be greater than 3
+VALIDATION: verifies that explicit login is disabled as an authentication protocol. <br/>  
+COMPLIANCE: set the tuning parameter Server_AuthenticationPolicy to a value greater than 3.  
+This is equivalent to the third notch, "Disable explicit login", or higher on the Security 
+Settings plugin in PI SMT.  For more information, see "Security Best Practice #2" and "Security 
+Best Practice #3" in KB00833. <br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/KB00833
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -740,7 +844,8 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
+
 	try
 	{		
 		# Execute the PIConfig script.
@@ -748,17 +853,45 @@ PROCESS
 																-lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel						
 		
 		# Validate rules
-		$ServerAuthPolicy = $outputFileContent
-		if($ServerAuthPolicy -lt 3){$result = $false} else {$result =$true}
+		$ServerAuthPolicy = $outputFileContent[0]
+		
+		switch ($ServerAuthPolicy)
+				{
+					0   { $description = "All authentication options enabled."; break; }
+					2   { $description = "Explicit logins for users with blank passwords disabled."; break; }
+					3   { $description = "Explicit logins disabled."; break; }
+					19   { $description = "Explicit logins and SDK Trusts disabled."; break; }
+					51   { $description = "All trusts and explicit login disabled."; break; }
+			
+					default {$description = "Unrecognized configuration" }
+				}
+		
+		if($ServerAuthPolicy -lt 3)
+		{
+			$result = $false
+			$msg = "Using non-compliant policy: {0}"
+		} 
+		else 
+		{
+			$result =$true
+			$msg = "Using compliant policy: {0}"
+		}
+		$msg = [string]::Format($msg, $description)
 
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20007" `
 										-ain "Explicit login disabled" -aiv $result `
+										-msg $msg `
 										-Group1 "PI System" -Group2 "PI Data Archive" `
 										-Severity "Severe"								
 }
@@ -776,10 +909,11 @@ function Get-PISysAudit_CheckPIAdminUsage
 .SYNOPSIS
 AU20008 - Check if piadmin is not used
 .DESCRIPTION
-Audit ID: AU20008
-Audit Check Name: piadmin is not used
-Category: Severe
-Compliance: Value must be empty
+VALIDATION: verifies that piadmin is not used in trusts or mappings. <br/>
+COMPLIANCE: replace any trusts or mappings that use piadmin with a mapping or trust to a
+PI Identity with appropriate privilege for the applications that will use it.  For more 
+information, see "Security Best Practice" #4 in KB00833: <br/>
+https://techsupport.osisoft.com/Troubleshooting/KB/KB00833.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -804,7 +938,9 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
+	$weakTrustList = ""
+	$weakMappingList = ""
 	try
 	{		
 		# Execute the PIConfig scripts.
@@ -813,26 +949,53 @@ PROCESS
 																
 		$outputFileContentMapping = Invoke-PISysAudit_PIConfigScript -f "CheckPIAdminUsageInMappings.dif" `
 																-lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel						
-																																
-		# Validate rules
-		#Check is piadmin is used in any mappings or trusts. If it is, list them in the output
 		
-		if(($outputFileContentTrust) -or ($outputFileContentMapping))
+		# Filtering out piconfig exit messages from output
+		foreach($line in $outputFileContentTrust)
+		{
+			# Lines with delimiter have content of interest.
+			if($line.Contains("^"))
+			{
+				$weakTrustList += $line.SubString(0, $line.IndexOf("^")) + "; "
+			}
+		}
+		foreach($line in $outputFileContentMapping)
+		{
+			# Lines with delimiter have content of interest.
+			if($line.Contains("^"))
+			{
+				$weakMappingList += $line.SubString(0, $line.IndexOf("^")) + "; "
+			}
+		}
+																															
+		# Validate rules
+		# Check is piadmin is used in any mappings or trusts. If it is, list them in the output
+		
+		if(($weakTrustList) -or ($weakMappingList))
 		{
 			$result = $false 
-			$message = "Trust(s) that present weaknesses: " + $outputFileContentTrust
-			$message+= "`nMapping(s) that present weaknesses: " + $outputFileContentMapping
-		} else {$result =$true}
-			
+			$msg = "Trust(s) that present weaknesses: " + $weakTrustList
+			$msg += "`nMapping(s) that present weaknesses: " + $weakMappingList
+		} 
+		else 
+		{
+			$result =$true
+			$msg = "No Trust(s) or Mapping(s) identified as weaknesses."
+		}
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20008" `
 										-ain "piadmin is not used" -aiv $result `
-										-msg  $message `
+										-msg  $msg `
 										-Group1 "PI System" -Group2 "PI Data Archive" `
 										-Severity "Severe"								
 }
@@ -848,10 +1011,10 @@ function Get-PISysAudit_CheckTrusts
 {
 <#  
 .SYNOPSIS
-AU20009 - Trusts checkup
+AU20009 - Trust configuration strength
 .DESCRIPTION
 Audit ID: AU20009
-Audit Check Name: Trusts checkup
+Audit Check Name: Trust configuration strength
 Category: Severe
 Compliance: Any existing trusts should be only for PI API connections. These trusts should at a minimum be 2+ (app name specified). Warnings for open trusts.
 #>
@@ -878,20 +1041,25 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{		
 		# Execute the PIConfig scripts.
 				
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU20009" `
-										-ain "AU20009" -aiv $result `
-										-msg "<Message>" `
+										-ain "Trust configuration strength" -aiv $result `
+										-msg $msg `
 										-Group1 "PI System" -Group2 "PI Data Archive" `
 										-Severity "Severe"								
 }
@@ -914,10 +1082,8 @@ function Get-PISysAudit_TemplateAU2xxxx
 .SYNOPSIS
 AU2xxxx - <Name>
 .DESCRIPTION
-Audit ID: AU2xxxx
-Audit Check Name: <Name>
-Category: <Category>
-Compliance: <Enter what it needs to be compliant>
+VERIFICATION: <Enter what the verification checks>
+COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -942,19 +1108,24 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$msg = ""
 	try
 	{		
 		# Enter routine.			
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 										-at $AuditTable "AU2xxxx" `
 										-ain "<Name>" -aiv $result `
-										-msg "<Message>" `
+										-msg $msg `
 										-Group1 "<Category 1>" -Group2 "<Category 2>" -Group3 "<Category 3>" -Group4 "<Category 4>"`
 										-Severity "<Severity>"								
 }

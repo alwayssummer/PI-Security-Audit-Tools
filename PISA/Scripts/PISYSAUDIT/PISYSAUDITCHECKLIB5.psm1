@@ -56,10 +56,10 @@ function Get-PISysAudit_CheckCoresightVersion
 .SYNOPSIS
 AU50001 - Check for latest version of Coresight
 .DESCRIPTION
-Audit ID: AU50001
-Audit Check Name: Check for latest version of Coresight
-Category: Severe
-Compliance: use latest version of PI Coresight
+VALIDATION: verifies PI Coresight version.<br/>
+COMPLIANCE: upgrade to the latest version of PI Coresight.  For more information, 
+see "Upgrade a PI Coresight installation" in the PI Live Library.<br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -84,6 +84,7 @@ PROCESS
 {		
 	# Get and store the function Name.
 	$fn = GetFunctionName
+	$msg = ""
 	
 	try
 	{		
@@ -95,17 +96,31 @@ PROCESS
 		# Form an integer value with all the version tokens.
 		[string]$temp = $InstallVersionTokens[0] + $installVersionTokens[1] + $installVersionTokens[2] + $installVersionTokens[3]
 		$installVersionInt64 = [Convert]::ToInt64($temp)
-		if($installVersionInt64 -ge 3004){$result = $true}	
-		else {$result = $false}
+		if($installVersionInt64 -ge 3004)
+		{
+			$result = $true
+			$msg = "Version is compliant."
+		}	
+		else 
+		{
+			$result = $false
+			$msg = "Version is not compliant."
+		}
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 									-at $AuditTable "AU50001" `
+									-msg $msg `
 									-ain "PI Coresight Version" -aiv $result `
-									-Group1 "PI Coresight" `
+									-Group1 "PI System" -Group2 "PI Coresight" `
 									-Severity "Moderate"																																																
 
 }
@@ -125,12 +140,10 @@ function Get-PISysAudit_TemplateAU1xxxx
 {
 <#  
 .SYNOPSIS
-AU1xxxx - <Name>
+AU5xxxx - <Name>
 .DESCRIPTION
-Audit ID: AU1xxxx
-Audit Check Name: <Name>
-Category: <Category>
-Compliance: <Enter what it needs to be compliant>
+VERIFICATION: <Enter what the verification checks>
+COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -161,12 +174,18 @@ PROCESS
 		# Enter routine.			
 	}
 	catch
-	{ $result = "N/A" }	
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
 									-at $AuditTable "AU1xxxx" `
 									-ain "<Name>" -aiv $result `
+									-msg $msg `
 									-Group1 "<Category 1>" -Group2 "<Category 2>" `
 									-Group3 "<Category 3>" -Group4 "<Category 4>" `
 									-Severity "<Severity>"																																																
