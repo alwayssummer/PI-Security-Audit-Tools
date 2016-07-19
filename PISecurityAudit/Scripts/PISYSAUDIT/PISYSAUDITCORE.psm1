@@ -57,7 +57,7 @@ function SetFolders
 	# ..\
 	# ..\Scripts
 	# ..\Scripts\PISYSAUDIT
-	# ..\
+	# ..\Export
 	# ..\piconfig
 	# ..\pwd	
 	$scriptsPath = Split-Path $modulePath
