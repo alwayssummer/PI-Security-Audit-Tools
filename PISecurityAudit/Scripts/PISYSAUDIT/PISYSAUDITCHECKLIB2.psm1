@@ -433,7 +433,7 @@ function Get-PISysAudit_CheckEditDays
 .SYNOPSIS
 AU20004 - Check Edit Days
 .DESCRIPTION
-VALIDATION: verified that Edit Days is set. <br/>
+VALIDATION: verified that the Edit Days tuning parameter is set. <br/>
 COMPLIANCE: set to a value greater than zero.  EditDays defines the number of past 
 days where events can be modified in the Snapshot or Archive databases. A zero value means 
 no time check is done.  For instructions to set EditDays, see "Modify the EditDays tuning 
