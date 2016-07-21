@@ -3223,9 +3223,11 @@ PROCESS
 			# Construct new input file for the CLU
 			# Set the PIconfig output
 			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output.txt"
+			$outputDebugFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output_debug.txt"
 			$inputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_input.dif"
 
 			Clear-Content $outputFilePath
+			Clear-Content $outputDebugFilePath
 			Clear-Content $inputFilePath
 
 			Out-File -FilePath $inputFilePath -InputObject ("@outp " + $outputFilePath) -Encoding ASCII	
@@ -3235,9 +3237,12 @@ PROCESS
 			# As the command is local to the PI Data Archive it will make use of Named Pipe.
 			Start-Process -FilePath $PIConfigExec `
 				-RedirectStandardInput $inputFilePath `
+				-RedirectStandardOutput $outputDebugFilePath `
 				-Wait -NoNewWindow			
 				
-				
+			$msg = Get-Content -Path $outputDebugFilePath | Out-String
+			Write-PISysAudit_LogMessage $msg "Debug" $fn -dbgl $DBGLevel -rdbgl 2
+
 			# Read the content.
 			$outputFileContent = Get-Content -Path $outputFilePath
 		}
