@@ -57,6 +57,7 @@ function SetFolders
 	# ..\
 	# ..\Scripts
 	# ..\Scripts\PISYSAUDIT
+	# ..\Scripts\Temp
 	# ..\Export
 	# ..\piconfig
 	# ..\pwd	
@@ -67,13 +68,18 @@ function SetFolders
 	if (!(Test-Path $exportPath)){
 	New-Item $exportPath -type directory
 	}
+	$scriptsPathTemp = Join-Path -Path $scriptsPath -ChildPath "Temp"
+	if (!(Test-Path $scriptsPathTemp)){
+	New-Item $scriptsPathTemp -type directory
+	}
 
 	$picnfgPath = Join-Path -Path $rootPath -ChildPath "piconfig"
 	$pwdPath = Join-Path -Path $rootPath -ChildPath "pwd"		
 	$logFile = Join-Path -Path $rootPath -ChildPath "PISystemAudit.log"		
 
 	# Store them at within the global scope range.	
-	New-Variable -Name "ScriptsPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $scriptsPath			
+	New-Variable -Name "ScriptsPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $scriptsPath
+	New-Variable -Name "ScriptsPathTemp" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $scriptsPathTemp			
 	New-Variable -Name "PasswordPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $pwdPath
 	New-Variable -Name "ExportPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $exportPath
 	New-Variable -Name "PIConfigScriptPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $picnfgPath
@@ -2498,9 +2504,9 @@ PROCESS
 			# Set Paths
 			#......................................................................................
 			# Get the Scripts path.
-			$scriptsPath = (Get-Variable "ScriptsPath" -Scope "Global").Value																			
+			$scriptsPathTemp = (Get-Variable "ScriptsPathTemp" -Scope "Global").Value																			
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "netsh_output.txt"                                 
+			$outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "netsh_output.txt"                                 
 			# Set the path to netsh CLU.
 			$windowsFolder = Get-PISysAudit_EnvVariable "WINDIR"
 			$netshExec = Join-Path -Path $windowsFolder -ChildPath "System32\netsh.exe"                                 						
@@ -2928,16 +2934,14 @@ PROCESS
 			#......................................................................................
 			# Set the PIPC folder (64 bit).		
 			$PIHome64_path = Get-PISysAudit_EnvVariable "PIHOME64"
-			# Set the PIPC folder (32 bit).		
-			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME"
 			# Set the PIPC\AF folder (64 bit).		
 			$PIHome_AF_path = Join-Path -Path $PIHome64_path -ChildPath "AF"
-			# Set the PIPC\log folder (64 bit).
-			$PIHome_Log_path = Join-Path -Path $PIHome_path -ChildPath "log"
+			# Set the output folder.
+			$scriptsPathTemp = (Get-Variable "scriptsPathTemp" -Scope "Global").Value
 		    # Set the path to reach out the afdiag.exe CLU.
 			$AFDiagExec = Join-Path -Path $PIHome_AF_path -ChildPath "afdiag.exe"                                   			
 			# Set the output for the CLU.
-            $outputFilePath = Join-Path -Path $PIHome_Log_path -ChildPath "afdiag_output.txt"                                 
+            $outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "afdiag_output.txt"                                 
 			
 			if($Operation -eq "Write")
 			{
@@ -3180,7 +3184,9 @@ PROCESS
 			#......................................................................................
 			# Set Paths
 			#......................................................................................			
-            # Get the Scripts path.
+            # Get the Scripts Temp path.
+			$scriptsPathTemp = (Get-Variable "scriptsPathTemp" -Scope "Global").Value
+			# Get the Scripts path.
 			$scriptsPath = (Get-Variable "scriptsPath" -Scope "Global").Value
 			# Set the path to reach out the piconfig.exe CLU.												
 			$piconfigExec = (Get-Variable "PISysAuditPIConfigExec" -Scope "Global").Value			
@@ -3197,7 +3203,7 @@ PROCESS
 			if($UseAdhocScript)
 			{
 				# Set the path for the .dif file containing the script for piconfig.exe
-				$PIConfigInputFilePath = Join-Path -Path $scriptsPath -ChildPath "input.dif"         								
+				$PIConfigInputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "input.dif"         								
 				# Create the input file.
 				Out-File -FilePath $PIConfigInputFilePath -InputObject $PIConfigScript -Encoding ASCII
 			}
@@ -3222,9 +3228,9 @@ PROCESS
 			
 			# Construct new input file for the CLU
 			# Set the PIconfig output
-			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output.txt"
-			$outputDebugFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output_debug.txt"
-			$inputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_input.dif"
+			$outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piconfig_output.txt"
+			$outputDebugFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piconfig_output_debug.txt"
+			$inputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piconfig_input.dif"
 
 			Clear-Content $outputFilePath
 			Clear-Content $outputDebugFilePath
@@ -3260,6 +3266,8 @@ PROCESS
 			#......................................................................................
 			# Get the Scripts path.
 			$scriptsPath = (Get-Variable "ScriptsPath" -Scope "Global").Value
+			# Get the Scripts Temp path.
+			$scriptsPathTemp = (Get-Variable "ScriptsPathTemp" -Scope "Global").Value
 			# Set the path to reach out the piconfig.exe CLU.												
 			$piconfigExec = (Get-Variable "PISysAuditPIConfigExec" -Scope "Global").Value			
 									
@@ -3275,7 +3283,7 @@ PROCESS
 			if($UseAdhocScript)
 			{
 				# Set the path for the .dif file containing the script for piconfig.exe
-				$PIConfigInputFilePath = Join-Path -Path $scriptsPath -ChildPath "input.dif"         
+				$PIConfigInputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "input.dif"         
 				# Create the input file.
 				Out-File -FilePath $PIConfigInputFilePath -InputObject $PIConfigScript -Encoding ASCII
 			}
@@ -3301,7 +3309,7 @@ PROCESS
 			$argList1 = [string]::Format(" -Node `"{0}`" -Windows", $RemoteComputerName)					
 			$argList2 = [string]::Format(" -Node `"{0}`" -Trust", $RemoteComputerName)					
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $scriptsPath -ChildPath "piconfig_output.txt"														
+			$outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piconfig_output.txt"														
 			
 			#......................................................................................
 			# Start a piconfig remote session.
@@ -3405,12 +3413,14 @@ PROCESS
 			# Set the ADM folder.
 			$PIServer_adm_path = Join-Path -Path $PIServer_path -ChildPath "adm"			                                       			
 			# Set the path to reach out the piversion.exe CLU.
-			$PIVersionExec = Join-Path -Path $PIServer_adm_path -ChildPath "piversion.exe"			                                       						
+			$PIVersionExec = Join-Path -Path $PIServer_adm_path -ChildPath "piversion.exe"	
+			# Get the Scripts Temp path.
+			$scriptsPathTemp = (Get-Variable "scriptsPathTemp" -Scope "Global").Value		                                       						
 			# Define the arguments required by the piversion.exe command
 			# piversion.exe -v
 			$argList = "`"-v`""
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $PIServer_adm_path -ChildPath "piversion_output.txt"
+			$outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piversion_output.txt"
 
 			#......................................................................................
 			# Delete any residual output file.
@@ -3451,8 +3461,12 @@ PROCESS
 			# argument is enclosed between single quotes to pass correctly the parameter for
 			# PS Remoting.
 			$argList = "'-v'"
+			# Get the PIHome folder.
+			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME" -lc $false -rcn $RemoteComputerName
+			# Set the ADM folder.
+			$PIHome_log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $PIServer_adm_path -ChildPath "piversion_output.txt"			
+			$outputFilePath = Join-Path -Path $PIHome_log_path -ChildPath "piversion_output.txt"			
 									
 			#......................................................................................
 			# Execute the PIVersion command remotely.
@@ -3751,13 +3765,14 @@ PROCESS
 			#......................................................................................
 			# Set Paths
 			#......................................................................................					    						
-			$workPath = "C:\"
+			# Get the Scripts Temp path.
+			$scriptsPathTemp = (Get-Variable "scriptsPathTemp" -Scope "Global").Value
 			# Set the path to reach out the sqlcmd.exe CLU. This CLU is called from any location.
 			$sqlcmdExec = "sqlcmd.exe"
 			# Set the input for the CLU.
-            $inputFilePath = Join-Path -Path $workPath -ChildPath "sqlcmd_input.txt"                						
+            $inputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "sqlcmd_input.txt"                						
 			# Set the output for the CLU.
-            $outputFilePath = Join-Path -Path $workPath -ChildPath "sqlcmd_output.txt"                                 									
+            $outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "sqlcmd_output.txt"                                 									
 			# Define the arguments required by the sqlcmd.exe command						
 			# S ... for Server\instance name
 			# E ... for integrated security
@@ -3810,8 +3825,8 @@ PROCESS
 			#......................................................................................
 			# Set Paths.
 			#......................................................................................
-			# Get the user profile folder.
-			$workPath = "C:\"
+			# Get the TEMP folder.
+			$workPath = Get-PISysAudit_EnvVariable "TEMP"
 			# Set the path to reach out the sqlcmd.exe CLU. This CLU is called from any location.
 			$sqlcmdExec = "sqlcmd.exe"
 			# Set the input for the CLU.
@@ -4587,7 +4602,7 @@ param(
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]		
 		[alias("obf")]
 		[boolean]
-		$ObfuscateSensitiveData = $true,				
+		$ObfuscateSensitiveData = $false,				
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]				
 		[boolean]
 		$ShowUI = $true,
