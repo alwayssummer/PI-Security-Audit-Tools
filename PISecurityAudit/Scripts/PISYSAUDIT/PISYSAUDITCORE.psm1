@@ -4373,25 +4373,65 @@ PROCESS
 			$header = @"
 			<html><head><meta name="viewport" content="width=device-width" />
 			<style type="text/css">
-			h2 {font: 18px verdana; font-family: verdana; font-weight: bold}
-			body {font: 12px verdana} a {font: 12px verdana}
-			.summarytable {border-width: 1px; border-collapse: collapse }
-			.summaryheader {font: 12px verdana; font-weight: bold; background-color: lightblue}
-			.summaryrow {font: 12px verdana}
-			.recommentations {font: 12px verdana}
-			</style></head><body><h2>AUDIT SUMMARY</h2>
+			body {
+				font-size: 100%;
+				font-family: 'Segoe UI Light','Segoe UI','Lucida Grande',Verdana,Arial,Helvetica,sans-serif;
+				}
+			h2{
+				font-size: 1.875em;
+				}
+			p{
+				font-size: 0.875em;
+				}
+	
+			.summarytable {
+				width: 100%;
+				border-collapse: collapse;
+				}
+
+			.summarytable td, .summarytable th {
+				border: 1px solid #ddd;
+				font-size: 0.875em;
+			}
+			.summarytable th{
+				background-color: #f2f2f2;
+			}
+
+			
+			.info{
+				background-color: #FFF59D;
+			}
+			
+			.warning{
+				background-color: #FFCC80;
+			}
+			.error{
+				background-color: #FFAB91;
+			}	
+
+
+			</style>
+
+			
+			</head>
+				<body>
+					<h2>AUDIT SUMMARY</h2>
 "@
 			# Header for the summary table.
 			$tableHeader = @"
-			<table border="1" class="summarytable" style="align:left;"><tr class="summaryheader">
-			<td>ID</td>
-			<td>Server</td>
-			<td>Validation</td>
-			<td>Result</td> 
-			<td>Severity</td>
-			<td>Message</td>
-			<td>Category</td> 
-			<td>Area</td><tr>
+			<table class="summarytable table">
+			<thead>	
+				<tr>
+					<th>ID</th>
+					<th>Server</th>
+					<th>Validation</th>
+					<th>Result</th> 
+					<th>Severity</th>
+					<th>Message</th>
+					<th>Category</th> 
+					<th>Area</th>
+				</tr>
+			</thead>
 "@
 			$reportHTML = $header + $tableHeader
 			
@@ -4399,17 +4439,21 @@ PROCESS
 			$fails = @()
 			foreach($result in $results) 
 			{
-				$highlight = ""
+				$highlight = "`"`""
 				if($result.AuditItemValue.ToLower() -eq "fail"){
-					if($result.Severity.ToLower() -eq "severe") {$highlight = "bgcolor=`"red`"" }
-					elseif($result.Severity.ToLower() -eq "moderate") { $highlight = "bgcolor=`"orange`"" }
-					else { $highlight = "bgcolor=`"yellow`"" }
+					switch ($result.Severity.ToLower())
+					{
+						"severe" {$highlight="`"error`""; break}
+						"moderate" {$highlight="`"warning`""; break}
+						"low" {$highlight="`"info`""; break}
+					}
 					$fails += $result
 				}
 				$tableRow = @"
-				<tr class="summaryrow" {8}>
+				<tr class={8}>
 				<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{7}</td>
 				<td>{4}</td><td>{5}</td><td>{6}</td>
+				</tr>
 "@ 
 				$tableRow = [string]::Format($tableRow, $result.ID,$result.ServerName, $result.AuditItemName, 
 												$result.AuditItemValue, $result.MessageList, $result.Group1,
@@ -4423,7 +4467,7 @@ PROCESS
 			if($fails.Count -gt 0){
 				$fails = $fails | select ID -unique
 				# Recommendations section
-				$recommendationsHTML = "<div class=`"recommendations`">"
+				$recommendationsHTML = "<div>"
 				$recommendationsHTML += "<h2>Recommendations for failed validations:</h2>"
 				foreach($fail in $fails) 
 				{
@@ -4458,7 +4502,7 @@ PROCESS
 						default {break}
 					}
 					$recommendationInfo = Get-Help $AuditFunctionName
-					$recommendation = "<b>{0}</b><br/>{1}<br/>"
+					$recommendation = "<b>{0}</b><br/><p>{1}</p><br/>"
 					$recommendationsHTML += [string]::Format($recommendation, $recommendationInfo.Synopsis, $recommendationInfo.Description.Text)
 				}
 				$reportHTML += $recommendationsHTML
