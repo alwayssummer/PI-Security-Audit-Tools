@@ -4316,7 +4316,7 @@ param(
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("obf")]
 		[boolean]
-		$ObfuscateSensitiveData = $true,
+		$ObfuscateSensitiveData = $false,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("dtl")]
 		[boolean]
