@@ -1111,62 +1111,19 @@ PROCESS
 	$msg = ""
 	try
 	{		
-		# Get the Service account
-		$svcacc = Get-PISysAudit_ServiceLogOnAccount "pinetmgr" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		$serviceType = "piserver"
+		$serviceName = "pinetmgr"
 
-		# Get Domain info
-		$MachineDomain = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" "Domain" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		$result = Invoke-PISysAudit_SPN -svctype $serviceType -svcname $serviceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
 
-		# Get Hostname
-		$hostname = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\Control\ComputerName\ActiveComputerName" "ComputerName" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-
-		# Build FQDN using hostname and domain strings
-		$fqdn = $hostname + "." + $machineDomain
-
-		# Distinguish between Domain/Virtual account and Machine Accounts
-
-		# As PI currently needs to run under LocalSystem, this is a redundant check. 
-		# However, it makes this routine future-proof, so I am keeping it.
-
-		If ($svcacc.Contains("\")) 
-		{
-			# If NT Service account is running the pinetmgr service, use the hostname when verifying the SPN assignment
-			If ($svcacc.ToLower().Contains("nt service")) 
-			{ 
-				$svcaccMod = $hostname 
-			} 
-			# Else use the username to verify the SPN assignment
-			Else 
-			{ 
-				$svcaccMod = $svcacc
-				#$svcaccMod = $svcacc.Substring($value.IndexOf("\")+1) 
-
-			} 
-		}
-		# For machine accounts such as Network Service or Local System, use the hostname when verifying the SPN assignment
-		Else 
+		If ($result) 
 		{ 
-			$svcaccMod = $hostname 
-		}
-		# Run setspn and convert it into a string (no capital letters)
-		$spnCheck = $(setspn -l $svcaccMod | Out-String).ToLower()
-
-		# Verify hostnane AND FQDN SPNs are assigned to the service account
-		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
-		If ($spnCheck.Contains("piserver/" + $hostname.ToLower()) -and $spnCheck.Contains("piserver/" + $fqdn.ToLower())) 
-
-		# Print results
-		# FUTURE ENHANCEMENT IN THE WORKS:
-		# Improve the printing mechanism to include more details in case of failure
-		{ 
-			$result = $true 
-			$msg = "The PI Data Archive Service Principal Names exist and are assigned to the correct Service Account."
+			$msg = "The Service Principal Name exists and it is assigned to the correct Service Account."
 		} 
 		Else 
 		{ 
-			$result =  $false 
-			$msg = "The PI Data Archive Service Principal Names do NOT exis or are NOT assigned to the correct Service Account."
-		}		
+			$msg = "The Service Principal Name does NOT exist or is NOT assigned to the correct Service Account."
+		}	
 	}
 	catch
 	{

@@ -49,7 +49,7 @@ function Get-PISysAudit_FunctionsFromLibrary3
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)	
 	$listOfFunctions.Add("Get-PISysAudit_CheckFileExtensionWhitelist", 1)	
-	$listOfFunctions.Add("Get-PISysAudit_CheckAFServerVersion", 1)	
+	$listOfFunctions.Add("Get-PISysAudit_CheckAFServerVersion", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckAFSPN", 1)
 	# Return the list.
 	return $listOfFunctions
@@ -681,58 +681,18 @@ PROCESS
 	$msg = ""
 	try
 	{		
-		# Get the Service account
-		$svcacc = Get-PISysAudit_ServiceLogOnAccount "afservice" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		$serviceType = "afserver"
+		$serviceName = "afservice"
 
-		# Get Domain info
-		$MachineDomain = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" "Domain" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		$result = Invoke-PISysAudit_SPN -svctype $serviceType -svcname $serviceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
 
-		# Get Hostname
-		$hostname = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\Control\ComputerName\ActiveComputerName" "ComputerName" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-
-		# Build FQDN using hostname and domain strings
-		$fqdn = $hostname + "." + $machineDomain
-
-		# Distinguish between Domain/Virtual account and Machine Accounts
-		If ($svcacc.Contains("\")) 
-		{
-			# If NT Service account is running the AF Server service, use the hostname when verifying the SPN assignment
-			If ($svcacc.ToLower().Contains("nt service")) 
-			{ 
-				$svcaccMod = $hostname 
-			} 
-			# Else use the username to verify the SPN assignment
-			Else 
-			{ 
-				$svcaccMod = $svcacc
-				#$svcaccMod = $svcacc.Substring($value.IndexOf("\")+1) 
-
-			} 
-		}
-		# For machine accounts such as Network Service or Local System, use the hostname when verifying the SPN assignment
-		Else 
+		If ($result) 
 		{ 
-			$svcaccMod = $hostname 
-		}
-
-		# Run setspn and convert it to a string (no capital letters)
-		$spnCheck = $(setspn -l $svcaccMod | Out-String).ToLower()
-
-		# Verify hostnane AND FQDN SPNs are assigned to the service account
-		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
-		If ($spnCheck.Contains("afserver/" + $hostname.ToLower()) -and $spnCheck.Contains("afserver/" + $fqdn.ToLower())) 
-
-		# Print results
-		# FUTURE ENHANCEMENT IN THE WORKS:
-		# Improve the printing mechanism to include more details in case of failure
-		{ 
-			$result = $true 
-			$msg = "The AF Server Service Principal Name exists and it is assigned to the correct Service Account."
+			$msg = "The Service Principal Name exists and it is assigned to the correct Service Account."
 		} 
 		Else 
 		{ 
-			$result =  $false 
-			$msg = "The AF Server Service Principal Name does NOT exist or is NOT assigned to the correct Service Account."
+			$msg = "The Service Principal Name does NOT exist or is NOT assigned to the correct Service Account."
 		}			
 	}
 	catch

@@ -3521,6 +3521,115 @@ END {}
 #***************************
 }
 
+function Invoke-PISysAudit_SPN
+{
+<#
+.SYNOPSIS
+(Core functionality) Perform an SPN check with the setspn.exe command.
+.DESCRIPTION
+Perform an SPN check with the setspn.exe command.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]
+		[alias("svcname")]
+		[string]
+		$ServiceName,
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]
+		[alias("svctype")]
+		[string]
+		$ServiceType,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS		
+{
+	$fn = GetFunctionName
+	
+	try
+	{
+		# Get the Service account
+		$svcacc = Get-PISysAudit_ServiceLogOnAccount $ServiceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Get Domain info
+		$MachineDomain = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" "Domain" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Get Hostname
+		$hostname = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\Control\ComputerName\ActiveComputerName" "ComputerName" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Build FQDN using hostname and domain strings
+		$fqdn = $hostname + "." + $machineDomain
+
+		# Distinguish between Domain/Virtual account and Machine Accounts
+		If ($svcacc.Contains("\")) 
+		{
+			# If NT Service account is running the AF Server service, use the hostname when verifying the SPN assignment
+			If ($svcacc.ToLower().Contains("nt service")) 
+			{ 
+				$svcaccMod = $hostname 
+			} 
+			# Else use the username to verify the SPN assignment
+			Else 
+			{ 
+				$svcaccMod = $svcacc
+			} 
+		}
+		# For machine accounts such as Network Service or Local System, use the hostname when verifying the SPN assignment
+		Else 
+		{ 
+			$svcaccMod = $hostname 
+		}
+
+		# Run setspn and convert it to a string (no capital letters)
+		$spnCheck = $(setspn -l $svcaccMod | Out-String).ToLower()
+		
+		# Verify hostnane AND FQDN SPNs are assigned to the service account
+		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
+		If ($spnCheck.Contains($serviceType + "/" + $hostname.ToLower()) -and $spnCheck.Contains($serviceType + "/" + $fqdn.ToLower())) 
+		# Print results
+		# FUTURE ENHANCEMENT IN THE WORKS:
+		# Improve the printing mechanism to include more details in case of failure
+		{ 
+			$result = $true 
+		} 
+		Else 
+		{ 
+			$result =  $false 
+		}
+		
+		return $result
+	}
+	catch
+	{
+		# Return the error message.
+		$msgTemplate1 = "A problem occured to use setspn.exe on local computer"
+		$msgTemplate2 = "A problem occured to use setspn.exe on {0} computer"
+		if($LocalComputer)
+		{ $msg = $msgTemplate1 }
+		else
+		{ $msg = [string]::Format($msgTemplate2, $RemoteComputerName) }		
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
+		return $null
+	}
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
 function Invoke-PISysAudit_ADONET_ScalarValueFromSQLServerQuery
 {
 <#
@@ -4805,6 +4914,7 @@ Export-ModuleMember Invoke-PISysAudit_PIConfigScript
 Export-ModuleMember Invoke-PISysAudit_PIVersionCommand
 Export-ModuleMember Invoke-PISysAudit_ADONET_ScalarValueFromSQLServerQuery
 Export-ModuleMember Invoke-PISysAudit_SQLCMD_ScalarValueFromSQLServerQuery
+Export-ModuleMember Invoke-PISysAudit_SPN
 Export-ModuleMember New-PISysAuditObject
 Export-ModuleMember New-PISysAudit_PasswordOnDisk
 Export-ModuleMember New-PISysAuditComputerParams
