@@ -180,6 +180,12 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		information, see "Security Best Practice" #4 in KB00833: 
 		https://techsupport.osisoft.com/Troubleshooting/KB/KB00833.
 
+		AU20010 - PI Data Archive SPN Check
+		VALIDATION: Checks PI Data Archive SPN assignment.
+		COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. This makes Kerberos Authentication possible.
+		For more information, see "PI and Kerberos authentication" in the PI Live Library. 
+		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+
 		AU30001 - PI AF Server Service Account Check
 		VALIDATION: verifies that the AF Server application service is not running as the account 
 		Local System. 
@@ -225,6 +231,12 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		COMPLIANCE: upgrade to the latest version of PI AF Server.  For more information, 
 		see "PI AF Server upgrades" in the PI Live Library. 
 		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6.
+
+		AU30007 - PI AF Server SPN Check
+		VALIDATION: Checks PI AF Server SPN assignment.
+		COMPLIANCE: PI AF Server SPNs exist and are assigned to the AF Service account. This makes Kerberos Authentication possible.
+		For more information, see "PI AF and Kerberos authentication" in the PI Live Library. 
+		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
 
 		AU40001 - SQL Server xp_CmdShell Check
 		VALIDATION: verifies that SQL Server does not have xp_CmdShell enabled.

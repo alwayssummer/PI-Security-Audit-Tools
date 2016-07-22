@@ -24,12 +24,14 @@ AU20005	- PI Data Archive: Auto Trust Configuration
 AU20006	- PI Data Archive: Expensive Query Protection
 AU20007 - PI Data Archive: Check if explicit login is disabled
 AU20008 - PI Data Archive: piadmin used in mappings and trusts
+AU20010 - PI Data Archive: Service Principal Name check
 AU30001	- PI AF Server: Service Account  
 AU30002	- PI AF Server: Impersonation mode for AF Data Sets  
 AU30003	- PI AF Server: Service Access  
 AU30004 - PI AF Server: Plugin Verify Level
 AU30005 - PI AF Server: File Extension Whitelist
 AU30006 - PI AF Server: Version
+AU30007 - PI AF Server: Service Principal Name check
 AU40001	- SQL Server: xp_CmdShell	 
 AU40002	- SQL Server: Adhoc Queries	 
 AU40003	- SQL Server: DB Mail XPs	 

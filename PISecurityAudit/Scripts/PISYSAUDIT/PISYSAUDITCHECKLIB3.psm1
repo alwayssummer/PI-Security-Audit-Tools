@@ -50,7 +50,7 @@ function Get-PISysAudit_FunctionsFromLibrary3
 	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)	
 	$listOfFunctions.Add("Get-PISysAudit_CheckFileExtensionWhitelist", 1)	
 	$listOfFunctions.Add("Get-PISysAudit_CheckAFServerVersion", 1)	
-	
+	$listOfFunctions.Add("Get-PISysAudit_CheckAFSPN", 1)
 	# Return the list.
 	return $listOfFunctions
 }
@@ -643,6 +643,122 @@ END {}
 #***************************
 }
 
+function Get-PISysAudit_CheckAFSPN
+{
+<#  
+.SYNOPSIS
+AU30007 - Verify AF Server SPN exists
+.DESCRIPTION
+	VALIDATION: Checks PI AF Server SPN assignment.
+	COMPLIANCE: PI AF Server SPNs exist and are assigned to the AF Service account. This makes Kerberos Authentication possible.
+For more information, see "PI AF and Kerberos authentication" in the PI Live Library. 
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+#>
+
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	$msg = ""
+	try
+	{		
+		# Get the Service account
+		$svcacc = Get-PISysAudit_ServiceLogOnAccount "afservice" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Get Domain info
+		$MachineDomain = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" "Domain" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Get Hostname
+		$hostname = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\Control\ComputerName\ActiveComputerName" "ComputerName" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Build FQDN using hostname and domain strings
+		$fqdn = $hostname + "." + $machineDomain
+
+		# Distinguish between Domain/Virtual account and Machine Accounts
+		If ($svcacc.Contains("\")) 
+		{
+			# If NT Service account is running the AF Server service, use the hostname when verifying the SPN assignment
+			If ($svcacc.ToLower().Contains("nt service")) 
+			{ 
+				$svcaccMod = $hostname 
+			} 
+			# Else use the username to verify the SPN assignment
+			Else 
+			{ 
+				$svcaccMod = $svcacc
+				#$svcaccMod = $svcacc.Substring($value.IndexOf("\")+1) 
+
+			} 
+		}
+		# For machine accounts such as Network Service or Local System, use the hostname when verifying the SPN assignment
+		Else 
+		{ 
+			$svcaccMod = $hostname 
+		}
+
+		# Run setspn and convert it to a string (no capital letters)
+		$spnCheck = $(setspn -l $svcaccMod | Out-String).ToLower()
+
+		# Verify hostnane AND FQDN SPNs are assigned to the service account
+		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
+		If ($spnCheck.Contains("afserver/" + $hostname.ToLower()) -and $spnCheck.Contains("afserver/" + $fqdn.ToLower())) 
+
+		# Print results
+		# FUTURE ENHANCEMENT IN THE WORKS:
+		# Improve the printing mechanism to include more details in case of failure
+		{ 
+			$result = $true 
+			$msg = "The AF Server Service Principal Name exists and it is assigned to the correct Service Account."
+		} 
+		Else 
+		{ 
+			$result =  $false 
+			$msg = "The AF Server Service Principal Name does NOT exist or is NOT assigned to the correct Service Account."
+		}			
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30007" `
+										-ain "PI AF Server SPN Check" -aiv $result `
+										-msg $msg `
+										-Group1 "PI System" -Group2 "PI AF Server"`
+										-Severity "Moderate"
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
 # ........................................................................
 # Add your cmdlet after this section. Don't forget to add an intruction
 # to export them at the bottom of this script.
@@ -719,6 +835,7 @@ Export-ModuleMember Get-PISysAudit_CheckPIAFServicePrivileges
 Export-ModuleMember Get-PISysAudit_CheckPlugInVerifyLevel
 Export-ModuleMember Get-PISysAudit_CheckFileExtensionWhitelist
 Export-ModuleMember Get-PISysAudit_CheckAFServerVersion
+Export-ModuleMember Get-PISysAudit_CheckAFSPN
 # </Do not remove>
 
 # ........................................................................

@@ -4507,12 +4507,14 @@ PROCESS
 						"AU20007" {$AuditFunctionName = "Get-PISysAudit_CheckExplicitLoginDisabled"; break}
 						"AU20008" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminUsage"; break}
 						"AU20009" {break} # Check not yet implemented
+						"AU20010" {$AuditFunctionName = "Get-PISysAudit_CheckPISPN"; break}
 						"AU30001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServiceConfiguredAccount"; break}
 						"AU30002" {$AuditFunctionName = "Get-PISysAudit_CheckPImpersonationModeForAFDataSets"; break}
 						"AU30003" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServicePrivileges"; break}
 						"AU30004" {$AuditFunctionName = "Get-PISysAudit_CheckPlugInVerifyLevel"; break}
 						"AU30005" {$AuditFunctionName = "Get-PISysAudit_CheckFileExtensionWhitelist"; break}
 						"AU30006" {$AuditFunctionName = "Get-PISysAudit_CheckAFServerVersion"; break}
+						"AU30007" {$AuditFunctionName = "Get-PISysAudit_CheckAFSPN"; break}
 						"AU40001" {$AuditFunctionName = "Get-PISysAudit_CheckSQLXPCommandShell"; break}
 						"AU40002" {$AuditFunctionName = "Get-PISysAudit_CheckSQLAdHocQueries"; break}
 						"AU40003" {$AuditFunctionName = "Get-PISysAudit_CheckSQLDBMailXPs"; break}
