@@ -1080,9 +1080,9 @@ function Get-PISysAudit_CheckPISPN
 .SYNOPSIS
 AU20010 - Check PI Server SPN
 .DESCRIPTION
-	VALIDATION: Checks PI Data Archive SPN assignment.
-	COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. This makes Kerberos Authentication possible.
-For more information, see "PI and Kerberos authentication" in the PI Live Library. 
+VALIDATION: Checks PI Data Archive SPN assignment.<br/>
+COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. This makes Kerberos Authentication possible.
+For more information, see "PI and Kerberos authentication" in the PI Live Library. <br/>
 https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
@@ -1160,7 +1160,7 @@ function Get-PISysAudit_TemplateAU2xxxx
 .SYNOPSIS
 AU2xxxx - <Name>
 .DESCRIPTION
-VERIFICATION: <Enter what the verification checks>
+VALIDATION: <Enter what the verification checks>
 COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     

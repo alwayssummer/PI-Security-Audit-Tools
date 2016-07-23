@@ -2236,6 +2236,93 @@ END {}
 #***************************
 }
 
+function Get-PISysAudit_IISproperties
+{
+<#
+.SYNOPSIS
+(Core functionality) Enables use of the WebAdministration module.
+.DESCRIPTION
+Get IIS: properties.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("qry")]
+		[string]
+		$query,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{			
+	$fn = GetFunctionName
+	
+	try
+	{
+		# This approach works, but can be optimized
+
+
+		# Get the query string and create a scriptblock
+		$scriptBlock = [scriptblock]::create( $query )
+
+		# Execute the Get-ItemProperty cmdlet method locally or remotely via the Invoke-Command cmdlet
+		if($LocalComputer)		
+		{						
+			
+			# Import the WebAdministration module
+			Import-Module -Name "WebAdministration"		
+			
+			# Execute the command locally	
+			$value = Invoke-Command -ScriptBlock $scriptBlock			
+		}
+		else
+		{	
+					
+			# Establishing a new PS session on a remote computer		
+			$PSSession = New-PSSession -ComputerName $RemoteComputerName
+
+			# Importing WebAdministration module within the PS session
+			Invoke-Command -Session $PSSession -ScriptBlock {Import-Module WebAdministration}
+			
+			# Execute the command within a remote PS session
+			$value = Invoke-Command -Session $PSSession -ScriptBlock $scriptBlock
+			Remove-PSSession -ComputerName $RemoteComputerName
+		}
+	
+		# Return the value found.
+		return $value		
+	}
+	catch
+	{
+		# Return the error message.
+		$msgTemplate1 = "A problem occured during the reading of IIS Property: {0} from local machine."
+		$msgTemplate2 = "A problem occured during the reading of IIS Property: {0} from {1} machine."
+		if($LocalComputer)
+		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
+		else
+		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message) }
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
+		return $null
+	}
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
 function Get-PISysAudit_TestRegistryKey
 {
 <#
@@ -3444,6 +3531,10 @@ param(
 		[string]
 		$ServiceType,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("appPool")]
+		[string]
+		$csappPool,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("dbgl")]
 		[int]
 		$DBGLevel = 0)
@@ -3454,9 +3545,15 @@ PROCESS
 	
 	try
 	{
-		# Get the Service account
-		$svcacc = Get-PISysAudit_ServiceLogOnAccount $ServiceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-
+		If ( $ServiceName -ne "coresight") 
+		{
+			# Get the Service account
+			$svcacc = Get-PISysAudit_ServiceLogOnAccount $ServiceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		}
+		Else
+		{
+			$svcacc = $csappPool
+		}
 		# Get Domain info
 		$MachineDomain = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" "Domain" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
 
@@ -3491,7 +3588,7 @@ PROCESS
 		
 		# Verify hostnane AND FQDN SPNs are assigned to the service account
 		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
-		If ($spnCheck.Contains($serviceType + "/" + $hostname.ToLower()) -and $spnCheck.Contains($serviceType + "/" + $fqdn.ToLower())) 
+		If ($spnCheck.Contains($serviceType.ToLower() + "/" + $hostname.ToLower()) -and $spnCheck.Contains($serviceType.ToLower() + "/" + $fqdn.ToLower())) 
 		# Print results
 		# FUTURE ENHANCEMENT IN THE WORKS:
 		# Improve the printing mechanism to include more details in case of failure
@@ -4529,7 +4626,10 @@ PROCESS
 						"AU40003" {$AuditFunctionName = "Get-PISysAudit_CheckSQLDBMailXPs"; break}
 						"AU40004" {$AuditFunctionName = "Get-PISysAudit_CheckSQLOLEAutomationProcs"; break}
 						"AU50001" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightVersion"; break}
-					
+						"AU50002" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightAppPools"; break}
+						"AU50003" {$AuditFunctionName = "Get-PISysAudit_CoresightSSLcheck"; break}
+						"AU50004" {$AuditFunctionName = "Get-PISysAudit_CoresightSPNcheck"; break}
+
 						default {break}
 					}
 					$recommendationInfo = Get-Help $AuditFunctionName
@@ -4815,6 +4915,7 @@ Export-ModuleMember Invoke-PISysAudit_PIVersionCommand
 Export-ModuleMember Invoke-PISysAudit_ADONET_ScalarValueFromSQLServerQuery
 Export-ModuleMember Invoke-PISysAudit_SQLCMD_ScalarValueFromSQLServerQuery
 Export-ModuleMember Invoke-PISysAudit_SPN
+Export-ModuleMember Get-PISysAudit_IISproperties
 Export-ModuleMember New-PISysAuditObject
 Export-ModuleMember New-PISysAudit_PasswordOnDisk
 Export-ModuleMember New-PISysAuditComputerParams
