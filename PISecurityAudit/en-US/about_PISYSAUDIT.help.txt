@@ -277,11 +277,17 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		COMPLIANCE: Use a custom domain account. Network Service is acceptable, but not ideal.
 		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411 
 
-		AU50003 - Check Coresight AppPool identity
+		AU50003 - Check Coresight SSL configuration
 		VALIDATION: Checks whether SSL is enabled and enforced on the Coresight Web Site.<br/>
 		COMPLIANCE: A valid https binding is configured and only connections with SSL should be allowed.
 		For more information, see "Configure Secure Sockets Layer (SSL) access" in the PI Live Library. <br/>
 		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B 	
+
+		AU50004 - Check Coresight SPN configuration
+		VALIDATION: Checks PI Coresight SPN assignment. <br/>
+		COMPLIANCE: HTTP or HOST SPNs exist and are assigned to the Coresight AppPool account. This makes Kerberos Authentication possible.
+		For more information, see the PI Live Library link below. <br/>
+		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46 
 
 		//ENDSECTION - VALIDATIONS//
 

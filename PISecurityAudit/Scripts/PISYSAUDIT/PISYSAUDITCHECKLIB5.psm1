@@ -47,6 +47,7 @@ function Get-PISysAudit_FunctionsFromLibrary5
 	$listOfFunctions.Add("Get-PISysAudit_CheckCoresightVersion", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckCoresightAppPools", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CoresightSSLcheck", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CoresightSPNcheck", 1)
 	# Return the list.
 	return $listOfFunctions
 }
@@ -196,8 +197,8 @@ PROCESS
 				# Local user would use .\user naming convention most of the time
 				If ($CSUserSvc -contains ".\" ) 
 				{ 
-				$result = $false
-				$msg =  "Local User is running Coresight AppPools. Please use a custom domain account."
+					$result = $false
+					$msg =  "Local User is running Coresight AppPools. Please use a custom domain account."
 				}
 				# At this point, it's either a domain account or local account using HOSTNAME\user naming convention
 				Else 
@@ -215,15 +216,15 @@ PROCESS
 					# Detect local user
 					If ($hostname -eq $LsplitName )
 					{
-					$result = $false
-					$msg =  "Local User is running Coresight AppPools. Please use a custom domain account."
+						$result = $false
+						$msg =  "Local User is running Coresight AppPools. Please use a custom domain account."
 					}
 
 					# A custom domain account is used
 					Else 
 					{
-					$result = $true
-					$msg =  "A custom domain account is running both Coresight AppPools"
+						$result = $true
+						$msg =  "A custom domain account is running both Coresight AppPools"
 					}
 				}
 
@@ -238,8 +239,8 @@ PROCESS
 			# Let's keep it at Pass for now, but recommend using a custom domain account
 			Else 
 			{
-			$result = $true
-			$msg =  $CSAppPoolSvc + " is running the Coresight AppPools. A custom domain account is recommended instead."
+				$result = $true
+				$msg =  $CSAppPoolSvc + " is running the Coresight AppPools. A custom domain account is recommended instead."
 
 			}
 		}
@@ -338,14 +339,14 @@ PROCESS
 		} 	
 		Else 		
 		{ 
-			# Something is missing.
+			# Something is missing
 			$result = $false
 			If ( $WebBindings.protocol -contains "https" ) 
 			{
 				$msg = "A valid https binding is configured, but connections without SSL are allowed "
 			}
 			
-			# There could be an edge case scenario, where only connections with SSL are allowed, but there's no valid binding. A check can be easily added for that, but I don't think it's worth it.
+			# Print the full message
 			Else
 			{
 				$msg = "Make sure that a valid https binding is configured and only connections with SSL are allowed."
@@ -367,6 +368,111 @@ PROCESS
 									-ain "PI Coresight SSL Check" -aiv $result `
 									-Group1 "PI System" -Group2 "PI Coresight" `
 									-Severity "Moderate"																																															
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CoresightSPNcheck
+{
+<#  
+.SYNOPSIS
+AU50004 - Coresight SPN check
+.DESCRIPTION
+VALIDATION: Checks PI Coresight SPN assignment. <br/>
+COMPLIANCE: HTTP or HOST SPNs exist and are assigned to the Coresight AppPool account. This makes Kerberos Authentication possible.
+For more information, see the PI Live Library link below. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46 
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{		
+
+		# Coresight is using the http service class
+		$serviceType = "http"
+
+		# Special 'service name' for Coresight
+		$serviceName = "coresight"
+		
+		# Get Hostname of the CS server
+		$hostname = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\Control\ComputerName\ActiveComputerName" "ComputerName" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		
+		
+		# Not checking if the other AppPool is running under the same identity, as that is done over in the Get-PISysAudit_CheckCoresightAppPools function
+
+		# Build string and get the Identity Type of Coresight Service AppPool
+		$QuerySvcAppPool = "Get-ItemProperty iis:\apppools\coresightserviceapppool -Name processmodel.identitytype"
+		$CSAppPoolSvc = Get-PISysAudit_IISproperties -lc $LocalComputer -rcn $RemoteComputerName -qry $QuerySvcAppPool -DBGLevel $DBGLevel
+
+		# Build string and get the User running Coresight Service AppPool
+		$QuerySvcUser = "Get-ItemProperty iis:\apppools\coresightserviceapppool -Name processmodel.username.value"
+		$CSUserSvc = Get-PISysAudit_IISproperties -lc $LocalComputer -rcn $RemoteComputerName -qry $QuerySvcUser -DBGLevel $DBGLevel
+
+		If ( $CSAppPoolSvc -eq "SpecificUser") 
+		{ 
+			$csappPool = $CSUserSvc 
+		} 
+		Else 
+		{ 
+			$csappPool = $hostname 
+
+			# Machine accounts don't need http SPN
+			$serviceType = "host"
+		}
+		
+		$result = Invoke-PISysAudit_SPN -svctype $serviceType -svcname $serviceName -lc $LocalComputer -rcn $RemoteComputerName -appPool $csappPool -dbgl $DBGLevel
+
+		If ($result) 
+		{ 
+			$msg = "The Service Principal Name exists and it is assigned to the correct Service Account."
+		} 
+		Else 
+		{ 			
+			$msg = "The Service Principal Name does NOT exist or is NOT assigned to the correct Service Account."
+		}				
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+									-at $AuditTable "AU50004" `
+									-msg $msg `
+									-ain "PI Coresight SPN Check" -aiv $result `
+									-Group1 "PI System" -Group2 "PI Coresight" `
+									-Severity "Moderate"																																																
 }
 
 END {}
@@ -451,6 +557,7 @@ Export-ModuleMember Get-PISysAudit_FunctionsFromLibrary5
 Export-ModuleMember Get-PISysAudit_CheckCoresightVersion
 Export-ModuleMember Get-PISysAudit_CheckCoresightAppPools
 Export-ModuleMember Get-PISysAudit_CoresightSSLcheck
+Export-ModuleMember Get-PISysAudit_CoresightSPNcheck
 # </Do not remove>
 
 # ........................................................................

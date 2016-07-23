@@ -3531,6 +3531,10 @@ param(
 		[string]
 		$ServiceType,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("appPool")]
+		[string]
+		$csappPool,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("dbgl")]
 		[int]
 		$DBGLevel = 0)
@@ -3541,9 +3545,15 @@ PROCESS
 	
 	try
 	{
-		# Get the Service account
-		$svcacc = Get-PISysAudit_ServiceLogOnAccount $ServiceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
-
+		If ( $ServiceName -ne "coresight") 
+		{
+			# Get the Service account
+			$svcacc = Get-PISysAudit_ServiceLogOnAccount $ServiceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		}
+		Else
+		{
+			$svcacc = $csappPool
+		}
 		# Get Domain info
 		$MachineDomain = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" "Domain" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
 
@@ -3578,7 +3588,7 @@ PROCESS
 		
 		# Verify hostnane AND FQDN SPNs are assigned to the service account
 		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
-		If ($spnCheck.Contains($serviceType + "/" + $hostname.ToLower()) -and $spnCheck.Contains($serviceType + "/" + $fqdn.ToLower())) 
+		If ($spnCheck.Contains($serviceType.ToLower() + "/" + $hostname.ToLower()) -and $spnCheck.Contains($serviceType.ToLower() + "/" + $fqdn.ToLower())) 
 		# Print results
 		# FUTURE ENHANCEMENT IN THE WORKS:
 		# Improve the printing mechanism to include more details in case of failure
@@ -4616,7 +4626,10 @@ PROCESS
 						"AU40003" {$AuditFunctionName = "Get-PISysAudit_CheckSQLDBMailXPs"; break}
 						"AU40004" {$AuditFunctionName = "Get-PISysAudit_CheckSQLOLEAutomationProcs"; break}
 						"AU50001" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightVersion"; break}
-					
+						"AU50002" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightAppPools"; break}
+						"AU50003" {$AuditFunctionName = "Get-PISysAudit_CoresightSSLcheck"; break}
+						"AU50004" {$AuditFunctionName = "Get-PISysAudit_CoresightSPNcheck"; break}
+
 						default {break}
 					}
 					$recommendationInfo = Get-Help $AuditFunctionName
