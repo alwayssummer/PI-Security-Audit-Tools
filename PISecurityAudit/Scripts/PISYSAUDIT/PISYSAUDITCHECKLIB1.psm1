@@ -91,6 +91,7 @@ PROCESS
 	# Get and store the function Name.
 	$fn = GetFunctionName	
 	$msg = ""
+	$severity = "Unknown"
 	try
 	{				
 		# Read the registry key.
@@ -104,11 +105,13 @@ PROCESS
 		{ 
 			$result =  $false 
 			$msg = "Machine is not a member of an AD Domain."
+			$severity = "Severe"
 		} 
 		else 
 		{ 
 			$result = $true 
 			$msg = "Machine is a member of an AD Domain."
+			$severity = "N/A"
 		}
 	}
 	catch
@@ -125,7 +128,7 @@ PROCESS
 										-ain "Domain Membership Check" -aiv $result `
 										-msg $msg `
 										-Group1 "Machine" -Group2 "Domain" `
-										-Severity "Severe"																				 
+										-Severity $severity																				 
 }
 
 END {}
@@ -175,6 +178,7 @@ PROCESS
 	# Get and store the function Name.
 	$fn = GetFunctionName
 	$msg = ""
+	$severity = "Unknown"
 	try
 	{				
 		# Get the value from the WMI Query
@@ -266,7 +270,7 @@ PROCESS
 		}
 
 		# Check if the value is from one in the list			
-		if($sku -match "12|13|14|29|39|40|41|42") { $result =  $true } else { $result = $false }
+		if($sku -match "12|13|14|29|39|40|41|42") { $result =  $true; $severity = "N/A" } else { $result = $false; $severity = "Severe" }
 
 		# Set a message to return with the audit object.
 		$msgTemplate = "The following product is used: {0}"
@@ -287,7 +291,7 @@ PROCESS
 										-ain "Operating System SKU" -aiv $result `
 										-msg $msg `
 										-Group1 "Machine" -Group2 "Operating System" `
-										-Severity "Severe"													
+										-Severity $severity													
 }
 
 END {}
@@ -336,6 +340,7 @@ PROCESS
 	# Get and store the function Name.
 	$fn = GetFunctionName
 	$msg = ""
+	$severity = "Unknown"
 	try
 	{				
 		# Read the registry key.
@@ -358,11 +363,13 @@ PROCESS
 		{ 
 			$result = $true 
 			$msg = "Firewall enabled."
+			$severity = "N/A"
 		} 
 		else 
 		{ 
 			$result = $false 
 			$msg = "Firewall not enabled."
+			$severity = "Moderate"
 		}							
 	}
 	catch
@@ -379,7 +386,7 @@ PROCESS
 										-ain "Firewall Enabled" -aiv $result `
 										-msg $msg `
 										-Group1 "Machine" -Group2 "Policy" `
-										-Severity "Moderate"																				 
+										-Severity $severity																				 
 }
 
 END {}
@@ -423,10 +430,11 @@ PROCESS
 {					
 	# Get and store the function Name.
 	$fn = GetFunctionName
-	
+	$severity = "Unknown"
 	try
 	{				
 		$result = $false
+		$severity = "Moderate"
 		# Read the AppLocker policy.
 		[xml] $appLockerPolicy = Get-PISysAudit_AppLockerState -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
 		if($appLockerPolicy -ne $null)
@@ -436,6 +444,7 @@ PROCESS
 			{
 				$result = $true
 				$msg = "AppLocker is configured to enforce."
+				$severity = "N/A"
 			}
 			else
 			{
@@ -461,7 +470,7 @@ PROCESS
 										-ain "AppLocker Enabled" -aiv $result `
 										-msg $msg `
 										-Group1 "Machine" -Group2 "Policy" `
-										-Severity "Moderate"																				 
+										-Severity $severity																				 
 }
 
 END {}
@@ -541,7 +550,7 @@ PROCESS
 				$msg = "Recommended UAC feature {0} disabled."
 				$msg = [string]::Format($msg, $additionalUACFeature)
 			}	
-			else {$msg = "UAC features enabled."}
+			else {$msg = "UAC features enabled."; $severity = "N/A"}
 		}
 		else
 		{$msg = $tmpmsg}	
@@ -607,6 +616,7 @@ PROCESS
 	# Get and store the function Name.
 	$fn = GetFunctionName
 	$msg = ""
+	$severity = "Unknown"
 	try
 	{		
 		# Enter routine.			
@@ -626,7 +636,7 @@ PROCESS
 									-msg $msg `
 									-Group1 "<Category 1>" -Group2 "<Category 2>" `
 									-Group3 "<Category 3>" -Group4 "<Category 4>" `
-									-Severity "<Severity>"																																																
+									-Severity $severity																																																
 }
 
 END {}
