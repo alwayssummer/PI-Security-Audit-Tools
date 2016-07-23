@@ -3586,21 +3586,26 @@ PROCESS
 		}
 
 		# Run setspn and convert it to a string (no capital letters)
-		$spnCheck = $(setspn -l $svcaccMod | Out-String).ToLower()
-		
+		$spnCheck = $(setspn -l $svcaccMod) 
+
 		# Verify hostnane AND FQDN SPNs are assigned to the service account
-		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
-		If ($spnCheck.Contains($serviceType.ToLower() + "/" + $hostname.ToLower()) -and $spnCheck.Contains($serviceType.ToLower() + "/" + $fqdn.ToLower())) 
-		# Print results
-		# FUTURE ENHANCEMENT IN THE WORKS:
-		# Improve the printing mechanism to include more details in case of failure
-		{ 
-			$result = $true 
-		} 
-		Else 
-		{ 
-			$result =  $false 
+		$spnCounter = 0
+		$hostnameSPN = $($serviceType.ToLower() + "/" + $hostname.ToLower())
+		$fqdnSPN = $($serviceType.ToLower() + "/" + $fqdn.ToLower())
+		foreach($line in $spnCheck)
+		{
+			switch($line.ToLower().Trim())
+			{
+				$hostnameSPN {$spnCounter++; break}
+				$fqdnSPN {$spnCounter++; break}
+				default {break}
+			}
 		}
+
+		# FUTURE ENHANCEMENT:
+		# Return details to improve messaging in case of failure
+		If ($spnCounter -eq 2) { $result = $true } 
+		Else { $result =  $false }
 		
 		return $result
 	}
