@@ -649,9 +649,9 @@ function Get-PISysAudit_CheckAFSPN
 .SYNOPSIS
 AU30007 - Verify AF Server SPN exists
 .DESCRIPTION
-	VALIDATION: Checks PI AF Server SPN assignment.
+	VALIDATION: Checks PI AF Server SPN assignment.<br/>
 	COMPLIANCE: PI AF Server SPNs exist and are assigned to the AF Service account. This makes Kerberos Authentication possible.
-For more information, see "PI AF and Kerberos authentication" in the PI Live Library. 
+For more information, see "PI AF and Kerberos authentication" in the PI Live Library. <br/>
 https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
 #>
 

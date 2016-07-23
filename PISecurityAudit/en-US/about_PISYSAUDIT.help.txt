@@ -272,6 +272,10 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		see "Upgrade a PI Coresight installation" in the PI Live Library.
 		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-
 
+		AU50002 - Check Coresight AppPool identity
+		VALIDATION: checks PI Coresight AppPool identity.
+		COMPLIANCE: Use a custom domain account. Network Service is acceptable, but not ideal.
+		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411 
 		//ENDSECTION - VALIDATIONS//
 
 
