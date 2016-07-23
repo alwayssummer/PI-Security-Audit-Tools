@@ -3575,6 +3575,8 @@ PROCESS
 			Else 
 			{ 
 				$svcaccMod = $svcacc
+				# If it's a local account, then there cannot be an SPN assigned.
+				if($svcaccMod.Split("\")[0] -eq "."){return $false}
 			} 
 		}
 		# For machine accounts such as Network Service or Local System, use the hostname when verifying the SPN assignment
