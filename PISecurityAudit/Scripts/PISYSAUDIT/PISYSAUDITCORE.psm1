@@ -996,9 +996,9 @@ param(
 		$complianceCheckFunctionTemplate = "Compliance Check function: {0}, arguments: {1}, {2}, {3}, {4}"
 				
 		# Process.
-		$i = 0
 		foreach($item in $ComputerParamsTable.GetEnumerator())
-		{		
+		{	
+			$i = 0	
 			# Read the object within the System.Collections.DictionaryEntry
 			$computerParams = $item.Value
 			
@@ -4106,7 +4106,7 @@ param(
 		$Group4 = "",
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("s")]
-		[ValidateSet("Unknown", "Low", "Moderate", "Severe")]
+		[ValidateSet("Unknown", "N/A", "Low", "Moderate", "Severe")]
 		[String]
 		$Severity = "Low")
 BEGIN {}
@@ -4123,6 +4123,10 @@ PROCESS
 	# Create an unique ID with the item ID and computer name.
 	$myKey = $AuditItemID + "-" + $computerName
 	
+	# If the validation succeeds, there is no issue; if the validation fails, we can't accurately assess severity.
+	if($AuditItemValue){$Severity = "N/A"}
+	elseif($AuditItemValue -eq "N/A"){$Severity = "Unknown"}
+
 	# Set the properties.
 	Add-Member -InputObject $tempObj -MemberType NoteProperty -Name "ID" -Value $AuditItemID
 	Add-Member -InputObject $tempObj -MemberType NoteProperty -Name "ServerName" -Value $computerName
