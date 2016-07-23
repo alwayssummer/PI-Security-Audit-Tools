@@ -46,7 +46,7 @@ function Get-PISysAudit_FunctionsFromLibrary5
 	[System.Collections.HashTable]$listOfFunctions = @{}	
 	$listOfFunctions.Add("Get-PISysAudit_CheckCoresightVersion", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckCoresightAppPools", 1)
-			
+	$listOfFunctions.Add("Get-PISysAudit_CoresightSSLcheck", 1)
 	# Return the list.
 	return $listOfFunctions
 }
@@ -140,7 +140,8 @@ function Get-PISysAudit_CheckCoresightAppPools
 AU50002 - Check Coresight AppPools identity
 .DESCRIPTION
 VALIDATION: checks PI Coresight AppPool identity.<br/>
-COMPLIANCE: Use a custom domain account. Network Service is acceptable, but not ideal.<br/>
+COMPLIANCE: Use a custom domain account. Network Service is acceptable, but not ideal. 
+For more information, see "Create a service account for PI Coresight" in the PI Live Library. <br/>
 https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411 
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
@@ -276,6 +277,106 @@ END {}
 #***************************
 }
 
+function Get-PISysAudit_CoresightSSLcheck
+{
+<#  
+.SYNOPSIS
+AU50003 - Coresight SSL check
+.DESCRIPTION
+VALIDATION: Checks whether SSL is enabled and enforced on the Coresight Web Site.<br/>
+COMPLIANCE: A valid https binding is configured and only connections with SSL should be allowed.
+For more information, see "Configure Secure Sockets Layer (SSL) access" in the PI Live Library. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B 	
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	
+	try
+	{	
+		# Get the name of Web Site PI Coresight is installed in
+		$RegKeyPath = "HKLM:\Software\PISystem\Coresight"
+		$attribute = "WebSite"
+		$CSwebSite = Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -rkp $RegKeyPath -a $attribute -DBGLevel $DBGLevel	
+
+		# Get Coresight Web Site bindings
+		$WebBindingsQuery = "Get-WebBinding -Name" + " " + $CSwebSite
+		$WebBindings = Get-PISysAudit_IISproperties -lc $LocalComputer -rcn $RemoteComputerName -qry $WebBindingsQuery -DBGLevel $DBGLevel
+		#$WebBindings
+
+		# Check that only connections with SSL are allowed
+		# Future consideration: perhaps we should also check this on the CS app level
+		$enforceSSLQuery = "Get-WebConfigurationProperty -Location" + " " + $CSwebSite + " " + "-Filter ""system.webServer/security/access"" -Name ""sslFlags"""
+		$SSLCheck = Get-PISysAudit_IISproperties -lc $LocalComputer -rcn $RemoteComputerName -qry $enforceSSLQuery -DBGLevel $DBGLevel
+
+		# Evaluate both checks
+		if($WebBindings.protocol -contains "https" -and $SSLCheck -eq "Ssl") 
+		{
+			# Everything checks out!
+			$result = $true
+			$msg = "A valid https binding is configured and only connections with SSL are allowed."
+		} 	
+		Else 		
+		{ 
+			# Something is missing.
+			$result = $false
+			If ( $WebBindings.protocol -contains "https" ) 
+			{
+				$msg = "A valid https binding is configured, but connections without SSL are allowed "
+			}
+			
+			# There could be an edge case scenario, where only connections with SSL are allowed, but there's no valid binding. A check can be easily added for that, but I don't think it's worth it.
+			Else
+			{
+				$msg = "Make sure that a valid https binding is configured and only connections with SSL are allowed."
+			}
+		}
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occured during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+									-at $AuditTable "AU50003" `
+									-msg $msg `
+									-ain "PI Coresight SSL Check" -aiv $result `
+									-Group1 "PI System" -Group2 "PI Coresight" `
+									-Severity "Moderate"																																															
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+
 # ........................................................................
 # Add your cmdlet after this section. Don't forget to add an intruction
 # to export them at the bottom of this script.
@@ -286,7 +387,7 @@ function Get-PISysAudit_TemplateAU1xxxx
 .SYNOPSIS
 AU5xxxx - <Name>
 .DESCRIPTION
-VERIFICATION: <Enter what the verification checks>
+VALIDATION: <Enter what the verification checks>
 COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
@@ -349,6 +450,7 @@ END {}
 Export-ModuleMember Get-PISysAudit_FunctionsFromLibrary5
 Export-ModuleMember Get-PISysAudit_CheckCoresightVersion
 Export-ModuleMember Get-PISysAudit_CheckCoresightAppPools
+Export-ModuleMember Get-PISysAudit_CoresightSSLcheck
 # </Do not remove>
 
 # ........................................................................
