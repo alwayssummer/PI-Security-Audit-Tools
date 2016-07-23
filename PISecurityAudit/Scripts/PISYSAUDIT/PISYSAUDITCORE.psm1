@@ -996,9 +996,9 @@ param(
 		$complianceCheckFunctionTemplate = "Compliance Check function: {0}, arguments: {1}, {2}, {3}, {4}"
 				
 		# Process.
+		$i = 0
 		foreach($item in $ComputerParamsTable.GetEnumerator())
 		{		
-			$i = 0
 			# Read the object within the System.Collections.DictionaryEntry
 			$computerParams = $item.Value
 			
@@ -4106,7 +4106,7 @@ param(
 		$Group4 = "",
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("s")]
-		[ValidateSet("N/A", "Unknown", "Low", "Moderate", "Severe")]
+		[ValidateSet("Unknown", "Low", "Moderate", "Severe")]
 		[String]
 		$Severity = "Low")
 BEGIN {}
