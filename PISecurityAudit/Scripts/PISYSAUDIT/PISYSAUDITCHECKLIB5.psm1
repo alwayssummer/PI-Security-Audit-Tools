@@ -112,7 +112,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -257,7 +257,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -321,13 +321,14 @@ PROCESS
 		$CSwebSite = Get-PISysAudit_RegistryKeyValue -lc $LocalComputer -rcn $RemoteComputerName -rkp $RegKeyPath -a $attribute -DBGLevel $DBGLevel	
 
 		# Get Coresight Web Site bindings
-		$WebBindingsQuery = "Get-WebBinding -Name" + " " + $CSwebSite
+		$WebBindingsQueryTemplate = "Get-WebBinding -Name `"{0}`""
+		$WebBindingsQuery = [string]::Format($WebBindingsQueryTemplate, $CSwebSite)
 		$WebBindings = Get-PISysAudit_IISproperties -lc $LocalComputer -rcn $RemoteComputerName -qry $WebBindingsQuery -DBGLevel $DBGLevel
-		#$WebBindings
 
 		# Check that only connections with SSL are allowed
 		# Future consideration: perhaps we should also check this on the CS app level
-		$enforceSSLQuery = "Get-WebConfigurationProperty -Location" + " " + $CSwebSite + " " + "-Filter ""system.webServer/security/access"" -Name ""sslFlags"""
+		$enforceSSLQueryTemplate = "Get-WebConfigurationProperty -Location `"{0}`" -Filter `"system.webServer/security/access`" -Name `"sslFlags`""
+		$enforceSSLQuery = [string]::Format($enforceSSLQueryTemplate, $CSwebSite)
 		$SSLCheck = Get-PISysAudit_IISproperties -lc $LocalComputer -rcn $RemoteComputerName -qry $enforceSSLQuery -DBGLevel $DBGLevel
 
 		# Evaluate both checks
@@ -356,7 +357,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -461,7 +462,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -527,7 +528,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	

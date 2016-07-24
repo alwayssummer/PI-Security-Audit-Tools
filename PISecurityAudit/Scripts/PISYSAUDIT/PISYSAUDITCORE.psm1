@@ -1050,7 +1050,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem has occured during the generation of the filtered list of computers"						
+		$msg = "A problem has occurred during the generation of the filtered list of computers"						
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		# Validation has failed.
 		return $null
@@ -1113,7 +1113,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem has occured during the validation with WSMan"						
+		$msg = "A problem has occurred during the validation with WSMan"						
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		# Validation has failed.
 		return $false
@@ -1204,7 +1204,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of computer checks"					
+		$msg = "A problem occurred during the processing of computer checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}			
@@ -1322,7 +1322,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI Data Archive checks"					
+		$msg = "A problem occurred during the processing of PI Data Archive checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}			
@@ -1420,7 +1420,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI AF Server checks"					
+		$msg = "A problem occurred during the processing of PI AF Server checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}
@@ -1526,7 +1526,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of SQL Server checks"					
+		$msg = "A problem occurred during the processing of SQL Server checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}		
@@ -1566,10 +1566,10 @@ param(
 			return
 		}
 
-		if((Get-PISysAudit_WindowsFeature -lc $ComputerParams.IsLocal -rcn $ComputerParams.ComputerName -wrf "Web-Scripting-Tools" -DBGLevel $DBGLevel) -eq $false)
+		if((Get-PISysAudit_InstalledWin32Feature -lc $ComputerParams.IsLocal -rcn $ComputerParams.ComputerName -wfn "IIS-ManagementScriptingTools" -DBGLevel $DBGLevel) -ne 1)
 		{
 			# Return the error message.
-			$msgTemplate = "The computer {0} does not have the Web-Scripting-Tools role (IIS cmdlets) or the validation failed; some audit checks may not be available."
+			$msgTemplate = "The computer {0} does not have the IIS Management Scripting Tools Feature (IIS cmdlets) or the validation failed; some audit checks may not be available."
 			$msg = [string]::Format($msgTemplate, $ComputerParams.ComputerName)
 			Write-PISysAudit_LogMessage $msg "Warning" $fn
 			return
@@ -1625,7 +1625,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI Coresight checks"					
+		$msg = "A problem occurred during the processing of PI Coresight checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}		
@@ -2058,12 +2058,12 @@ PROCESS
 	catch
 	{		
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the environment variable: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the environment variable: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred while setting the environment variable: {0} on local machine."
+		$msgTemplate2 = "A problem occurred while setting the environment variable: {0} on {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
-		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message) }
+		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message, $RemoteComputerName) }
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 	}		
 }
@@ -2143,12 +2143,12 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the environment variable: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the environment variable: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the environment variable: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the environment variable: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
-		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message) }
+		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message, $RemoteComputerName) }
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return $null
 	}		
@@ -2218,8 +2218,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the registry key: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the registry key: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the registry key: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the registry key: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2305,8 +2305,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of IIS Property: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of IIS Property: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of IIS Property: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of IIS Property: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2377,8 +2377,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the registry key: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the registry key: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the registry key: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the registry key: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2672,13 +2672,13 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_InstalledWin32Features
+function Get-PISysAudit_InstalledWin32Feature
 {
 <#
 .SYNOPSIS
-(Core functionality) Get installed Windows Features on a given computer.
+(Core functionality) Get install status of Windows Feature on a given computer.
 .DESCRIPTION
-Get installed Windows Features on a given computer.
+Get install status of Windows Feature on a given computer.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(		
@@ -2690,6 +2690,10 @@ param(
 		[alias("rcn")]
 		[string]
 		$RemoteComputerName = "",
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]
+		[alias("wfn")]
+		[string]
+		$WindowsFeatureName,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("dbgl")]
 		[int]
@@ -2703,9 +2707,10 @@ PROCESS
 	{									
 		$className = "Win32_OptionalFeature"
 		$namespace = "root\CIMV2"		
-		$filterExpression = "InstallState='1'"
+		$filterExpressionTemplate = "Name='{0}'"
+		$filterExpression = [string]::Format($filterExpressionTemplate, $WindowsFeatureName)
 		$WMIObject = ExecuteWMIQuery $className -n $namespace -lc $LocalComputer -rcn $RemoteComputerName -FilterExpression $filterExpression -DBGLevel $DBGLevel										
-		return $WMIObject | Sort Name | Select Name, InstallState
+		return $WMIObject.InstallState
 	}
 	catch
 	{
@@ -2784,7 +2789,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		Write-PISysAudit_LogMessage "A problem occured when calling the netsh command." "Error" $fn -eo $_
+		Write-PISysAudit_LogMessage "A problem occurred when calling the netsh command." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -2844,7 +2849,7 @@ PROCESS
 	{
 		
 		# Return the error message.
-		Write-PISysAudit_LogMessage "A problem occured while retrieving the AppLocker configuration." "Error" $fn -eo $_
+		Write-PISysAudit_LogMessage "A problem occurred while retrieving the AppLocker configuration." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -2978,78 +2983,6 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_WindowsFeature
-{
-<#
-.SYNOPSIS
-(Core functionality) Check for a Windows Role or Feature on the target machine.
-.DESCRIPTION
-Check if a Windows Feature is installed on the target machine.
-#>
-[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
-param(
-		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
-		[alias("wrf")]
-		[string]
-		$WindowsRoleFeature,
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("lc")]
-		[boolean]
-		$LocalComputer = $true,
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("rcn")]
-		[string]
-		$RemoteComputerName = "",
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("dbgl")]
-		[int]
-		$DBGLevel = 0)		
-BEGIN {}
-PROCESS
-{			
-	$fn = GetFunctionName
-	
-	try
-	{
-		# Build ScriptBlock to Invoke the Get-WindowsFeature cmdlet
-		$scriptBlockCmdTemplate = "Import-Module ServerManager; `$(Get-WindowsFeature -Name `"{0}`").Installed"
-		$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $WindowsRoleFeature)
-		$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
-
-		# Execute the Get-WindowsFeature cmdlet method locally or remotely via the Invoke-Command cmdlet.
-		if($LocalComputer)
-		{										
-			$value = Invoke-Command -ScriptBlock $scriptBlock			
-		}
-		else
-		{	
-			$value = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
-		}
-	
-		# Return the value found.
-		return $value		
-	}
-	catch
-	{
-		# Return the error message.
-		$msgTemplate1 = "A problem occured during the detection of a feature on the local machine: {0}"
-		$msgTemplate2 = "A problem occured during the detection of a feature on {1}: {0}"
-		if($LocalComputer)
-		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
-		else
-		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message, $RemoteComputerName) }
-		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
-		return $null
-	}
-}
-
-END {}
-
-#***************************
-#End of exported function
-#***************************
-}
-
 function Invoke-PISysAudit_AFDiagCommand
 {
 <#
@@ -3123,8 +3056,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use afdiag.exe on local computer"
-		$msgTemplate2 = "A problem occured to use afdiag.exe on {0} computer"
+		$msgTemplate1 = "A problem occurred with afdiag.exe on local computer"
+		$msgTemplate2 = "A problem occurred with afdiag.exe on {0} computer"
 		if($LocalComputer)
 		{ $msg = $msgTemplate1 }
 		else
@@ -3388,7 +3321,7 @@ PROCESS
 				if(ValidateFileContent $outputFileContent "no access")
 				{
 					# Return the error message.		
-					$msg = "An authentication problem occured with piconfig.exe"
+					$msg = "An authentication problem occurred with piconfig.exe"
 					Write-PISysAudit_LogMessage $msg "Error" $fn
 					return $null		
 				}
@@ -3401,7 +3334,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.		
-		$msg = "A problem occured to use piconfig.exe"
+		$msg = "A problem occurred using piconfig.exe"
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		return $null
 	}
@@ -3486,8 +3419,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use piversion.exe on local computer"
-		$msgTemplate2 = "A problem occured to use piversion.exe on {0} computer"
+		$msgTemplate1 = "A problem occurred using piversion.exe on local computer"
+		$msgTemplate2 = "A problem occurred using piversion.exe on {0} computer"
 		if($LocalComputer)
 		{ $msg = $msgTemplate1 }
 		else
@@ -3575,6 +3508,8 @@ PROCESS
 			Else 
 			{ 
 				$svcaccMod = $svcacc
+				# If it's a local account, then there cannot be an SPN assigned.
+				if($svcaccMod.Split("\")[0] -eq "."){return $false}
 			} 
 		}
 		# For machine accounts such as Network Service or Local System, use the hostname when verifying the SPN assignment
@@ -3584,33 +3519,33 @@ PROCESS
 		}
 
 		# Run setspn and convert it to a string (no capital letters)
-		$spnCheck = $(setspn -l $svcaccMod | Out-String).ToLower()
-		
+		$spnCheck = $(setspn -l $svcaccMod) 
+
 		# Verify hostnane AND FQDN SPNs are assigned to the service account
-		# Potential edge case issue - the hostname is a substring of FQDN, so as long as ServiceClass/FQDN SPN exists, the check below will pass
-		If ($spnCheck.Contains($serviceType.ToLower() + "/" + $hostname.ToLower()) -and $spnCheck.Contains($serviceType.ToLower() + "/" + $fqdn.ToLower())) 
-		# Print results
-		# FUTURE ENHANCEMENT IN THE WORKS:
-		# Improve the printing mechanism to include more details in case of failure
-		{ 
-			$result = $true 
-		} 
-		Else 
-		{ 
-			$result =  $false 
+		$spnCounter = 0
+		$hostnameSPN = $($serviceType.ToLower() + "/" + $hostname.ToLower())
+		$fqdnSPN = $($serviceType.ToLower() + "/" + $fqdn.ToLower())
+		foreach($line in $spnCheck)
+		{
+			switch($line.ToLower().Trim())
+			{
+				$hostnameSPN {$spnCounter++; break}
+				$fqdnSPN {$spnCounter++; break}
+				default {break}
+			}
 		}
+
+		# FUTURE ENHANCEMENT:
+		# Return details to improve messaging in case of failure
+		If ($spnCounter -eq 2) { $result = $true } 
+		Else { $result =  $false }
 		
 		return $result
 	}
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use setspn.exe on local computer"
-		$msgTemplate2 = "A problem occured to use setspn.exe on {0} computer"
-		if($LocalComputer)
-		{ $msg = $msgTemplate1 }
-		else
-		{ $msg = [string]::Format($msgTemplate2, $RemoteComputerName) }		
+		$msg = "A problem occurred using setspn.exe"	
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		return $null
 	}
@@ -3714,7 +3649,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during the SQL Query: {0}"
+		$msgTemplate = "A problem occurred during the SQL Query: {0}"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		$value = $null
@@ -4016,7 +3951,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during the SQL Query: {0}"
+		$msgTemplate = "A problem occurred during the SQL Query: {0}"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		$value = $null
@@ -4652,7 +4587,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during generation of the report"
+		$msgTemplate = "A problem occurred during generation of the report"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		return $null
@@ -4905,10 +4840,9 @@ Export-ModuleMember Get-PISysAudit_CheckPrivilege
 Export-ModuleMember Get-PISysAudit_OSSKU
 Export-ModuleMember Get-PISysAudit_InstalledComponents
 Export-ModuleMember Get-PISysAudit_InstalledKBs
-Export-ModuleMember Get-PISysAudit_InstalledWin32Features
+Export-ModuleMember Get-PISysAudit_InstalledWin32Feature
 Export-ModuleMember Get-PISysAudit_FirewallState
 Export-ModuleMember Get-PISysAudit_AppLockerState
-Export-ModuleMember Get-PISysAudit_WindowsFeature
 Export-ModuleMember Invoke-PISysAudit_AFDiagCommand
 Export-ModuleMember Invoke-PISysAudit_PIConfigScript
 Export-ModuleMember Invoke-PISysAudit_PIVersionCommand

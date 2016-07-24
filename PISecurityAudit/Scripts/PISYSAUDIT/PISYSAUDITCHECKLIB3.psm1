@@ -113,7 +113,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -218,7 +218,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -338,7 +338,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -419,7 +419,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -531,7 +531,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}		
@@ -621,7 +621,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -698,7 +698,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -763,7 +763,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
