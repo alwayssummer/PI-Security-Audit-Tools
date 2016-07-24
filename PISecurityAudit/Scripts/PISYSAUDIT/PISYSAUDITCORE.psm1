@@ -4419,9 +4419,14 @@ PROCESS
 			$results += $item.Value	
 		}
 		
-		# Export to .csv but sort by the ID column first.
-		$results = $results | Select-Object * | Sort ID 
+		# Export to .csv but sort the results table first to have Failed items on the top sorted by Severity 
+		$results = $results | Sort @{Expression="AuditItemValue";Descending=$false},@{Expression="Severity";Descending=$true},@{Expression="ID";Descending=$false}
 		$results | Export-Csv -Path $fileToExport -Encoding ASCII -NoType
+
+
+		
+
+		$now=Get-Date -format "dd-MMM-yyyy HH:mm:ss"
 		
 		if($DetailReport){
 			
@@ -4431,51 +4436,56 @@ PROCESS
 
 			# Header for the report. 
 			$header = @"
-			<html><head><meta name="viewport" content="width=device-width" />
-			<style type="text/css">
-			body {
-				font-size: 100%;
-				font-family: 'Segoe UI Light','Segoe UI','Lucida Grande',Verdana,Arial,Helvetica,sans-serif;
-				}
-			h2{
-				font-size: 1.875em;
-				}
-			p{
-				font-size: 0.875em;
-				}
+			<html>
+				<head><meta name="viewport" content="width=device-width" />
+					<style type="text/css">
+						body {
+							font-size: 100%;
+							font-family: 'Segoe UI Light','Segoe UI','Lucida Grande',Verdana,Arial,Helvetica,sans-serif;
+						}
+						h2{
+							font-size: 1.875em;
+						}
+						p{
+							font-size: 0.875em;
+							}
+						a{
+							color: black;
+						}
 	
-			.summarytable {
-				width: 100%;
-				border-collapse: collapse;
-				}
+						.summarytable {
+							width: 100%;
+							border-collapse: collapse;
+							}
 
-			.summarytable td, .summarytable th {
-				border: 1px solid #ddd;
-				font-size: 0.875em;
-			}
-			.summarytable th{
-				background-color: #f2f2f2;
-			}
+						.summarytable td, .summarytable th {
+							border: 1px solid #ddd;
+							font-size: 0.875em;
+						}
+						.summarytable th{
+							background-color: #f2f2f2;
+						}
 
 			
-			.info{
-				background-color: #FFF59D;
-			}
+						.info{
+							background-color: #FFF59D;
+						}
 			
-			.warning{
-				background-color: #FFCC80;
-			}
-			.error{
-				background-color: #FFAB91;
-			}	
-
-
-			</style>
+						.warning{
+							background-color: #FFCC80;
+						}
+						.error{
+							background-color: #FFAB91;
+						}	
+					</style>
 
 			
 			</head>
 				<body>
-					<h2>AUDIT SUMMARY</h2>
+				<div style="padding-bottom:1em">
+					<h2>AUDIT SUMMARY </h2>
+					<h4>$($now)</h4> 
+				</div>
 "@
 			# Header for the summary table.
 			$tableHeader = @"
@@ -4499,6 +4509,7 @@ PROCESS
 			$fails = @()
 			foreach($result in $results) 
 			{
+				$aTag = ""
 				$highlight = "`"`""
 				if($result.AuditItemValue.ToLower() -eq "fail"){
 					switch ($result.Severity.ToLower())
@@ -4508,10 +4519,17 @@ PROCESS
 						"low" {$highlight="`"info`""; break}
 					}
 					$fails += $result
+
+					$resultID = $result.ID
+					$aTag = "<a href=`"#$resultID`">"
 				}
+
+				
+				
+					
 				$tableRow = @"
 				<tr class={8}>
-				<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{7}</td>
+				<td>$aTag{0}</a></td><td>{1}</td><td>{2}</td><td>{3}</td><td>{7}</td>
 				<td>{4}</td><td>{5}</td><td>{6}</td>
 				</tr>
 "@ 
@@ -4567,10 +4585,10 @@ PROCESS
 						default {break}
 					}
 					$recommendationInfo = Get-Help $AuditFunctionName
-					$recommendation = "<b>{0}</b><br/><p>{1}</p><br/>"
-					$recommendationsHTML += [string]::Format($recommendation, $recommendationInfo.Synopsis, $recommendationInfo.Description.Text)
+					$recommendation = "<b id=`"{0}`">{1}</b><br/><p>{2}</p><br/>"
+					$recommendationsHTML += [string]::Format($recommendation, $fail.ID, $recommendationInfo.Synopsis, $recommendationInfo.Description.Text)
 				}
-				$reportHTML += $recommendationsHTML
+					$reportHTML += $recommendationsHTML
 			}
 			# Add footer to report.
 			$footerHTML = "</div></body></html>"

@@ -59,7 +59,7 @@ AU50001 - Check for latest version of Coresight
 VALIDATION: verifies PI Coresight version.<br/>
 COMPLIANCE: upgrade to the latest version of PI Coresight.  For more information, 
 see "Upgrade a PI Coresight installation" in the PI Live Library.<br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-8D4F039D8DA6">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-8D4F039D8DA6</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -141,7 +141,7 @@ AU50002 - Check Coresight AppPools identity
 VALIDATION: checks PI Coresight AppPool identity.<br/>
 COMPLIANCE: Use a custom domain account. Network Service is acceptable, but not ideal. 
 For more information, see "Create a service account for PI Coresight" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411 
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -285,7 +285,7 @@ AU50003 - Coresight SSL check
 VALIDATION: Checks whether SSL is enabled and enforced on the Coresight Web Site.<br/>
 COMPLIANCE: A valid https binding is configured and only connections with SSL should be allowed.
 For more information, see "Configure Secure Sockets Layer (SSL) access" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B 	
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -385,7 +385,7 @@ AU50004 - Coresight SPN check
 VALIDATION: Checks PI Coresight SPN assignment. <br/>
 COMPLIANCE: HTTP or HOST SPNs exist and are assigned to the Coresight AppPool account. This makes Kerberos Authentication possible.
 For more information, see the PI Live Library link below. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46 
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							

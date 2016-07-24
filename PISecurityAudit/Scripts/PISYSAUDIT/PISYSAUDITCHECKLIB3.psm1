@@ -144,7 +144,7 @@ COMPLIANCE: set the Configuration Setting ExternalDataTablesAllowNonImpersonated
 false, thereby requiring impersonation for access to external tables.  This setting can be 
 changed by running the AFDiag utility with the /ExternalDataTablesAllowNonImpersonatedUsers- 
 flag.  For more information, see "AFDiag utility parameters" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -250,7 +250,7 @@ rights. <br/>
 COMPLIANCE: ensure that the account does not have the following privileges: 
 SeDebugPrivilege, SeTakeOwnershipPrivilege and SeTcbPrivilege.  For information on these 
 rights and how to set them, see "User Rights" on TechNet: <br/>
-https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx.
+<a href="https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx">https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -368,7 +368,7 @@ VALIDATION: verifies that PI AF requires plugins to be validated. <br/>
 COMPLIANCE: set the Configuration Setting PlugInVerifyLevel to RequireSigned or 
 RequireSignedTrustedProvider.  This can be done with AFDiag /PluginVerifyLevel:<Level>.
 For more information, see "AFDiag utility parameters" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -451,7 +451,7 @@ COMPLIANCE: set the Configuration Setting FileExtensions to only include the fil
 extensions: docx:xlsx:csv:pdf:txt:rtf:jpg:jpeg:png:svg:tiff:gif or a subset thereof.
 This can be done with AFDiag /FileExtensions:<ExtensionList>.  For more information, 
 see "AFDiag utility parameters" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -561,7 +561,7 @@ AU30006 - PI AF Server Version
 VALIDATION: verifies PI AF Server version. <br/>
 COMPLIANCE: upgrade to the latest version of PI AF Server.  For more information, 
 see "PI AF Server upgrades" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6.
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6 </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -651,7 +651,7 @@ AU30007 - Verify AF Server SPN exists
 	VALIDATION: Checks PI AF Server SPN assignment.<br/>
 	COMPLIANCE: PI AF Server SPNs exist and are assigned to the AF Service account. This makes Kerberos Authentication possible.
 For more information, see "PI AF and Kerberos authentication" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D</a>
 #>
 
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
