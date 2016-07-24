@@ -4450,6 +4450,9 @@ PROCESS
 						p{
 							font-size: 0.875em;
 							}
+						a{
+							color: black;
+						}
 	
 						.summarytable {
 							width: 100%;
@@ -4507,6 +4510,7 @@ PROCESS
 			$fails = @()
 			foreach($result in $results) 
 			{
+				$aTag = ""
 				$highlight = "`"`""
 				if($result.AuditItemValue.ToLower() -eq "fail"){
 					switch ($result.Severity.ToLower())
@@ -4516,10 +4520,17 @@ PROCESS
 						"low" {$highlight="`"info`""; break}
 					}
 					$fails += $result
+
+					$resultID = $result.ID
+					$aTag = "<a href=`"#$resultID`">"
 				}
+
+				
+				
+					
 				$tableRow = @"
 				<tr class={8}>
-				<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{7}</td>
+				<td>$aTag{0}</a></td><td>{1}</td><td>{2}</td><td>{3}</td><td>{7}</td>
 				<td>{4}</td><td>{5}</td><td>{6}</td>
 				</tr>
 "@ 
@@ -4575,10 +4586,10 @@ PROCESS
 						default {break}
 					}
 					$recommendationInfo = Get-Help $AuditFunctionName
-					$recommendation = "<b>{0}</b><br/><p>{1}</p><br/>"
-					$recommendationsHTML += [string]::Format($recommendation, $recommendationInfo.Synopsis, $recommendationInfo.Description.Text)
+					$recommendation = "<b id=`"{0}`">{1}</b><br/><p>{2}</p><br/>"
+					$recommendationsHTML += [string]::Format($recommendation, $fail.ID, $recommendationInfo.Synopsis, $recommendationInfo.Description.Text)
 				}
-				$reportHTML += $recommendationsHTML
+					$reportHTML += $recommendationsHTML
 			}
 			# Add footer to report.
 			$footerHTML = "</div></body></html>"

@@ -64,7 +64,7 @@ VALIDATION: verifies that SQL Server does not have xp_CmdShell enabled.<br/>
 COMPLIANCE: disable xp_CmdShell configuration option.  This option can be configured 
 using the Policy-Based Management or the sp_configure stored procedure.  For more 
 information, see:<br/>
-<a>https://msdn.microsoft.com/en-us/library/ms190693.aspx</a>
+<a href="https://msdn.microsoft.com/en-us/library/ms190693.aspx">https://msdn.microsoft.com/en-us/library/ms190693.aspx</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -168,7 +168,7 @@ VALIDATION: verifies that SQL Server does not have Ad Hoc Distributed Queries en
 COMPLIANCE: disable Ad Hoc Distributed Queries configuration option.  This option can be 
 configured using the Policy-Based Management or the sp_configure stored procedure. For more 
 information, see:<br/> 
-https://msdn.microsoft.com/en-us/library/ms187569.aspx.
+<a href="https://msdn.microsoft.com/en-us/library/ms187569.aspx">https://msdn.microsoft.com/en-us/library/ms187569.aspx </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -272,7 +272,7 @@ VALIDATION CHECK: verifies that SQL Server does not have Ad Hoc Distributed Quer
 FOR COMPLIANCE: disable Database Mail XPs configuration option.  This option can be configured 
 using the Policy-Based Management or the sp_configure stored procedure. For more information, 
 see:<br/>
-https://msdn.microsoft.com/en-us/library/ms191189.aspx.
+<a href="https://msdn.microsoft.com/en-us/library/ms191189.aspx">https://msdn.microsoft.com/en-us/library/ms191189.aspx</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -376,7 +376,7 @@ VALIDATION: verifies that SQL Server does not have OLE Automation Procedures ena
 COMPLIANCE: disable the OLE Automation Procedures configuration option.  This option can 
 be configured using the Policy-Based Management or the sp_configure stored procedure. For 
 more information, see:<br/>
-https://msdn.microsoft.com/en-us/library/ms191188.aspx.
+<a href="https://msdn.microsoft.com/en-us/library/ms191188.aspx">https://msdn.microsoft.com/en-us/library/ms191188.aspx</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
