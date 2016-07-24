@@ -322,7 +322,7 @@ VALIDATION: verifies that the PI Data Archive is using the most recent release. 
 COMPLIANCE: upgrade the PI Data Archive to the latest version, PI Data Archive 
 2016 (3.4.400.1162).  For more information, see the "Upgrade a PI Data Archive Server" 
 section of the PI Data Archive Installation and Upgrade Guide, Live Library: <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD. 
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD ">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -438,7 +438,7 @@ COMPLIANCE: set to a value greater than zero.  EditDays defines the number of pa
 days where events can be modified in the Snapshot or Archive databases. A zero value means 
 no time check is done.  For instructions to set EditDays, see "Modify the EditDays tuning 
 parameter" section in the PI Data Archive System Management Guide:<br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399.
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399 ">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399 </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -669,7 +669,7 @@ VALIDATION: verify that the PI Data Archive has protection against expensive que
 COMPLIANCE: set the archive_maxqueryexecutionsec tuning parameter to a value between 60 
 and 300.  For more information on this parameter and other that can protect against expensive 
 queries, see the knowledgebase article 3224OSI8 <br/>
-https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8  
+<a href="https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8">https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8  </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -821,7 +821,7 @@ COMPLIANCE: set the tuning parameter Server_AuthenticationPolicy to a value grea
 This is equivalent to the third notch, "Disable explicit login", or higher on the Security 
 Settings plugin in PI SMT.  For more information, see "Security Best Practice #2" and "Security 
 Best Practice #3" in KB00833. <br/>
-https://techsupport.osisoft.com/Troubleshooting/KB/KB00833
+<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB00833">https://techsupport.osisoft.com/Troubleshooting/KB/KB00833 </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -915,7 +915,7 @@ VALIDATION: verifies that piadmin is not used in trusts or mappings. <br/>
 COMPLIANCE: replace any trusts or mappings that use piadmin with a mapping or trust to a
 PI Identity with appropriate privilege for the applications that will use it.  For more 
 information, see "Security Best Practice" #4 in KB00833: <br/>
-https://techsupport.osisoft.com/Troubleshooting/KB/KB00833.
+<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB00833 ">https://techsupport.osisoft.com/Troubleshooting/KB/KB00833 </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -1082,7 +1082,7 @@ AU20010 - Check PI Server SPN
 VALIDATION: Checks PI Data Archive SPN assignment.<br/>
 COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. This makes Kerberos Authentication possible.
 For more information, see "PI and Kerberos authentication" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							

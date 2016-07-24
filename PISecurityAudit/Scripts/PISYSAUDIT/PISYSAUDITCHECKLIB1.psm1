@@ -144,11 +144,11 @@ VALIDATION: verifies that the OS Stock Keeping Unit (SKU) is appropriate for
 production use.<br/>
 COMPLIANCE: SKU should match one of the following: 12, 13, 14, 29, 39, 40, 41 or 42.
 All SKU values are viewable here: <br/>
-http://msdn.microsoft.com/en-us/library/ms724358.aspx <br/>  
+<a href="http://msdn.microsoft.com/en-us/library/ms724358.aspx">http://msdn.microsoft.com/en-us/library/ms724358.aspx</a><br/>  
 These SKUs were chosen to highlight the reduced attack surface area of a core 
 installation of Windows Server.  For more on the advantages of Windows Server Core, 
 please see:<br/>
-https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx
+<a href="https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx">https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -306,10 +306,10 @@ VALIDATION: verifies that the Windows host based firewall is enabled.<br/>
 COMPLIANCE: enable the Windows firewall for Domain, Private and Public Scope.  
 A firewall's effectiveness is heavily dependent on the configuration.  
 For PI specific port requirements, please see:<br/> 
-https://techsupport.osisoft.com/Troubleshooting/KB/KB01162. <br/>
+<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB01162"> https://techsupport.osisoft.com/Troubleshooting/KB/KB01162 </a> <br/>
 For more general information on the Windows firewall, see "Windows Firewall with 
 Advanced Security Overview" on TechNet: <br/>
-https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx.
+<a href="https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx">https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -397,7 +397,7 @@ AU10004 - AppLocker Enabled
 VALIDATION: verifies that AppLocker is enabled. <br/>  
 COMPLIANCE: set AppLocker to Enforce mode after establishing a policy.  For a 
 primer on running AppLocker on a PI Data Archive, see: <br/>
-https://techsupport.osisoft.com/Troubleshooting/KB/KB00994
+<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB00994">https://techsupport.osisoft.com/Troubleshooting/KB/KB00994</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -483,7 +483,7 @@ Additionally, a check is performed for the feature ValidateAdminCodeSignatures.
 Lower severity is assigned if this is the only feature disabled.<br/>
 COMPLIANCE: enable the flagged UAC features through Local Security Policy.  
 For more information on specific UAC features, see: <br/>
-https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx.
+<a href="https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx">https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
