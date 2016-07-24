@@ -562,6 +562,173 @@ param(
 	}
 }
 
+function ExecuteCommandLineUtility
+{
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]
+param(									
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[alias("exec")]
+		[string]
+		$UtilityExec,		
+		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[alias("output")]
+		[string]
+		$OutputFilePath,	
+		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[alias("args")]
+		[string]
+		$ArgList,	
+		[parameter(Mandatory=$false, Position=1, ParameterSetName = "Default")]		
+		[ValidateSet("Read","Write","Delete","Default")]
+		[alias("oper")]
+		[string]
+		$Operation = "Default",	
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)			
+		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+
+	try
+	{	
+			
+			if($LocalComputer)
+			{
+				if($Operation -eq "Default" -or $Operation -eq "Write")
+				{
+					#......................................................................................
+					# Delete any residual output file.
+					#......................................................................................
+					if(Test-Path $OutputFilePath) { Remove-Item $OutputFilePath }
+			
+					#......................................................................................
+					# Execute the command locally by calling another process.
+					#......................................................................................
+					Start-Process -FilePath $UtilityExec `
+									-ArgumentList $ArgList `
+									-RedirectStandardOutput $OutputFilePath `
+									-Wait -NoNewWindow				
+				}
+
+				if($Operation -eq "Default" -or $Operation -eq "Read")
+				{
+					#......................................................................................
+					# Read the content.			
+					#......................................................................................
+					$outputFileContent = Get-Content -Path $OutputFilePath
+				}
+
+				if($Operation -eq "Default" -or $Operation -eq "Delete")
+				{
+					#......................................................................................
+					# Delete output file.
+					#......................................................................................
+					if(Test-Path $OutputFilePath) { Remove-Item $OutputFilePath }
+				}
+			}
+			else
+			{
+				if($Operation -eq "Default" -or $Operation -eq "Write")
+				{
+					#......................................................................................			
+					# Delete (remotely) any residual output file.
+					# Write the script block template with '[' and ']' delimiter because the
+					# [string]::Format function will fail and then replace with the '{' and '}'
+					#......................................................................................
+					$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
+					$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $OutputFilePath)
+					$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
+			
+					# Verbose only if Debug Level is 2+
+					$msgTemplate = "Remote command to send to {0} is: {1}"
+					$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
+					Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
+			
+					$scriptBlock = [scriptblock]::create( $scriptBlockCmd )										
+					# The script block returns the result but we are not interested, so send it
+					# to null.
+					Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock | Out-Null
+			
+					#......................................................................................
+					# Execute the command remotely.
+					#......................................................................................
+					$scriptBlockCmdTemplate = "Start-Process -FilePath `"{0}`" -ArgumentList {1} -RedirectStandardOutput `"{2}`" -Wait -NoNewWindow"
+					$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $UtilityExec, $ArgList, $OutputFilePath)											
+			
+					# Verbose only if Debug Level is 2+
+					$msgTemplate = "Remote command to send to {0} is: {1}"
+					$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
+					Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
+			
+					$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
+					Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
+				}
+
+				if($Operation -eq "Default" -or $Operation -eq "Read")
+				{
+					#......................................................................................
+					# Read the content remotely.
+					#......................................................................................
+					$scriptBlockCmdTemplate = "Get-Content -Path ""{0}"""
+					$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)									
+			
+					# Verbose only if Debug Level is 2+
+					$msgTemplate = "Remote command to send to {0} is: {1}"
+					$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
+					Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
+			
+					$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
+					$outputFileContent = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock	
+				}
+
+				if($Operation -eq "Default" -or $Operation -eq "Delete")
+				{
+					# Delete (remotely) output file.
+					# Write the script block template with '[' and ']' delimiter because the
+					# [string]::Format function will fail and then replace with the '{' and '}'
+					#......................................................................................
+					$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
+					$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $OutputFilePath)
+					$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
+			
+					# Verbose only if Debug Level is 2+
+					$msgTemplate = "Remote command to send to {0} is: {1}"
+					$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
+					Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
+			
+					$scriptBlock = [scriptblock]::create( $scriptBlockCmd )				
+					# The script block returns the result but we are not interested, so send it
+					# to null.
+					Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock | Out-Null
+				}
+			}
+
+			if($Operation -eq "Default" -or $Operation -eq "Read"){return $outputFileContent}
+	}
+	catch
+	{
+		# Return the error message.
+		$msgTemplate1 = "A problem occurred with {0} on local computer"
+		$msgTemplate2 = "A problem occurred with {0} on {1} computer"
+		if($LocalComputer)
+		{ $msg = [string]::Format($msgTemplate1, $UtilityExec) }
+		else
+		{ $msg = [string]::Format($msgTemplate2, $UtilityExec, $RemoteComputerName) }		
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
+		return $null
+	}
+}
+
 function GetPasswordOnDisk
 {
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]
@@ -883,7 +1050,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem has occured during the generation of the filtered list of computers"						
+		$msg = "A problem has occurred during the generation of the filtered list of computers"						
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		# Validation has failed.
 		return $null
@@ -946,7 +1113,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem has occured during the validation with WSMan"						
+		$msg = "A problem has occurred during the validation with WSMan"						
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		# Validation has failed.
 		return $false
@@ -996,9 +1163,9 @@ param(
 		$complianceCheckFunctionTemplate = "Compliance Check function: {0}, arguments: {1}, {2}, {3}, {4}"
 				
 		# Process.
-		$i = 0
 		foreach($item in $ComputerParamsTable.GetEnumerator())
-		{		
+		{	
+			$i = 0	
 			# Read the object within the System.Collections.DictionaryEntry
 			$computerParams = $item.Value
 			
@@ -1037,7 +1204,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of computer checks"					
+		$msg = "A problem occurred during the processing of computer checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}			
@@ -1155,7 +1322,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI Data Archive checks"					
+		$msg = "A problem occurred during the processing of PI Data Archive checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}			
@@ -1253,7 +1420,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI AF Server checks"					
+		$msg = "A problem occurred during the processing of PI AF Server checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}
@@ -1359,7 +1526,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of SQL Server checks"					
+		$msg = "A problem occurred during the processing of SQL Server checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}		
@@ -1399,10 +1566,10 @@ param(
 			return
 		}
 
-		if((Get-PISysAudit_WindowsFeature -lc $ComputerParams.IsLocal -rcn $ComputerParams.ComputerName -wrf "Web-Scripting-Tools" -DBGLevel $DBGLevel) -eq $false)
+		if((Get-PISysAudit_InstalledWin32Feature -lc $ComputerParams.IsLocal -rcn $ComputerParams.ComputerName -wfn "IIS-ManagementScriptingTools" -DBGLevel $DBGLevel) -ne 1)
 		{
 			# Return the error message.
-			$msgTemplate = "The computer {0} does not have the Web-Scripting-Tools role (IIS cmdlets) or the validation failed; some audit checks may not be available."
+			$msgTemplate = "The computer {0} does not have the IIS Management Scripting Tools Feature (IIS cmdlets) or the validation failed; some audit checks may not be available."
 			$msg = [string]::Format($msgTemplate, $ComputerParams.ComputerName)
 			Write-PISysAudit_LogMessage $msg "Warning" $fn
 			return
@@ -1458,7 +1625,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI Coresight checks"					
+		$msg = "A problem occurred during the processing of PI Coresight checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}		
@@ -1891,12 +2058,12 @@ PROCESS
 	catch
 	{		
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the environment variable: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the environment variable: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred while setting the environment variable: {0} on local machine."
+		$msgTemplate2 = "A problem occurred while setting the environment variable: {0} on {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
-		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message) }
+		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message, $RemoteComputerName) }
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 	}		
 }
@@ -1976,12 +2143,12 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the environment variable: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the environment variable: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the environment variable: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the environment variable: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
-		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message) }
+		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message, $RemoteComputerName) }
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return $null
 	}		
@@ -2051,8 +2218,95 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the registry key: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the registry key: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the registry key: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the registry key: {0} from {1} machine."
+		if($LocalComputer)
+		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
+		else
+		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message) }
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
+		return $null
+	}
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_IISproperties
+{
+<#
+.SYNOPSIS
+(Core functionality) Enables use of the WebAdministration module.
+.DESCRIPTION
+Get IIS: properties.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("qry")]
+		[string]
+		$query,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{			
+	$fn = GetFunctionName
+	
+	try
+	{
+		# This approach works, but can be optimized
+
+
+		# Get the query string and create a scriptblock
+		$scriptBlock = [scriptblock]::create( $query )
+
+		# Execute the Get-ItemProperty cmdlet method locally or remotely via the Invoke-Command cmdlet
+		if($LocalComputer)		
+		{						
+			
+			# Import the WebAdministration module
+			Import-Module -Name "WebAdministration"		
+			
+			# Execute the command locally	
+			$value = Invoke-Command -ScriptBlock $scriptBlock			
+		}
+		else
+		{	
+					
+			# Establishing a new PS session on a remote computer		
+			$PSSession = New-PSSession -ComputerName $RemoteComputerName
+
+			# Importing WebAdministration module within the PS session
+			Invoke-Command -Session $PSSession -ScriptBlock {Import-Module WebAdministration}
+			
+			# Execute the command within a remote PS session
+			$value = Invoke-Command -Session $PSSession -ScriptBlock $scriptBlock
+			Remove-PSSession -ComputerName $RemoteComputerName
+		}
+	
+		# Return the value found.
+		return $value		
+	}
+	catch
+	{
+		# Return the error message.
+		$msgTemplate1 = "A problem occurred during the reading of IIS Property: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of IIS Property: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2123,8 +2377,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the registry key: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the registry key: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the registry key: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the registry key: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2418,13 +2672,13 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_InstalledWin32Features
+function Get-PISysAudit_InstalledWin32Feature
 {
 <#
 .SYNOPSIS
-(Core functionality) Get installed Windows Features on a given computer.
+(Core functionality) Get install status of Windows Feature on a given computer.
 .DESCRIPTION
-Get installed Windows Features on a given computer.
+Get install status of Windows Feature on a given computer.
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(		
@@ -2436,6 +2690,10 @@ param(
 		[alias("rcn")]
 		[string]
 		$RemoteComputerName = "",
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]
+		[alias("wfn")]
+		[string]
+		$WindowsFeatureName,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("dbgl")]
 		[int]
@@ -2449,9 +2707,10 @@ PROCESS
 	{									
 		$className = "Win32_OptionalFeature"
 		$namespace = "root\CIMV2"		
-		$filterExpression = "InstallState='1'"
+		$filterExpressionTemplate = "Name='{0}'"
+		$filterExpression = [string]::Format($filterExpressionTemplate, $WindowsFeatureName)
 		$WMIObject = ExecuteWMIQuery $className -n $namespace -lc $LocalComputer -rcn $RemoteComputerName -FilterExpression $filterExpression -DBGLevel $DBGLevel										
-		return $WMIObject | Sort Name | Select Name, InstallState
+		return $WMIObject.InstallState
 	}
 	catch
 	{
@@ -2498,136 +2757,39 @@ PROCESS
 	
 	try
 	{									
+		
+		# Set the path to netsh CLU.
+		$windowsFolder = Get-PISysAudit_EnvVariable "WINDIR" -lc $LocalComputer -rcn $RemoteComputerName
+		$netshExec = Join-Path -Path $windowsFolder -ChildPath "System32\netsh.exe"
+
 		if($LocalComputer)
 		{			
-			#......................................................................................
-			# Set Paths
-			#......................................................................................
 			# Get the Scripts path.
-			$scriptsPathTemp = (Get-Variable "ScriptsPathTemp" -Scope "Global").Value																			
-			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "netsh_output.txt"                                 
-			# Set the path to netsh CLU.
-			$windowsFolder = Get-PISysAudit_EnvVariable "WINDIR"
-			$netshExec = Join-Path -Path $windowsFolder -ChildPath "System32\netsh.exe"                                 						
+			$scriptTempFileLocation = (Get-Variable "ScriptsPathTemp" -Scope "Global").Value																			                                                             						
 			# Set the arguments of netsh.exe
 			$argList = "advfirewall show allprofiles state"						
-			
-			#......................................................................................
-			# Delete any residual output file.
-			#......................................................................................
-			if(Test-Path $outputFilePath) { Remove-Item $outputFilePath }
-			
-			#......................................................................................
-			# Execute the afdiag command locally by calling another process.			
-			#......................................................................................
-			Start-Process -FilePath $netshExec `
-							-ArgumentList $argList `
-							-RedirectStandardOutput $outputFilePath `
-							-Wait -NoNewWindow
-							
-			#......................................................................................
-			# Read the content.
-			#......................................................................................
-			$outputFileContent = Get-Content -Path $outputFilePath
-			
-			#......................................................................................
-			# Delete output file.
-			#......................................................................................
-			if(Test-Path $outputFilePath) { Remove-Item $outputFilePath }
 		}
 		else
 		{
-			#......................................................................................
-			# Set Paths
-			#......................................................................................
 			# Get the PIHome folder.
 			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME" -lc $false -rcn $RemoteComputerName											           
 			# Set the log folder.
-			$PIHome_log_path = Join-Path -Path $PIHome_path -ChildPath "log"
-			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $PIHome_log_path -ChildPath "netsh_output.txt"                                 			
-			# Set the path to netsh CLU.
-			$windowsFolder = Get-PISysAudit_EnvVariable "WINDIR" -lc $false -rcn $RemoteComputerName											           
-			$netshExec = Join-Path -Path $windowsFolder -ChildPath "System32\netsh.exe"                                 						
+			$scriptTempFileLocation = Join-Path -Path $PIHome_path -ChildPath "log"                          			                                						
 			# Set the arguments of netsh.exe
 			$argList = "'advfirewall show allprofiles state'"
-			
-			#......................................................................................			
-			# Delete (remotely) any residual output file.
-			# Write the script block template with '[' and ']' delimiter because the
-			# [string]::Format function will fail and then replace with the '{' and '}'
-			#......................................................................................
-			$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)
-			$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
-			
-			# Verbose only if Debug Level is 2+
-			$msgTemplate = "Remote command to send to {0} is: {1}"
-			$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-			Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )										
-			# The script block returns the result but we are not interested, so send it
-			# to null.
-			Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock | Out-Null
-			
-			#......................................................................................
-			# Execute the netsh command remotely.
-			#......................................................................................
-			$scriptBlockCmdTemplate = "Start-Process -FilePath `"{0}`" -ArgumentList {1} -RedirectStandardOutput `"{2}`" -Wait -NoNewWindow"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $netshExec, $argList, $outputFilePath)											
-			
-			# Verbose only if Debug Level is 2+
-			$msgTemplate = "Remote command to send to {0} is: {1}"
-			$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-			Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )										
-			Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
-			
-			#......................................................................................
-			# Read the content remotely.
-			#......................................................................................
-			$scriptBlockCmdTemplate = "Get-Content -Path `"{0}`""
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)									
-			
-			# Verbose only if Debug Level is 2+
-			$msgTemplate = "Remote command to send to {0} is: {1}"
-			$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-			Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )					
-			$outputFileContent = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
-			
-			#......................................................................................
-			# Delete (remotely) output file.
-			# Write the script block template with '[' and ']' delimiter because the
-			# [string]::Format function will fail and then replace with the '{' and '}'
-			#......................................................................................
-			$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)
-			$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
-			
-			# Verbose only if Debug Level is 2+
-			$msgTemplate = "Remote command to send to {0} is: {1}"
-			$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-			Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )				
-			# The script block returns the result but we are not interested, so send it
-			# to null.
-			Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock | Out-Null
 		}
+		# Set the output for the CLU.
+		$outputFilePath = Join-Path -Path $scriptTempFileLocation -ChildPath "netsh_output.txt"
+		$outputFileContent = ExecuteCommandLineUtility -lc $LocalComputer -rcn $RemoteComputerName -UtilityExec $netshExec `
+																			-ArgList $argList -OutputFilePath $outputFilePath -dbgl $DBGLevel
 		
 		# Return the content.
 		return $outputFileContent
 	}
 	catch
 	{
-		
 		# Return the error message.
-		Write-PISysAudit_LogMessage "A problem occured when calling the netsh command." "Error" $fn -eo $_
+		Write-PISysAudit_LogMessage "A problem occurred when calling the netsh command." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -2687,7 +2849,7 @@ PROCESS
 	{
 		
 		# Return the error message.
-		Write-PISysAudit_LogMessage "A problem occured while retrieving the AppLocker configuration." "Error" $fn -eo $_
+		Write-PISysAudit_LogMessage "A problem occurred while retrieving the AppLocker configuration." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -2821,78 +2983,6 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_WindowsFeature
-{
-<#
-.SYNOPSIS
-(Core functionality) Check for a Windows Role or Feature on the target machine.
-.DESCRIPTION
-Check if a Windows Feature is installed on the target machine.
-#>
-[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
-param(
-		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
-		[alias("wrf")]
-		[string]
-		$WindowsRoleFeature,
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("lc")]
-		[boolean]
-		$LocalComputer = $true,
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("rcn")]
-		[string]
-		$RemoteComputerName = "",
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("dbgl")]
-		[int]
-		$DBGLevel = 0)		
-BEGIN {}
-PROCESS
-{			
-	$fn = GetFunctionName
-	
-	try
-	{
-		# Build ScriptBlock to Invoke the Get-WindowsFeature cmdlet
-		$scriptBlockCmdTemplate = "Import-Module ServerManager; `$(Get-WindowsFeature -Name `"{0}`").Installed"
-		$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $WindowsRoleFeature)
-		$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
-
-		# Execute the Get-WindowsFeature cmdlet method locally or remotely via the Invoke-Command cmdlet.
-		if($LocalComputer)
-		{										
-			$value = Invoke-Command -ScriptBlock $scriptBlock			
-		}
-		else
-		{	
-			$value = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
-		}
-	
-		# Return the value found.
-		return $value		
-	}
-	catch
-	{
-		# Return the error message.
-		$msgTemplate1 = "A problem occured during the detection of a feature on the local machine: {0}"
-		$msgTemplate2 = "A problem occured during the detection of a feature on {1}: {0}"
-		if($LocalComputer)
-		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
-		else
-		{ $msg = [string]::Format($msgTemplate2, $_.Exception.Message, $RemoteComputerName) }
-		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
-		return $null
-	}
-}
-
-END {}
-
-#***************************
-#End of exported function
-#***************************
-}
-
 function Invoke-PISysAudit_AFDiagCommand
 {
 <#
@@ -2927,164 +3017,47 @@ PROCESS
 	
 	try
 	{
+		#......................................................................................
+		# Set Paths
+		#......................................................................................
+		# Set the PIPC folder (64 bit).		
+		$PIHome64_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $LocalComputer -rcn $RemoteComputerName
+		# Set the PIPC\AF folder (64 bit).		
+		$PIHome_AF_path = Join-Path -Path $PIHome64_path -ChildPath "AF"
+		# Set the path to reach out the afdiag.exe CLU.
+		$AFDiagExec = Join-Path -Path $PIHome_AF_path -ChildPath "afdiag.exe"
+		# Set the path to reach out the AFService executable.
+		$pathToService = Join-Path -Path $PIHome_AF_path -ChildPath "AFService.exe"
+
 		if($LocalComputer)
 		{						
-			#......................................................................................
-			# Set Paths
-			#......................................................................................
-			# Set the PIPC folder (64 bit).		
-			$PIHome64_path = Get-PISysAudit_EnvVariable "PIHOME64"
-			# Set the PIPC\AF folder (64 bit).		
-			$PIHome_AF_path = Join-Path -Path $PIHome64_path -ChildPath "AF"
 			# Set the output folder.
-			$scriptsPathTemp = (Get-Variable "scriptsPathTemp" -Scope "Global").Value
-		    # Set the path to reach out the afdiag.exe CLU.
-			$AFDiagExec = Join-Path -Path $PIHome_AF_path -ChildPath "afdiag.exe"                                   			
-			# Set the output for the CLU.
-            $outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "afdiag_output.txt"                                 
-			
-			if($Operation -eq "Write")
-			{
-				#......................................................................................
-				# Delete any residual output file.
-				#......................................................................................
-				if(Test-Path $outputFilePath) { Remove-Item $outputFilePath }
-			
-				#......................................................................................
-				# Execute the afdiag command locally by calling another process.			
-				#......................................................................................
-				Start-Process -FilePath $AFDiagExec `
-								-RedirectStandardOutput $outputFilePath `
-								-Wait -NoNewWindow -WorkingDirectory $PIHome_AF_path
-			}
-
-			if($Operation -eq "Read")
-			{
-				#......................................................................................
-				# Read the content.
-				#......................................................................................
-				$outputFileContent = Get-Content -Path $outputFilePath
-			}
-
-			if($Operation -eq "Delete")
-			{
-				#......................................................................................
-				# Delete output file.
-				#......................................................................................
-				if(Test-Path $outputFilePath) { Remove-Item $outputFilePath }
-			}
+			$scriptTempFilesPath = (Get-Variable "scriptsPathTemp" -Scope "Global").Value 
+			# Define the arguments required by the afdiag.exe command						
+			$argListTemplate = "/ExeFile:`"{0}`""	                          			                                
 		}
 		else
-		{																	
-			#......................................................................................
-			# Set Paths
-			#......................................................................................						
-			# Set the PIPC folder (64 bit).		
-			$PIHome64_path = Get-PISysAudit_EnvVariable "PIHOME64" -lc $false -rcn $RemoteComputerName
-			# Set the PIPC folder (32 bit).		
+		{																		
 			$PIHome_path = Get-PISysAudit_EnvVariable "PIHOME" -lc $false -rcn $RemoteComputerName
-			# Set the PIPC\AF folder (64 bit).		
-			$PIHome_AF_path = Join-Path -Path $PIHome64_path -ChildPath "AF"
 			# Set the PIPC\log folder (64 bit).
-			$PIHome_Log_path = Join-Path -Path $PIHome_path -ChildPath "log"
-			# Set the path to reach out the piversion.exe CLU.
-			$afdiagExec = Join-Path -Path $PIHome_AF_path -ChildPath "afdiag.exe"			                                       						
-			# Set the path to reach out the AFService executable.
-			$pathToService = Join-Path -Path $PIHome_AF_path -ChildPath "AFService.exe"                                   					                                      
+			$scriptTempFilesPath = Join-Path -Path $PIHome_path -ChildPath "log"		                                       						                                   					                                      
 			# Define the arguments required by the afdiag.exe command						
-			$argListTemplate = "'/ExeFile:`"{0}`"'"
-			$argList = [string]::Format($ArgListTemplate, $pathToService)                            					                                      
-			# Set the output for the CLU.
-            $outputFilePath = Join-Path -Path $PIHome_Log_path -ChildPath "afdiag_output.txt"
-
-			if($Operation -eq "Write")
-			{
-				#......................................................................................			
-				# Delete (remotely) any residual output file.
-				# Write the script block template with '[' and ']' delimiter because the
-				# [string]::Format function will fail and then replace with the '{' and '}'
-				#......................................................................................
-				$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
-				$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)
-				$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
-			
-				# Verbose only if Debug Level is 2+
-				$msgTemplate = "Remote command to send to {0} is: {1}"
-				$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-				Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-				$scriptBlock = [scriptblock]::create( $scriptBlockCmd )										
-				# The script block returns the result but we are not interested, so send it
-				# to null.
-				Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock | Out-Null			
-			
-				#......................................................................................
-				# Execute the afdiag command remotely.
-				#......................................................................................
-				$scriptBlockCmdTemplate = "Start-Process -FilePath `"{0}`" -ArgumentList {1} -RedirectStandardOutput `"{2}`" -Wait -NoNewWindow"
-				$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $afdiagExec, $argList, $outputFilePath)											
-			
-				# Verbose only if Debug Level is 2+
-				$msgTemplate = "Remote command to send to {0} is: {1}"
-				$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-				Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-				$scriptBlock = [scriptblock]::create( $scriptBlockCmd )										
-				Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
-			}
-			
-			if($Operation -eq "Read")
-			{
-				#......................................................................................
-				# Read the content remotely.
-				#......................................................................................
-				$scriptBlockCmdTemplate = "Get-Content -Path `"{0}`""
-				$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)									
-			
-				# Verbose only if Debug Level is 2+
-				$msgTemplate = "Remote command to send to {0} is: {1}"
-				$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-				Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-				$scriptBlock = [scriptblock]::create( $scriptBlockCmd )					
-				$outputFileContent = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
-			}
-
-			
-			if($Operation -eq "Delete")
-			{
-				#......................................................................................
-				# Delete (remotely) output file.
-				# Write the script block template with '[' and ']' delimiter because the
-				# [string]::Format function will fail and then replace with the '{' and '}'
-				#......................................................................................
-				$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
-				$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)
-				$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
-			
-				# Verbose only if Debug Level is 2+
-				$msgTemplate = "Remote command to send to {0} is: {1}"
-				$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-				Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-				$scriptBlock = [scriptblock]::create( $scriptBlockCmd )				
-				# The script block returns the result but we are not interested, so send it
-				# to null.
-				Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock | Out-Null
-			}
-		}					
-		
-		if($Operation -eq "Read")
-		{
-			# Return the content.
-			return $outputFileContent
+			$argListTemplate = "'/ExeFile:`"{0}`"'"	
 		}
+		$argList = [string]::Format($ArgListTemplate, $pathToService)
+		
+		# Set the output for the CLU.
+        $outputFilePath = Join-Path -Path $scriptTempFilesPath -ChildPath "afdiag_output.txt"
+		$outputFileContent = ExecuteCommandLineUtility -lc $LocalComputer -rcn $RemoteComputerName -UtilityExec $AFDiagExec `
+														-ArgList $argList -OutputFilePath $outputFilePath -Operation $Operation -DBGLevel $DBGLevel	
+		
+		if($Operation -eq "Read"){ return $outputFileContent }			
 	}
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use afdiag.exe on local computer"
-		$msgTemplate2 = "A problem occured to use afdiag.exe on {0} computer"
+		$msgTemplate1 = "A problem occurred with afdiag.exe on local computer"
+		$msgTemplate2 = "A problem occurred with afdiag.exe on {0} computer"
 		if($LocalComputer)
 		{ $msg = $msgTemplate1 }
 		else
@@ -3348,7 +3321,7 @@ PROCESS
 				if(ValidateFileContent $outputFileContent "no access")
 				{
 					# Return the error message.		
-					$msg = "An authentication problem occured with piconfig.exe"
+					$msg = "An authentication problem occurred with piconfig.exe"
 					Write-PISysAudit_LogMessage $msg "Error" $fn
 					return $null		
 				}
@@ -3361,7 +3334,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.		
-		$msg = "A problem occured to use piconfig.exe"
+		$msg = "A problem occurred using piconfig.exe"
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		return $null
 	}
@@ -3403,59 +3376,29 @@ PROCESS
 	
 	try
 	{
+		
+		#......................................................................................
+		# Set Paths
+		#......................................................................................
+		# Get the PI folder.
+		$PIServer_path = Get-PISysAudit_EnvVariable "PISERVER" -lc $LocalComputer -rcn $RemoteComputerName
+		# Set the ADM folder.
+		$PIServer_adm_path = Join-Path -Path $PIServer_path -ChildPath "adm"
+		# Set the path to reach out the piversion.exe CLU.
+		$PIVersionExec = Join-Path -Path $PIServer_adm_path -ChildPath "piversion.exe"
+
 		if($LocalComputer)
-		{
-			#......................................................................................
-			# Set Paths
-			#......................................................................................
-			# Get the PI folder.
-			$PIServer_path = Get-PISysAudit_EnvVariable "PISERVER"
-			# Set the ADM folder.
-			$PIServer_adm_path = Join-Path -Path $PIServer_path -ChildPath "adm"			                                       			
-			# Set the path to reach out the piversion.exe CLU.
-			$PIVersionExec = Join-Path -Path $PIServer_adm_path -ChildPath "piversion.exe"	
-			# Get the Scripts Temp path.
-			$scriptsPathTemp = (Get-Variable "scriptsPathTemp" -Scope "Global").Value		                                       						
+		{			                                       			
 			# Define the arguments required by the piversion.exe command
 			# piversion.exe -v
 			$argList = "`"-v`""
+			# Get the Scripts Temp path.
+			$scriptsPathTemp = (Get-Variable "scriptsPathTemp" -Scope "Global").Value		                                       						
 			# Set the output for the CLU.
 			$outputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piversion_output.txt"
-
-			#......................................................................................
-			# Delete any residual output file.
-			#......................................................................................
-			if(Test-Path $outputFilePath) { Remove-Item $outputFilePath }
-			
-			#......................................................................................
-			# Execute the PIVersion command locally by calling another process.
-			#......................................................................................
-			Start-Process -FilePath $PIVersionExec `
-							-ArgumentList $argList `
-							-RedirectStandardOutput $outputFilePath `
-							-Wait -NoNewWindow				
-			
-			#......................................................................................
-			# Read the content.			
-			#......................................................................................
-			$outputFileContent = Get-Content -Path $outputFilePath
-			
-			#......................................................................................
-			# Delete output file.
-			#......................................................................................
-			if(Test-Path $outputFilePath) { Remove-Item $outputFilePath }
 		}
 		else
-		{					
-			#......................................................................................
-			# Set Paths.
-			#......................................................................................
-			# Get the PI folder.
-			$PIServer_path = Get-PISysAudit_EnvVariable "PISERVER" -lc $false -rcn $RemoteComputerName
-			# Set the ADM folder.
-			$PIServer_adm_path = Join-Path -Path $PIServer_path -ChildPath "adm"			                                       
-			# Set the path to reach out the piversion.exe CLU.
-			$PIVersionExec = Join-Path -Path $PIServer_adm_path -ChildPath "piversion.exe"			                                       						
+		{						                                       						
 			# Define the arguments required by the piversion.exe command
 			# piversion.exe -v
 			# argument is enclosed between single quotes to pass correctly the parameter for
@@ -3466,36 +3409,9 @@ PROCESS
 			# Set the ADM folder.
 			$PIHome_log_path = Join-Path -Path $PIHome_path -ChildPath "log"
 			# Set the output for the CLU.
-			$outputFilePath = Join-Path -Path $PIHome_log_path -ChildPath "piversion_output.txt"			
-									
-			#......................................................................................
-			# Execute the PIVersion command remotely.
-			#......................................................................................
-			$scriptBlockCmdTemplate = "Start-Process -FilePath `"{0}`" -ArgumentList {1} -RedirectStandardOutput `"{2}`" -Wait -NoNewWindow"
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $PIVersionExec, $argList, $outputFilePath)											
-			
-			# Verbose only if Debug Level is 2+
-			$msgTemplate = "Remote command to send to {0} is: {1}"
-			$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-			Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
-			Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock
-			
-			#......................................................................................
-			# Read the content remotely.
-			#......................................................................................
-			$scriptBlockCmdTemplate = "Get-Content -Path ""{0}"""
-			$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $outputFilePath)									
-			
-			# Verbose only if Debug Level is 2+
-			$msgTemplate = "Remote command to send to {0} is: {1}"
-			$msg = [string]::Format($msgTemplate, $RemoteComputerName, $scriptBlockCmd)
-			Write-PISysAudit_LogMessage $msg "debug" $fn -dbgl $DBGLevel -rdbgl 2
-			
-			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
-			$outputFileContent = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock						
+			$outputFilePath = Join-Path -Path $PIHome_log_path -ChildPath "piversion_output.txt"								
 		}
+		$outputFileContent = ExecuteCommandLineUtility -lc $LocalComputer -rcn $RemoteComputerName -UtilityExec $PIVersionExec -ArgList $argList -OutputFilePath $outputFilePath -DBGLevel $DBGLevel
 		
 		# Return the output path + file to read the extract of the command.
 		return $outputFileContent
@@ -3503,12 +3419,133 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use piversion.exe on local computer"
-		$msgTemplate2 = "A problem occured to use piversion.exe on {0} computer"
+		$msgTemplate1 = "A problem occurred using piversion.exe on local computer"
+		$msgTemplate2 = "A problem occurred using piversion.exe on {0} computer"
 		if($LocalComputer)
 		{ $msg = $msgTemplate1 }
 		else
 		{ $msg = [string]::Format($msgTemplate2, $RemoteComputerName) }		
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
+		return $null
+	}
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Invoke-PISysAudit_SPN
+{
+<#
+.SYNOPSIS
+(Core functionality) Perform an SPN check with the setspn.exe command.
+.DESCRIPTION
+Perform an SPN check with the setspn.exe command.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]
+		[alias("svcname")]
+		[string]
+		$ServiceName,
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]
+		[alias("svctype")]
+		[string]
+		$ServiceType,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("appPool")]
+		[string]
+		$csappPool,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)
+BEGIN {}
+PROCESS		
+{
+	$fn = GetFunctionName
+	
+	try
+	{
+		If ( $ServiceName -ne "coresight") 
+		{
+			# Get the Service account
+			$svcacc = Get-PISysAudit_ServiceLogOnAccount $ServiceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+		}
+		Else
+		{
+			$svcacc = $csappPool
+		}
+		# Get Domain info
+		$MachineDomain = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" "Domain" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Get Hostname
+		$hostname = Get-PISysAudit_RegistryKeyValue "HKLM:\SYSTEM\CurrentControlSet\Control\ComputerName\ActiveComputerName" "ComputerName" -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		# Build FQDN using hostname and domain strings
+		$fqdn = $hostname + "." + $machineDomain
+
+		# Distinguish between Domain/Virtual account and Machine Accounts
+		If ($svcacc.Contains("\")) 
+		{
+			# If NT Service account is running the AF Server service, use the hostname when verifying the SPN assignment
+			If ($svcacc.ToLower().Contains("nt service")) 
+			{ 
+				$svcaccMod = $hostname 
+			} 
+			# Else use the username to verify the SPN assignment
+			Else 
+			{ 
+				$svcaccMod = $svcacc
+				# If it's a local account, then there cannot be an SPN assigned.
+				if($svcaccMod.Split("\")[0] -eq "."){return $false}
+			} 
+		}
+		# For machine accounts such as Network Service or Local System, use the hostname when verifying the SPN assignment
+		Else 
+		{ 
+			$svcaccMod = $hostname 
+		}
+
+		# Run setspn and convert it to a string (no capital letters)
+		$spnCheck = $(setspn -l $svcaccMod) 
+
+		# Verify hostnane AND FQDN SPNs are assigned to the service account
+		$spnCounter = 0
+		$hostnameSPN = $($serviceType.ToLower() + "/" + $hostname.ToLower())
+		$fqdnSPN = $($serviceType.ToLower() + "/" + $fqdn.ToLower())
+		foreach($line in $spnCheck)
+		{
+			switch($line.ToLower().Trim())
+			{
+				$hostnameSPN {$spnCounter++; break}
+				$fqdnSPN {$spnCounter++; break}
+				default {break}
+			}
+		}
+
+		# FUTURE ENHANCEMENT:
+		# Return details to improve messaging in case of failure
+		If ($spnCounter -eq 2) { $result = $true } 
+		Else { $result =  $false }
+		
+		return $result
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occurred using setspn.exe"	
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		return $null
 	}
@@ -3612,7 +3649,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during the SQL Query: {0}"
+		$msgTemplate = "A problem occurred during the SQL Query: {0}"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		$value = $null
@@ -3914,7 +3951,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during the SQL Query: {0}"
+		$msgTemplate = "A problem occurred during the SQL Query: {0}"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		$value = $null
@@ -3997,7 +4034,7 @@ param(
 		$Group4 = "",
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]
 		[alias("s")]
-		[ValidateSet("Unknown", "Low", "Moderate", "Severe")]
+		[ValidateSet("Unknown", "N/A", "Low", "Moderate", "Severe")]
 		[String]
 		$Severity = "Low")
 BEGIN {}
@@ -4014,6 +4051,10 @@ PROCESS
 	# Create an unique ID with the item ID and computer name.
 	$myKey = $AuditItemID + "-" + $computerName
 	
+	# If the validation succeeds, there is no issue; if the validation fails, we can't accurately assess severity.
+	if($AuditItemValue){$Severity = "N/A"}
+	elseif($AuditItemValue -eq "N/A"){$Severity = "Unknown"}
+
 	# Set the properties.
 	Add-Member -InputObject $tempObj -MemberType NoteProperty -Name "ID" -Value $AuditItemID
 	Add-Member -InputObject $tempObj -MemberType NoteProperty -Name "ServerName" -Value $computerName
@@ -4514,18 +4555,23 @@ PROCESS
 						"AU20007" {$AuditFunctionName = "Get-PISysAudit_CheckExplicitLoginDisabled"; break}
 						"AU20008" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminUsage"; break}
 						"AU20009" {break} # Check not yet implemented
+						"AU20010" {$AuditFunctionName = "Get-PISysAudit_CheckPISPN"; break}
 						"AU30001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServiceConfiguredAccount"; break}
 						"AU30002" {$AuditFunctionName = "Get-PISysAudit_CheckPImpersonationModeForAFDataSets"; break}
 						"AU30003" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServicePrivileges"; break}
 						"AU30004" {$AuditFunctionName = "Get-PISysAudit_CheckPlugInVerifyLevel"; break}
 						"AU30005" {$AuditFunctionName = "Get-PISysAudit_CheckFileExtensionWhitelist"; break}
 						"AU30006" {$AuditFunctionName = "Get-PISysAudit_CheckAFServerVersion"; break}
+						"AU30007" {$AuditFunctionName = "Get-PISysAudit_CheckAFSPN"; break}
 						"AU40001" {$AuditFunctionName = "Get-PISysAudit_CheckSQLXPCommandShell"; break}
 						"AU40002" {$AuditFunctionName = "Get-PISysAudit_CheckSQLAdHocQueries"; break}
 						"AU40003" {$AuditFunctionName = "Get-PISysAudit_CheckSQLDBMailXPs"; break}
 						"AU40004" {$AuditFunctionName = "Get-PISysAudit_CheckSQLOLEAutomationProcs"; break}
 						"AU50001" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightVersion"; break}
-					
+						"AU50002" {$AuditFunctionName = "Get-PISysAudit_CheckCoresightAppPools"; break}
+						"AU50003" {$AuditFunctionName = "Get-PISysAudit_CoresightSSLcheck"; break}
+						"AU50004" {$AuditFunctionName = "Get-PISysAudit_CoresightSPNcheck"; break}
+
 						default {break}
 					}
 					$recommendationInfo = Get-Help $AuditFunctionName
@@ -4548,7 +4594,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during generation of the report"
+		$msgTemplate = "A problem occurred during generation of the report"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		return $null
@@ -4801,15 +4847,16 @@ Export-ModuleMember Get-PISysAudit_CheckPrivilege
 Export-ModuleMember Get-PISysAudit_OSSKU
 Export-ModuleMember Get-PISysAudit_InstalledComponents
 Export-ModuleMember Get-PISysAudit_InstalledKBs
-Export-ModuleMember Get-PISysAudit_InstalledWin32Features
+Export-ModuleMember Get-PISysAudit_InstalledWin32Feature
 Export-ModuleMember Get-PISysAudit_FirewallState
 Export-ModuleMember Get-PISysAudit_AppLockerState
-Export-ModuleMember Get-PISysAudit_WindowsFeature
 Export-ModuleMember Invoke-PISysAudit_AFDiagCommand
 Export-ModuleMember Invoke-PISysAudit_PIConfigScript
 Export-ModuleMember Invoke-PISysAudit_PIVersionCommand
 Export-ModuleMember Invoke-PISysAudit_ADONET_ScalarValueFromSQLServerQuery
 Export-ModuleMember Invoke-PISysAudit_SQLCMD_ScalarValueFromSQLServerQuery
+Export-ModuleMember Invoke-PISysAudit_SPN
+Export-ModuleMember Get-PISysAudit_IISproperties
 Export-ModuleMember New-PISysAuditObject
 Export-ModuleMember New-PISysAudit_PasswordOnDisk
 Export-ModuleMember New-PISysAuditComputerParams
