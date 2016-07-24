@@ -1050,7 +1050,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem has occured during the generation of the filtered list of computers"						
+		$msg = "A problem has occurred during the generation of the filtered list of computers"						
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		# Validation has failed.
 		return $null
@@ -1113,7 +1113,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem has occured during the validation with WSMan"						
+		$msg = "A problem has occurred during the validation with WSMan"						
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		# Validation has failed.
 		return $false
@@ -1204,7 +1204,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of computer checks"					
+		$msg = "A problem occurred during the processing of computer checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}			
@@ -1322,7 +1322,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI Data Archive checks"					
+		$msg = "A problem occurred during the processing of PI Data Archive checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}			
@@ -1420,7 +1420,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI AF Server checks"					
+		$msg = "A problem occurred during the processing of PI AF Server checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}
@@ -1526,7 +1526,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of SQL Server checks"					
+		$msg = "A problem occurred during the processing of SQL Server checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}		
@@ -1625,7 +1625,7 @@ param(
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of PI Coresight checks"					
+		$msg = "A problem occurred during the processing of PI Coresight checks"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_				
 		return
 	}		
@@ -2058,8 +2058,8 @@ PROCESS
 	catch
 	{		
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the environment variable: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the environment variable: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the environment variable: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the environment variable: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2143,8 +2143,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the environment variable: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the environment variable: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the environment variable: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the environment variable: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2218,8 +2218,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the registry key: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the registry key: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the registry key: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the registry key: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2305,8 +2305,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of IIS Property: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of IIS Property: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of IIS Property: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of IIS Property: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2377,8 +2377,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the reading of the registry key: {0} from local machine."
-		$msgTemplate2 = "A problem occured during the reading of the registry key: {0} from {1} machine."
+		$msgTemplate1 = "A problem occurred during the reading of the registry key: {0} from local machine."
+		$msgTemplate2 = "A problem occurred during the reading of the registry key: {0} from {1} machine."
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -2784,7 +2784,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		Write-PISysAudit_LogMessage "A problem occured when calling the netsh command." "Error" $fn -eo $_
+		Write-PISysAudit_LogMessage "A problem occurred when calling the netsh command." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -2844,7 +2844,7 @@ PROCESS
 	{
 		
 		# Return the error message.
-		Write-PISysAudit_LogMessage "A problem occured while retrieving the AppLocker configuration." "Error" $fn -eo $_
+		Write-PISysAudit_LogMessage "A problem occurred while retrieving the AppLocker configuration." "Error" $fn -eo $_
 		return $null
 	}
 }
@@ -3032,8 +3032,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured during the detection of a feature on the local machine: {0}"
-		$msgTemplate2 = "A problem occured during the detection of a feature on {1}: {0}"
+		$msgTemplate1 = "A problem occurred during the detection of a feature on the local machine: {0}"
+		$msgTemplate2 = "A problem occurred during the detection of a feature on {1}: {0}"
 		if($LocalComputer)
 		{ $msg = [string]::Format($msgTemplate1, $_.Exception.Message) }
 		else
@@ -3123,8 +3123,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use afdiag.exe on local computer"
-		$msgTemplate2 = "A problem occured to use afdiag.exe on {0} computer"
+		$msgTemplate1 = "A problem occurred with afdiag.exe on local computer"
+		$msgTemplate2 = "A problem occurred with afdiag.exe on {0} computer"
 		if($LocalComputer)
 		{ $msg = $msgTemplate1 }
 		else
@@ -3388,7 +3388,7 @@ PROCESS
 				if(ValidateFileContent $outputFileContent "no access")
 				{
 					# Return the error message.		
-					$msg = "An authentication problem occured with piconfig.exe"
+					$msg = "An authentication problem occurred with piconfig.exe"
 					Write-PISysAudit_LogMessage $msg "Error" $fn
 					return $null		
 				}
@@ -3401,7 +3401,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.		
-		$msg = "A problem occured to use piconfig.exe"
+		$msg = "A problem occurred using piconfig.exe"
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_
 		return $null
 	}
@@ -3486,8 +3486,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use piversion.exe on local computer"
-		$msgTemplate2 = "A problem occured to use piversion.exe on {0} computer"
+		$msgTemplate1 = "A problem occurred using piversion.exe on local computer"
+		$msgTemplate2 = "A problem occurred using piversion.exe on {0} computer"
 		if($LocalComputer)
 		{ $msg = $msgTemplate1 }
 		else
@@ -3612,8 +3612,8 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate1 = "A problem occured to use setspn.exe on local computer"
-		$msgTemplate2 = "A problem occured to use setspn.exe on {0} computer"
+		$msgTemplate1 = "A problem occurred using setspn.exe on local computer"
+		$msgTemplate2 = "A problem occurred using setspn.exe on {0} computer"
 		if($LocalComputer)
 		{ $msg = $msgTemplate1 }
 		else
@@ -3721,7 +3721,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during the SQL Query: {0}"
+		$msgTemplate = "A problem occurred during the SQL Query: {0}"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		$value = $null
@@ -4023,7 +4023,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during the SQL Query: {0}"
+		$msgTemplate = "A problem occurred during the SQL Query: {0}"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		$value = $null
@@ -4659,7 +4659,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msgTemplate = "A problem occured during generation of the report"
+		$msgTemplate = "A problem occurred during generation of the report"
 		$msg = [string]::Format($msgTemplate, $_.Exception.Message)
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_		
 		return $null
