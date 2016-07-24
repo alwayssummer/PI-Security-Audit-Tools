@@ -3,9 +3,7 @@
 # ***********************************************************************
 # * Modulename:   PISYSAUDIT
 # * Filename:     PISYSAUDITCHECKLIB2.psm1
-# * Version:      1.0.0.8
 # * Description:  Validation rules for PI Data Archive.
-# * Authors:  Jim Davidson, Bryan Owen and Mathieu Hamel from OSIsoft.
 # *
 # * Copyright 2016 OSIsoft, LLC
 # * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +25,7 @@
 # Version History:
 # ------------------------------------------------------------------------
 # Version 1.0.0.8 Initial release on OSIsoft Users Community.
+# Authors:  Jim Davidson, Bryan Owen and Mathieu Hamel from OSIsoft.
 #
 # ************************************************************************
 
