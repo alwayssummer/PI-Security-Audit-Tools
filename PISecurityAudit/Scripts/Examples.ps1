@@ -9,10 +9,10 @@ piaudit
 
 # Example 2
 # Example with specific parameters for each server/PI Component.
-$cpt = piauditparams $null "myPI" "PIDataArchive"
-$cpt = piauditparams $cpt "myPI" "PIAFServer"
-$cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" # -IntegratedSecurity $false -user "sa" -pf "p1.dat"
-$cpt = piauditparams $cpt "myPI" "PICoresightServer"
+$cpt = piauditparams $null "myPIServer" "PIDataArchive"
+$cpt = piauditparams $cpt "myPIAFServer" "PIAFServer"
+$cpt = piauditparams $cpt "mySQLServer" "SQLServer" -InstanceName "myinstance" # -IntegratedSecurity $false -user "sa" -pf "p1.dat"
+$cpt = piauditparams $cpt "myCoresight" "PICoresightServer"
 piaudit -cpt $cpt
 
 # Example 3
@@ -21,19 +21,19 @@ pwdondisk
 
 # Example with specific parameters for each server/PI Component.
 # Use the name of the password file to pass to use SQL Account authentication.
-$cpt = piauditparams $null "myPI" "PIDataArchive"
-$cpt = piauditparams $cpt "myPI" "PIAFServer"
-$cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" -IntegratedSecurity $false -user "sa" -pf "p1.dat"
-$cpt = piauditparams $cpt "myPI" "PICoresightServer"
+$cpt = piauditparams $null "myPIServer" "PIDataArchive"
+$cpt = piauditparams $cpt "myPIAFServer" "PIAFServer"
+$cpt = piauditparams $cpt "mySQLServer" "SQLServer" -InstanceName "myinstance" -IntegratedSecurity $false -user "sa" -pf "p1.dat"
+$cpt = piauditparams $cpt "myCoresight" "PICoresightServer"
 piaudit -cpt $cpt
 
 # Example 4
 # Example with specific parameters for each server/PI Component.
 # You will be prompted for entering a password for the SQL Account authentication.
-$cpt = piauditparams $null "myPI" "PIDataArchive"
-$cpt = piauditparams $cpt "myPI" "PIAFServer"
-$cpt = piauditparams $cpt "myPI" "SQLServer" -InstanceName "myinstance" -IntegratedSecurity $false -user "sa"
-$cpt = piauditparams $cpt "myPI" "PICoresightServer"
+$cpt = piauditparams $null "myPIServer" "PIDataArchive"
+$cpt = piauditparams $cpt "myPIAFServer" "PIAFServer"
+$cpt = piauditparams $cpt "mySQLServer" "SQLServer" -InstanceName "myinstance" -IntegratedSecurity $false -user "sa"
+$cpt = piauditparams $cpt "myCoresight" "PICoresightServer"
 piaudit -cpt $cpt
 
 # Example 5

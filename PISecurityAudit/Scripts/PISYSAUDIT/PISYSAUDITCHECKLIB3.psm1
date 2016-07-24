@@ -49,8 +49,8 @@ function Get-PISysAudit_FunctionsFromLibrary3
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAFServicePrivileges", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPlugInVerifyLevel", 1)	
 	$listOfFunctions.Add("Get-PISysAudit_CheckFileExtensionWhitelist", 1)	
-	$listOfFunctions.Add("Get-PISysAudit_CheckAFServerVersion", 1)	
-	
+	$listOfFunctions.Add("Get-PISysAudit_CheckAFServerVersion", 1)
+	$listOfFunctions.Add("Get-PISysAudit_CheckAFSPN", 1)
 	# Return the list.
 	return $listOfFunctions
 }
@@ -113,7 +113,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -218,7 +218,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -338,7 +338,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -419,7 +419,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -531,7 +531,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}		
@@ -621,7 +621,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -634,6 +634,82 @@ PROCESS
 										-Group1 "PI System" -Group2 "PI AF Server" `
 										-Severity "Moderate"
 										
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
+function Get-PISysAudit_CheckAFSPN
+{
+<#  
+.SYNOPSIS
+AU30007 - Verify AF Server SPN exists
+.DESCRIPTION
+	VALIDATION: Checks PI AF Server SPN assignment.<br/>
+	COMPLIANCE: PI AF Server SPNs exist and are assigned to the AF Service account. This makes Kerberos Authentication possible.
+For more information, see "PI AF and Kerberos authentication" in the PI Live Library. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+#>
+
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	$msg = ""
+	try
+	{		
+		$serviceType = "afserver"
+		$serviceName = "afservice"
+
+		$result = Invoke-PISysAudit_SPN -svctype $serviceType -svcname $serviceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		If ($result) 
+		{ 
+			$msg = "The Service Principal Name exists and it is assigned to the correct Service Account."
+		} 
+		Else 
+		{ 
+			$msg = "The Service Principal Name does NOT exist or is NOT assigned to the correct Service Account."
+		}			
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occurred during the processing of the validation check"					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}	
+	
+	# Define the results in the audit table			
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU30007" `
+										-ain "PI AF Server SPN Check" -aiv $result `
+										-msg $msg `
+										-Group1 "PI System" -Group2 "PI AF Server"`
+										-Severity "Moderate"
 }
 
 END {}
@@ -687,7 +763,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check"					
+		$msg = "A problem occurred during the processing of the validation check"					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -719,6 +795,7 @@ Export-ModuleMember Get-PISysAudit_CheckPIAFServicePrivileges
 Export-ModuleMember Get-PISysAudit_CheckPlugInVerifyLevel
 Export-ModuleMember Get-PISysAudit_CheckFileExtensionWhitelist
 Export-ModuleMember Get-PISysAudit_CheckAFServerVersion
+Export-ModuleMember Get-PISysAudit_CheckAFSPN
 # </Do not remove>
 
 # ........................................................................

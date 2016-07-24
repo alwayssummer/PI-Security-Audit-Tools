@@ -52,7 +52,8 @@ function Get-PISysAudit_FunctionsFromLibrary2
 	$listOfFunctions.Add("Get-PISysAudit_CheckExpensiveQueryProtection", 1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckExplicitLoginDisabled",1)
 	$listOfFunctions.Add("Get-PISysAudit_CheckPIAdminUsage",1)
-			
+	$listOfFunctions.Add("Get-PISysAudit_CheckPISPN",1)
+				
 	# Return the list.
 	return $listOfFunctions	
 }
@@ -184,7 +185,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -289,7 +290,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -406,7 +407,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}	
@@ -511,7 +512,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -637,7 +638,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -787,7 +788,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -884,7 +885,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -988,7 +989,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -1052,7 +1053,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -1073,6 +1074,81 @@ END {}
 #***************************
 }
 
+function Get-PISysAudit_CheckPISPN
+{
+<#  
+.SYNOPSIS
+AU20010 - Check PI Server SPN
+.DESCRIPTION
+VALIDATION: Checks PI Data Archive SPN assignment.<br/>
+COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. This makes Kerberos Authentication possible.
+For more information, see "PI and Kerberos authentication" in the PI Live Library. <br/>
+https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	$msg = ""
+	try
+	{		
+		$serviceType = "piserver"
+		$serviceName = "pinetmgr"
+
+		$result = Invoke-PISysAudit_SPN -svctype $serviceType -svcname $serviceName -lc $LocalComputer -rcn $RemoteComputerName -dbgl $DBGLevel
+
+		If ($result) 
+		{ 
+			$msg = "The Service Principal Name exists and it is assigned to the correct Service Account."
+		} 
+		Else 
+		{ 
+			$msg = "The Service Principal Name does NOT exist or is NOT assigned to the correct Service Account."
+		}	
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occurred during the processing of the validation check."					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU20010" `
+										-ain "PI Data Archive SPN Check" -aiv $result `
+										-msg $msg `
+										-Group1 "PI System" -Group2 "PI Data Archive"`
+										-Severity "Moderate"								
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
+
 
 # ........................................................................
 # Add your cmdlet after this section. Don't forget to add an intruction
@@ -1084,7 +1160,7 @@ function Get-PISysAudit_TemplateAU2xxxx
 .SYNOPSIS
 AU2xxxx - <Name>
 .DESCRIPTION
-VERIFICATION: <Enter what the verification checks>
+VALIDATION: <Enter what the verification checks>
 COMPLIANCE: <Enter what it needs to be compliant>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
@@ -1118,7 +1194,7 @@ PROCESS
 	catch
 	{
 		# Return the error message.
-		$msg = "A problem occured during the processing of the validation check."					
+		$msg = "A problem occurred during the processing of the validation check."					
 		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
 		$result = "N/A"
 	}
@@ -1152,6 +1228,7 @@ Export-ModuleMember Get-PISysAudit_CheckAutoTrustConfig
 Export-ModuleMember Get-PISysAudit_CheckExpensiveQueryProtection
 Export-ModuleMember Get-PISysAudit_CheckExplicitLoginDisabled
 Export-ModuleMember Get-PISysAudit_CheckPIAdminUsage
+Export-ModuleMember Get-PISysAudit_CheckPISPN
 # </Do not remove>
 
 # ........................................................................
