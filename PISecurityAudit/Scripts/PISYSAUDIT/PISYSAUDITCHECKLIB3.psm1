@@ -251,7 +251,7 @@ rights. <br/>
 COMPLIANCE: ensure that the account does not have the following privileges: 
 SeDebugPrivilege, SeTakeOwnershipPrivilege and SeTcbPrivilege.  For information on these 
 rights and how to set them, see "User Rights" on TechNet: <br/>
-https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx.
+<a>https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -369,7 +369,7 @@ VALIDATION: verifies that PI AF requires plugins to be validated. <br/>
 COMPLIANCE: set the Configuration Setting PlugInVerifyLevel to RequireSigned or 
 RequireSignedTrustedProvider.  This can be done with AFDiag /PluginVerifyLevel:<Level>.
 For more information, see "AFDiag utility parameters" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
+<a>https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
@@ -562,7 +562,7 @@ AU30006 - PI AF Server Version
 VALIDATION: verifies PI AF Server version. <br/>
 COMPLIANCE: upgrade to the latest version of PI AF Server.  For more information, 
 see "PI AF Server upgrades" in the PI Live Library. <br/>
-https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6.
+<a>https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6 </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							

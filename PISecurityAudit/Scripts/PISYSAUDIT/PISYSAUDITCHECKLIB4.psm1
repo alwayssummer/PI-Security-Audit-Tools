@@ -64,7 +64,7 @@ VALIDATION: verifies that SQL Server does not have xp_CmdShell enabled.<br/>
 COMPLIANCE: disable xp_CmdShell configuration option.  This option can be configured 
 using the Policy-Based Management or the sp_configure stored procedure.  For more 
 information, see:<br/>
-https://msdn.microsoft.com/en-us/library/ms190693.aspx.
+<a>https://msdn.microsoft.com/en-us/library/ms190693.aspx</a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
 param(							
