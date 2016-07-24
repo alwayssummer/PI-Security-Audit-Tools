@@ -3,10 +3,7 @@
 # ***********************************************************************
 # * Modulename:   PISYSAUDIT
 # * Filename:     PISYSAUDITCHECKLIB4.psm1
-# * Version:      1.0.0.8
 # * Description:  Validation rules for SQL Server.
-# * Authors:  Jim Davidson, Bryan Owen and Mathieu Hamel from OSIsoft.
-# * Structure:
 # *
 # * Copyright 2016 OSIsoft, LLC
 # * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +25,7 @@
 # Version History:
 # ------------------------------------------------------------------------
 # Version 1.0.0.8 Initial release on OSIsoft Users Community.
+# Authors:  Jim Davidson, Bryan Owen and Mathieu Hamel from OSIsoft.
 #
 # ************************************************************************
 
