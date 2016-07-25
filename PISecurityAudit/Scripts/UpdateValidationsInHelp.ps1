@@ -1,15 +1,17 @@
 # Reload the module to make sure you are using the latest
+$rootModuleDir = Split-Path $PSScriptRoot
 if(Get-Module pisysaudit){remove-module pisysaudit}
-$modulepath = $PSScriptRoot + '\PISYSAUDIT.psd1'
+$modulepath = $rootModuleDir + '\PISYSAUDIT.psd1'
 Import-Module $modulepath
 
 # Read the existing Help
-$helpFilePath = $PSScriptRoot + "\en-US\about_PISYSAUDIT.help.txt"
+$helpFilePath = $rootModuleDir + "\Help\en-US\about_PISYSAUDIT.help.txt"
 $helpFile = Get-Content $helpFilePath
 
 # Initialize 
 $newHelp = ""
 $write = $true
+
 
 # Loop through current contents
 foreach ($line in $helpFile)

@@ -47,9 +47,9 @@ AU50004	- Coresight: Service Principal Name Check
 SETUP INSTRUCTIONS:  
 The PISysAudit module does not require installation; you only need to extract the package. You will need to import the module from the extracted location in order to use it. The file structure is the following:  
   * PISecurityAudit = Contains the module definition.
-  * PISecurityAudit\piconfig = Contains the piconfig scripts leveraged by the PI Data Archive validation checks.
+  * PISecurityAudit\Scripts\piconfig = Contains the piconfig scripts leveraged by the PI Data Archive validation checks.
   * PISecurityAudit\Scripts = Contains command line utilities or PS scripts needed by the PS module
-  * PISecurityAudit\export = Contains the generated reports
+  * PISecurityAudit\Export = Contains the generated reports
   * PISecurityAudit\pwd = Contains saved password files using strong encryption
   
 For example, if you have decompressed the package inside your user folder (C:\users\<user>\documents\PISecurityAudit), you need to import the module the following:  
