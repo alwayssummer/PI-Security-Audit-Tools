@@ -2590,17 +2590,17 @@ PROCESS
 	{				
 		if($LocalComputer)
 		{
-			$unsortedAndUnfilteredResult = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { Get-ItemProperty $_.PsPath } | Where { $_.Displayname -and ($_.Displayname -match ".*") }
-			$result = $unsortedAndUnfilteredResult | Sort Displayname | Select DisplayName, Publisher, DisplayVersion, InstallDate			
+			$unsortedAndUnfilteredResult = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | ForEach-Object { Get-ItemProperty $_.PsPath } | Where-Object { $_.Displayname -and ($_.Displayname -match ".*") }
+			$result = $unsortedAndUnfilteredResult | Sort-Object Displayname | Select-Object DisplayName, Publisher, DisplayVersion, InstallDate			
 			return $result
 		}
 		else
 		{	
-			$scriptBlockCmd = "Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { Get-ItemProperty `$_.PsPath } | Where { `$_.Displayname -and (`$_.Displayname -match `".*`") }"
+			$scriptBlockCmd = "Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | ForEach-Object { Get-ItemProperty `$_.PsPath } | Where-Object { `$_.Displayname -and (`$_.Displayname -match `".*`") }"
 			# Create the script block to send via PS Remoting.
 			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
 			$unsortedAndUnfilteredResult = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock									
-			$result = $unsortedAndUnfilteredResult | Sort Displayname | Select DisplayName, Publisher, DisplayVersion, InstallDate
+			$result = $unsortedAndUnfilteredResult | Sort-Object Displayname | Select-Object DisplayName, Publisher, DisplayVersion, InstallDate
 			return $result			
 		}	
 	}
@@ -2653,7 +2653,7 @@ PROCESS
 		$namespace = "root\CIMV2"
 		$filterExpression = ""
 		$WMIObject = ExecuteWMIQuery $className -n $namespace -lc $LocalComputer -rcn $RemoteComputerName -FilterExpression $filterExpression -DBGLevel $DBGLevel								
-		return $WMIObject | Sort HotFixID | Select HotFixID, InstalledOn						
+		return $WMIObject | Sort-Object HotFixID | Select-Object HotFixID, InstalledOn						
 	}
 	catch
 	{
@@ -4426,7 +4426,7 @@ PROCESS
 		}
 		
 		# Export to .csv but sort the results table first to have Failed items on the top sorted by Severity 
-		$results = $results | Sort @{Expression="AuditItemValue";Descending=$false},@{Expression="Severity";Descending=$true},@{Expression="ID";Descending=$false}
+		$results = $results | Sort-Object @{Expression="AuditItemValue";Descending=$false},@{Expression="Severity";Descending=$true},@{Expression="ID";Descending=$false}
 		$results | Export-Csv -Path $fileToExport -Encoding ASCII -NoType
 
 
@@ -4549,7 +4549,7 @@ PROCESS
 			$reportHTML += $tableFooterHTML
 			
 			if($fails.Count -gt 0){
-				$fails = $fails | sort ID | select ID -unique
+				$fails = $fails | Sort-Object ID | Select-Object ID -unique
 				# Recommendations section
 				$recommendationsHTML = "<div>"
 				$recommendationsHTML += "<h2>Recommendations for failed validations:</h2>"
