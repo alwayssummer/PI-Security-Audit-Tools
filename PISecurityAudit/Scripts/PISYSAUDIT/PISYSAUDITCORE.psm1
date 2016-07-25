@@ -353,12 +353,12 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[AllowEmptyString()]
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "")
+		$RemoteComputerName)
 		
 	# Get and store the function Name.
 	$fn = GetFunctionName
@@ -393,11 +393,11 @@ function ReturnSQLServerName
 param(									
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[string]
-		$ServerName = "",
+		$ServerName,
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]		
 		[AllowEmptyString()]
 		[string]
-		$InstanceName = "Default")
+		$InstanceName)
 		
 	# Get and store the function Name.
 	$fn = GetFunctionName
@@ -428,13 +428,13 @@ function SetSQLAccountPasswordInCache
 param(											
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]		
 		[string]
-		$ServerName = $true,
+		$ServerName,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]				
 		[string]
-		$InstanceName = "Default",
+		$InstanceName,
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]		
 		[string]
-		$UserName = $true)
+		$UserName)
 		
 	# Get and store the function Name.
 	$fn = GetFunctionName
@@ -474,11 +474,11 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",								
+		$RemoteComputerName,								
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]				
 		[string]
 		$InstanceName = "Default",
@@ -568,24 +568,24 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",
-		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		$RemoteComputerName,
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]		
 		[alias("exec")]
 		[string]
 		$UtilityExec,		
-		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]		
 		[alias("output")]
 		[string]
 		$OutputFilePath,	
-		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]		
 		[alias("args")]
 		[string]
 		$ArgList,	
-		[parameter(Mandatory=$false, Position=1, ParameterSetName = "Default")]		
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]		
 		[ValidateSet("Read","Write","Delete","Default")]
 		[alias("oper")]
 		[string]
@@ -1860,7 +1860,7 @@ param(
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("fn")]			
 		[string]
-		$FunctionName = "",						
+		$FunctionName,						
 		[parameter(ParameterSetName = "Default")]
 		[alias("dbgl")]			
 		[int]
@@ -3222,7 +3222,7 @@ PROCESS
 			Write-PISysAudit_LogMessage $msg "Debug" $fn -dbgl $DBGLevel -rdbgl 2
 
 			# Read the content.
-			$outputFileContent = Get-Content -Path $outputFilePath -Wait
+			$outputFileContent = Get-Content -Path $outputFilePath
 
 			if(Test-Path $outputFilePath){Remove-Item $outputFilePath}
 			if(Test-Path $outputDebugFilePath){Remove-Item $outputDebugFilePath}
@@ -3316,7 +3316,7 @@ PROCESS
 				#......................................................................................
 				# Read the content remotely.
 				#......................................................................................			
-				$outputFileContent = Get-Content -Path $outputFilePath -Wait												
+				$outputFileContent = Get-Content -Path $outputFilePath 												
 				
 				#......................................................................................			
 				# Validate that the command succeeded (2nd time)
@@ -3576,15 +3576,15 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",				
+		$RemoteComputerName,				
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("rspc")]
 		[boolean]
-		$Require_sp_configure = $false,			
+		$Require_sp_configure,			
 		[parameter(Mandatory=$true, Position=3, ParameterSetName = "Default")]
 		[alias("q")]
 		[string]
@@ -3685,20 +3685,20 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[AllowEmptyString()]
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",				
+		$RemoteComputerName,				
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("rspc")]
 		[boolean]
-		$Require_sp_configure = $false,			
+		$Require_sp_configure,			
 		[parameter(Mandatory=$true, Position=3, ParameterSetName = "Default")]
 		[alias("q")]
 		[string]
-		$Query = "",
+		$Query,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]				
 		[string]
 		$InstanceName = "",								
@@ -3995,12 +3995,12 @@ param(
 		[AllowEmptyString()]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]
 		[AllowEmptyString()]
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",			
+		$RemoteComputerName,			
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("at")]
 		[System.Collections.HashTable]
@@ -4152,7 +4152,7 @@ param(
 		[AllowEmptyString()]
 		[alias("cn")]
 		[string]		
-		$ComputerName = "",
+		$ComputerName,
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]						
 		[ValidateSet(
 					"PIServer", "PIDataArchive", "PIDA",
@@ -4162,7 +4162,7 @@ param(
 					"Coresight", "PICS", "CS")]
 		[alias("type")]
 		[string]		
-		$PISystemComponentType = "",
+		$PISystemComponentType,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]		
 		[string]
 		$InstanceName = "",					
