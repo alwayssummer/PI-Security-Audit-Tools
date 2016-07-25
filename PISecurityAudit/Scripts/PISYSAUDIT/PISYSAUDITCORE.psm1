@@ -3222,7 +3222,7 @@ PROCESS
 			Write-PISysAudit_LogMessage $msg "Debug" $fn -dbgl $DBGLevel -rdbgl 2
 
 			# Read the content.
-			$outputFileContent = Get-Content -Path $outputFilePath
+			$outputFileContent = Get-Content -Path $outputFilePath -Wait
 
 			if(Test-Path $outputFilePath){Remove-Item $outputFilePath}
 			if(Test-Path $outputDebugFilePath){Remove-Item $outputDebugFilePath}
@@ -3316,7 +3316,7 @@ PROCESS
 				#......................................................................................
 				# Read the content remotely.
 				#......................................................................................			
-				$outputFileContent = Get-Content -Path $outputFilePath												
+				$outputFileContent = Get-Content -Path $outputFilePath -Wait												
 				
 				#......................................................................................			
 				# Validate that the command succeeded (2nd time)
@@ -4549,7 +4549,7 @@ PROCESS
 			$reportHTML += $tableFooterHTML
 			
 			if($fails.Count -gt 0){
-				$fails = $fails | select ID -unique
+				$fails = $fails | sort ID | select ID -unique
 				# Recommendations section
 				$recommendationsHTML = "<div>"
 				$recommendationsHTML += "<h2>Recommendations for failed validations:</h2>"
@@ -4570,8 +4570,8 @@ PROCESS
 						"AU20006" {$AuditFunctionName = "Get-PISysAudit_CheckExpensiveQueryProtection"; break}
 						"AU20007" {$AuditFunctionName = "Get-PISysAudit_CheckExplicitLoginDisabled"; break}
 						"AU20008" {$AuditFunctionName = "Get-PISysAudit_CheckPIAdminUsage"; break}
-						"AU20009" {break} # Check not yet implemented
-						"AU20010" {$AuditFunctionName = "Get-PISysAudit_CheckPISPN"; break}
+						"AU20009" {$AuditFunctionName = "Get-PISysAudit_CheckPISPN"; break} 
+						"AU20010" {break} # Check not yet implemented
 						"AU30001" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServiceConfiguredAccount"; break}
 						"AU30002" {$AuditFunctionName = "Get-PISysAudit_CheckPImpersonationModeForAFDataSets"; break}
 						"AU30003" {$AuditFunctionName = "Get-PISysAudit_CheckPIAFServicePrivileges"; break}

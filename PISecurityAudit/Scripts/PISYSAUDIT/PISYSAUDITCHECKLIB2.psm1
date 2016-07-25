@@ -301,7 +301,7 @@ PROCESS
 										-at $AuditTable "AU20002" `
 										-ain "PI Admin Trusts Disabled" -aiv $result `
 										-msg $msg `
-										-Group1 "PI System" -Group2 "Authentication" `
+										-Group1 "PI System" -Group2 "PI Data Archive" `
 										-Severity "Severe"																		
 }
 
@@ -1009,79 +1009,16 @@ END {}
 #***************************
 }
 
-function Get-PISysAudit_CheckTrusts
-{
-<#  
-.SYNOPSIS
-AU20009 - Trust configuration strength
-.DESCRIPTION
-Audit ID: AU20009
-Audit Check Name: Trust configuration strength
-Category: Severe
-Compliance: Any existing trusts should be only for PI API connections. These trusts should at a minimum be 2+ (app name specified). Warnings for open trusts.
-#>
-[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
-param(							
-		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
-		[alias("at")]
-		[System.Collections.HashTable]
-		$AuditTable,
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("lc")]
-		[boolean]
-		$LocalComputer = $true,
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("rcn")]
-		[string]
-		$RemoteComputerName = "",
-		[parameter(Mandatory=$false, ParameterSetName = "Default")]
-		[alias("dbgl")]
-		[int]
-		$DBGLevel = 0)		
-BEGIN {}
-PROCESS
-{		
-	# Get and store the function Name.
-	$fn = GetFunctionName
-	$msg = ""
-	try
-	{		
-		# Execute the PIConfig scripts.
-				
-	}
-	catch
-	{
-		# Return the error message.
-		$msg = "A problem occurred during the processing of the validation check."					
-		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
-		$result = "N/A"
-	}
-	
-	# Define the results in the audit table	
-	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
-										-at $AuditTable "AU20009" `
-										-ain "Trust configuration strength" -aiv $result `
-										-msg $msg `
-										-Group1 "PI System" -Group2 "PI Data Archive" `
-										-Severity "Severe"								
-}
-
-END {}
-
-#***************************
-#End of exported function
-#***************************
-}
-
 function Get-PISysAudit_CheckPISPN
 {
 <#  
 .SYNOPSIS
-AU20010 - Check PI Server SPN
+AU20009 - Check PI Server SPN
 .DESCRIPTION
 VALIDATION: Checks PI Data Archive SPN assignment.<br/>
-COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. This makes Kerberos Authentication possible.
-For more information, see "PI and Kerberos authentication" in the PI Live Library. <br/>
+COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. 
+This makes Kerberos Authentication possible.  For more information, see "PI and Kerberos 
+authentication" in the PI Live Library. <br/>
 <a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D </a>
 #>
 [CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
@@ -1134,7 +1071,7 @@ PROCESS
 	
 	# Define the results in the audit table	
 	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
-										-at $AuditTable "AU20010" `
+										-at $AuditTable "AU20009" `
 										-ain "PI Data Archive SPN Check" -aiv $result `
 										-msg $msg `
 										-Group1 "PI System" -Group2 "PI Data Archive"`
@@ -1148,6 +1085,69 @@ END {}
 #***************************
 }
 
+function Get-PISysAudit_CheckTrusts
+{
+<#  
+.SYNOPSIS
+AU20010 - Trust configuration strength
+.DESCRIPTION
+Audit ID: AU20010
+Audit Check Name: Trust configuration strength
+Category: Severe
+Compliance: Any existing trusts should be only for PI API connections. These trusts should at a minimum be 2+ (app name specified). Warnings for open trusts.
+#>
+[CmdletBinding(DefaultParameterSetName="Default", SupportsShouldProcess=$false)]     
+param(							
+		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
+		[alias("at")]
+		[System.Collections.HashTable]
+		$AuditTable,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("lc")]
+		[boolean]
+		$LocalComputer = $true,
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("rcn")]
+		[string]
+		$RemoteComputerName = "",
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]
+		[alias("dbgl")]
+		[int]
+		$DBGLevel = 0)		
+BEGIN {}
+PROCESS
+{		
+	# Get and store the function Name.
+	$fn = GetFunctionName
+	$msg = ""
+	try
+	{		
+		# Execute the PIConfig scripts.
+				
+	}
+	catch
+	{
+		# Return the error message.
+		$msg = "A problem occurred during the processing of the validation check."					
+		Write-PISysAudit_LogMessage $msg "Error" $fn -eo $_									
+		$result = "N/A"
+	}
+	
+	# Define the results in the audit table	
+	$AuditTable = New-PISysAuditObject -lc $LocalComputer -rcn $RemoteComputerName `
+										-at $AuditTable "AU20010" `
+										-ain "Trust configuration strength" -aiv $result `
+										-msg $msg `
+										-Group1 "PI System" -Group2 "PI Data Archive" `
+										-Severity "Severe"								
+}
+
+END {}
+
+#***************************
+#End of exported function
+#***************************
+}
 
 # ........................................................................
 # Add your cmdlet after this section. Don't forget to add an intruction

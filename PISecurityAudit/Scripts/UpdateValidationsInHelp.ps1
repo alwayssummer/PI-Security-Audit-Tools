@@ -5,7 +5,7 @@ $modulepath = $rootModuleDir + '\PISYSAUDIT.psd1'
 Import-Module $modulepath
 
 # Read the existing Help
-$helpFilePath = $rootModuleDir + "\Help\en-US\about_PISYSAUDIT.help.txt"
+$helpFilePath = $rootModuleDir + "\en-US\about_PISYSAUDIT.help.txt"
 $helpFile = Get-Content $helpFilePath
 
 # Initialize 
@@ -40,7 +40,9 @@ foreach ($line in $helpFile)
 				# now we can record each validation.
                 foreach($fn in $fnsSorted){
 					$fnHelp = Get-Help $fn.Name
-					$newHelp += "`r`n`t`t" + $fnHelp.Synopsis + "`r`n`t`t" + $($($fnHelp.Description.Text -replace "`n","`r`n`t`t") -replace "<br/>","") + "`r`n"
+					# Properly space the description and sanitize if of the html tags.
+					$newHelp += "`r`n`t`t" + $fnHelp.Synopsis + "`r`n`t`t" + $($($($($fnHelp.Description.Text `
+						-replace "`n","`r`n`t`t") -replace "<br/>","") -replace "</a>","") -replace '<a href=".*?">','') + "`r`n"
                 }
             }
             $newHelp += "`r`n`t`t//ENDSECTION - VALIDATIONS//`r`n"

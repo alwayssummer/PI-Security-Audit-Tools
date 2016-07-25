@@ -27,8 +27,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Help\" />
-    <Folder Include="Help\en-US\" />
+    <Folder Include="en-US\" />
     <Folder Include="Scripts\" />
     <Folder Include="Scripts\piconfig\" />
     <Folder Include="Scripts\PISYSAUDIT\" />
@@ -49,7 +48,7 @@
     <Compile Include="Scripts\UpdateValidationsInHelp.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Help\en-US\about_PISYSAUDIT.help.txt" />
+    <Content Include="en-US\about_PISYSAUDIT.help.txt" />
     <Content Include="Scripts\piconfig\CheckAutoTrustConfig.dif" />
     <Content Include="Scripts\piconfig\CheckEditDays.dif" />
     <Content Include="Scripts\piconfig\CheckExpensiveQuery.dif" />
