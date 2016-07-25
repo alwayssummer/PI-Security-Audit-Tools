@@ -1,7 +1,0 @@
-@outp C:\Users\asorokina\Source\Repos\PI-System-Audit-Tools\PISecurityAudit\Scripts\Temp\piconfig_output.txt
-@mode list
-@table piident
-@ostr ident,flags
-@select ident=*,identid=1,flags<32
-@ends
-@exit
