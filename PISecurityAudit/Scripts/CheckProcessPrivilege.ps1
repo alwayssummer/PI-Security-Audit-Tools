@@ -168,7 +168,7 @@ return privilegesList;
 
 '@
 
-if(($ServiceName -eq $null) -and ($ProcessName -eq $null))
+if(($null -eq $ServiceName) -and ($null -eq $ProcessName))
 {
 	# Return the error message.
 	$msg = "Reading privileges from the process failed. The syntax is: CheckProcessPrivilege.ps1 <Privilege Name> [<Service Name>] [<Process Name>]."
