@@ -113,7 +113,7 @@ PROCESS
 																		-dbgl $DBGLevel	
 								
 		# Check if the value is 1 = not compliant, 0 it is.								
-		if($value -eq $null)
+		if($null -eq $value)
 		{
 			# Return the error message.
 			$msg = "A problem occurred during the processing of the validation check (logon issue, communication problem, etc.)"					
@@ -217,7 +217,7 @@ PROCESS
 																		-dbgl $DBGLevel	
 		
 		# Check if the value is 1 = not compliant, 0 it is.								
-		if($value -eq $null)
+		if($null -eq $value)
 		{
 			# Return the error message.
 			$msg = "A problem occurred during the processing of the validation check (logon issue, communication problem, etc.)"					
@@ -321,7 +321,7 @@ PROCESS
 																		-dbgl $DBGLevel	
 		
 		# Check if the value is 1 = not compliant, 0 it is.								
-		if($value -eq $null)
+		if($null -eq $value)
 		{
 			# Return the error message.
 			$msg = "A problem occurred during the processing of the validation check (logon issue, communication problem, etc.)"					
@@ -425,7 +425,7 @@ PROCESS
 																		-dbgl $DBGLevel	
 		
 		# Check if the value is 1 = not compliant, 0 it is.								
-		if($value -eq $null)
+		if($null -eq $value)
 		{
 			# Return the error message.
 			$msg = "A problem occurred during the processing of the validation check (logon issue, communication problem, etc.)"					

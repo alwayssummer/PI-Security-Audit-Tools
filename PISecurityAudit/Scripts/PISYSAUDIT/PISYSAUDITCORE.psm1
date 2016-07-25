@@ -353,12 +353,12 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[AllowEmptyString()]
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "")
+		$RemoteComputerName)
 		
 	# Get and store the function Name.
 	$fn = GetFunctionName
@@ -393,11 +393,11 @@ function ReturnSQLServerName
 param(									
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[string]
-		$ServerName = "",
+		$ServerName,
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]		
 		[AllowEmptyString()]
 		[string]
-		$InstanceName = "Default")
+		$InstanceName)
 		
 	# Get and store the function Name.
 	$fn = GetFunctionName
@@ -428,13 +428,13 @@ function SetSQLAccountPasswordInCache
 param(											
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]		
 		[string]
-		$ServerName = $true,
+		$ServerName,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]				
 		[string]
-		$InstanceName = "Default",
+		$InstanceName,
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]		
 		[string]
-		$UserName = $true)
+		$UserName)
 		
 	# Get and store the function Name.
 	$fn = GetFunctionName
@@ -474,11 +474,11 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",								
+		$RemoteComputerName,								
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]				
 		[string]
 		$InstanceName = "Default",
@@ -525,7 +525,7 @@ param(
 				# Read from the global constant bag.
 				# Read the secure password from the cache								 
 				$securePWDFromCache = (Get-Variable "PISysAuditCachedSecurePWD" -Scope "Global" -ErrorAction "SilentlyContinue").Value					
-				if(($securePWDFromCache -eq $null) -or ($securePWDFromCache -eq ""))
+				if(($null -eq $securePWDFromCache) -or ($securePWDFromCache -eq ""))
 				{ 
 					# Return the error message.
 					$msg = "The password is not stored in cache"					
@@ -568,24 +568,24 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",
-		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		$RemoteComputerName,
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]		
 		[alias("exec")]
 		[string]
 		$UtilityExec,		
-		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]		
 		[alias("output")]
 		[string]
 		$OutputFilePath,	
-		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
+		[parameter(Mandatory=$true, ParameterSetName = "Default")]		
 		[alias("args")]
 		[string]
 		$ArgList,	
-		[parameter(Mandatory=$false, Position=1, ParameterSetName = "Default")]		
+		[parameter(Mandatory=$false, ParameterSetName = "Default")]		
 		[ValidateSet("Read","Write","Delete","Default")]
 		[alias("oper")]
 		[string]
@@ -795,7 +795,7 @@ param(
 		{ $PIServer_path = Get-PISysAudit_EnvVariable "PISERVER" -lc $false -rcn $RemoteComputerName }
 		
 		# Validate...
-		if($PIServer_path -eq $null) { return $false }
+		if($null -eq $PIServer_path) { return $false }
 		return $true
 	}
 	catch
@@ -827,7 +827,7 @@ param(
 		$namespace = "root\CIMV2"
 		$filterExpression = [string]::Format("name='{0}'", "AFService")
 		$WMIObject = ExecuteWMIQuery $className -n $namespace -lc $LocalComputer -rcn $RemoteComputerName -FilterExpression $filterExpression -DBGLevel $DBGLevel								
-		if($WMIObject -eq $null) { return $false}
+		if($null -eq $WMIObject) { return $false}
 		return $true
 	}
 	catch
@@ -870,7 +870,7 @@ param(
 			$filterExpression = [string]::Format("name='{0}'", $value)			
 		}
 		$WMIObject = ExecuteWMIQuery $className -n $namespace -lc $LocalComputer -rcn $RemoteComputerName -FilterExpression $filterExpression -DBGLevel $DBGLevel								
-		if($WMIObject -eq $null) { return $false}
+		if($null -eq $WMIObject) { return $false}
 		return $true
 	}
 	catch
@@ -1033,7 +1033,7 @@ param(
 				# if not set the flag to true.
 				$item = $null
 				$item = $validatedComputers[$computerParams.ComputerName]
-				if($item -eq $null) { $addComputer = $true }				
+				if($null -eq $item) { $addComputer = $true }				
 			}
 				
 			if($addComputer)
@@ -1093,7 +1093,7 @@ param(
 			{								
 				$result = $null
 				$result = Test-WSMan -authentication default -ComputerName $computerParams.ComputerName
-				if($result -eq $null)
+				if($null -eq $result)
 				{
 					$problemCounter++
 					$msgTemplate = "The server: {0} has a problem with WinRM communication"
@@ -1263,7 +1263,7 @@ param(
 		{
 			$outputFileContent = Invoke-PISysAudit_PIConfigScript -f "CheckPIServerAvailability.dif" `
 																-lc $ComputerParams.IsLocal -rcn $ComputerParams.ComputerName -dbgl $DBGLevel
-			if($outputFileContent -eq $null)
+			if($null -eq $outputFileContent)
 			{
 				$msgTemplate = "Unable to access the PI Data Archive {0} with piconfig.  Check if there is a valid mapping for your user."
 				$msg = [string]::Format($msgTemplate, $ComputerParams.ComputerName)
@@ -1658,7 +1658,7 @@ PROCESS
 			
 	# Set folders.
 	# Set the initialization flag..
-	if(($isPISysAuditInitialized -eq $null) -or ($isPISysAuditInitialized -eq $false))
+	if(($null -eq $isPISysAuditInitialized) -or ($isPISysAuditInitialized -eq $false))
 	{			
 		# Set folder names required by the script.
 		SetFolders
@@ -1734,7 +1734,7 @@ PROCESS
 		# Read from the global constant bag.
 		$isPISysAuditInitialized = (Get-Variable "PISysAuditInitialized" -Scope "Global" -ErrorAction "SilentlyContinue").Value					
 		# If initialization failed, leave the function.
-		if(($isPISysAuditInitialized -eq $null) -or ($isPISysAuditInitialized -eq $false))
+		if(($null -eq $isPISysAuditInitialized) -or ($isPISysAuditInitialized -eq $false))
 		{
 			$msg = "This script won't execute because initialization has not completed"
 			Write-PISysAudit_LogMessage $msg "Warning" $fn
@@ -1782,7 +1782,7 @@ PROCESS
 		# Read from the global constant bag.
 		$isPISysAuditInitialized = (Get-Variable "PISysAuditInitialized" -Scope "Global" -ErrorAction "SilentlyContinue").Value					
 		# If initialization failed, leave the function.
-		if(($isPISysAuditInitialized -eq $null) -or ($isPISysAuditInitialized -eq $false))
+		if(($null -eq $isPISysAuditInitialized) -or ($isPISysAuditInitialized -eq $false))
 		{
 			$msg = "This script won't execute because initialization has not completed"
 			Write-PISysAudit_LogMessage $msg "Warning" $fn
@@ -1860,7 +1860,7 @@ param(
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("fn")]			
 		[string]
-		$FunctionName = "",						
+		$FunctionName,						
 		[parameter(ParameterSetName = "Default")]
 		[alias("dbgl")]			
 		[int]
@@ -1912,7 +1912,7 @@ PROCESS
 		{
 			# This type of message is always shown whatever the debug level.
 			# Form the message.
-			if($ErrorObject -eq $null)
+			if($null -eq $ErrorObject)
 			{ $extMessageFile = [string]::Format($msgTemplate1, $ts, $FunctionName, $Message) }
 			else
 			{				
@@ -2590,17 +2590,17 @@ PROCESS
 	{				
 		if($LocalComputer)
 		{
-			$unsortedAndUnfilteredResult = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { Get-ItemProperty $_.PsPath } | Where { $_.Displayname -and ($_.Displayname -match ".*") }
-			$result = $unsortedAndUnfilteredResult | Sort Displayname | Select DisplayName, Publisher, DisplayVersion, InstallDate			
+			$unsortedAndUnfilteredResult = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | ForEach-Object { Get-ItemProperty $_.PsPath } | Where-Object { $_.Displayname -and ($_.Displayname -match ".*") }
+			$result = $unsortedAndUnfilteredResult | Sort-Object Displayname | Select-Object DisplayName, Publisher, DisplayVersion, InstallDate			
 			return $result
 		}
 		else
 		{	
-			$scriptBlockCmd = "Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { Get-ItemProperty `$_.PsPath } | Where { `$_.Displayname -and (`$_.Displayname -match `".*`") }"
+			$scriptBlockCmd = "Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | ForEach-Object { Get-ItemProperty `$_.PsPath } | Where-Object { `$_.Displayname -and (`$_.Displayname -match `".*`") }"
 			# Create the script block to send via PS Remoting.
 			$scriptBlock = [scriptblock]::create( $scriptBlockCmd )
 			$unsortedAndUnfilteredResult = Invoke-Command -ComputerName $RemoteComputerName -ScriptBlock $scriptBlock									
-			$result = $unsortedAndUnfilteredResult | Sort Displayname | Select DisplayName, Publisher, DisplayVersion, InstallDate
+			$result = $unsortedAndUnfilteredResult | Sort-Object Displayname | Select-Object DisplayName, Publisher, DisplayVersion, InstallDate
 			return $result			
 		}	
 	}
@@ -2653,7 +2653,7 @@ PROCESS
 		$namespace = "root\CIMV2"
 		$filterExpression = ""
 		$WMIObject = ExecuteWMIQuery $className -n $namespace -lc $LocalComputer -rcn $RemoteComputerName -FilterExpression $filterExpression -DBGLevel $DBGLevel								
-		return $WMIObject | Sort HotFixID | Select HotFixID, InstalledOn						
+		return $WMIObject | Sort-Object HotFixID | Select-Object HotFixID, InstalledOn						
 	}
 	catch
 	{
@@ -2914,7 +2914,7 @@ PROCESS
 	try
 	{						
 		# Must validate against a service or a process.
-		if(($ServiceName -eq $null) -and ($ProcessName -eq $null))
+		if(($null -eq $ServiceName) -and ($null -eq $ProcessName))
 		{
 			# Return the error message.
 			$msg = "Reading privileges from the process failed. The syntax is: CheckProcessPrivilege.ps1 <Privilege Name> [<Service Name>] [<Process Name>]."
@@ -3222,7 +3222,7 @@ PROCESS
 			Write-PISysAudit_LogMessage $msg "Debug" $fn -dbgl $DBGLevel -rdbgl 2
 
 			# Read the content.
-			$outputFileContent = Get-Content -Path $outputFilePath -Wait
+			$outputFileContent = Get-Content -Path $outputFilePath
 
 			if(Test-Path $outputFilePath){Remove-Item $outputFilePath}
 			if(Test-Path $outputDebugFilePath){Remove-Item $outputDebugFilePath}
@@ -3316,7 +3316,7 @@ PROCESS
 				#......................................................................................
 				# Read the content remotely.
 				#......................................................................................			
-				$outputFileContent = Get-Content -Path $outputFilePath -Wait												
+				$outputFileContent = Get-Content -Path $outputFilePath 												
 				
 				#......................................................................................			
 				# Validate that the command succeeded (2nd time)
@@ -3576,15 +3576,15 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",				
+		$RemoteComputerName,				
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("rspc")]
 		[boolean]
-		$Require_sp_configure = $false,			
+		$Require_sp_configure,			
 		[parameter(Mandatory=$true, Position=3, ParameterSetName = "Default")]
 		[alias("q")]
 		[string]
@@ -3661,7 +3661,7 @@ PROCESS
 	}				
 	
 	# Close the connection.
-	if(!($conn -eq $null)) { $conn.Close() }
+	if(!($null -eq $conn)) { $conn.Close() }
 	return $value
 }
 
@@ -3685,20 +3685,20 @@ param(
 		[parameter(Mandatory=$true, Position=0, ParameterSetName = "Default")]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]		
 		[AllowEmptyString()]
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",				
+		$RemoteComputerName,				
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("rspc")]
 		[boolean]
-		$Require_sp_configure = $false,			
+		$Require_sp_configure,			
 		[parameter(Mandatory=$true, Position=3, ParameterSetName = "Default")]
 		[alias("q")]
 		[string]
-		$Query = "",
+		$Query,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]				
 		[string]
 		$InstanceName = "",								
@@ -3778,7 +3778,7 @@ PROCESS
 				# Read from the global constant bag.
 				# Read the secure password from the cache								 
 				$securePWDFromCache = (Get-Variable "PISysAuditCachedSecurePWD" -Scope "Global" -ErrorAction "SilentlyContinue").Value					
-				if(($securePWDFromCache -eq $null) -or ($securePWDFromCache -eq ""))
+				if(($null -eq $securePWDFromCache) -or ($securePWDFromCache -eq ""))
 				{ 
 					# Return the error message.
 					$msg = "The password is not stored in cache"					
@@ -3995,12 +3995,12 @@ param(
 		[AllowEmptyString()]
 		[alias("lc")]
 		[boolean]
-		$LocalComputer = $true,
+		$LocalComputer,
 		[parameter(Mandatory=$true, Position=1, ParameterSetName = "Default")]
 		[AllowEmptyString()]
 		[alias("rcn")]
 		[string]
-		$RemoteComputerName = "",			
+		$RemoteComputerName,			
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]
 		[alias("at")]
 		[System.Collections.HashTable]
@@ -4152,7 +4152,7 @@ param(
 		[AllowEmptyString()]
 		[alias("cn")]
 		[string]		
-		$ComputerName = "",
+		$ComputerName,
 		[parameter(Mandatory=$true, Position=2, ParameterSetName = "Default")]						
 		[ValidateSet(
 					"PIServer", "PIDataArchive", "PIDA",
@@ -4162,7 +4162,7 @@ param(
 					"Coresight", "PICS", "CS")]
 		[alias("type")]
 		[string]		
-		$PISystemComponentType = "",
+		$PISystemComponentType,
 		[parameter(Mandatory=$false, ParameterSetName = "Default")]		
 		[string]
 		$InstanceName = "",					
@@ -4188,7 +4188,7 @@ PROCESS
 	# Initialize objects.
 	$localComputer = $false		
 	$resolvedComputerName = ""	
-	if($ComputerParamsTable -eq $null) { $ComputerParamsTable = @{} }
+	if($null -eq $ComputerParamsTable) { $ComputerParamsTable = @{} }
 	$skipParam = $false
 		
 	# ............................................................................................................
@@ -4200,7 +4200,7 @@ PROCESS
 	$isPISysAuditInitialized = (Get-Variable "PISysAuditInitialized" -Scope "Global" -ErrorAction "SilentlyContinue").Value					
 		
 	# If initialization failed, leave!
-	if(($isPISysAuditInitialized -eq $null) -or ($isPISysAuditInitialized -eq $false))
+	if(($null -eq $isPISysAuditInitialized) -or ($isPISysAuditInitialized -eq $false))
 	{
 		$msg = "PI System Audit Module initialization failed"
 		Write-PISysAudit_LogMessage $msg "Error" $fn
@@ -4346,7 +4346,7 @@ PROCESS
 		# Test if the key is already part of the list	
 		$item = $null	
 		$item = $ComputerParamsTable[$myKey]
-		if($item -eq $null) { $ComputerParamsTable.Add($myKey, $tempObj) }				
+		if($null -eq $item) { $ComputerParamsTable.Add($myKey, $tempObj) }				
 	}
 		
 	# Return the computer parameters table.
@@ -4426,7 +4426,7 @@ PROCESS
 		}
 		
 		# Export to .csv but sort the results table first to have Failed items on the top sorted by Severity 
-		$results = $results | Sort @{Expression="AuditItemValue";Descending=$false},@{Expression="Severity";Descending=$true},@{Expression="ID";Descending=$false}
+		$results = $results | Sort-Object @{Expression="AuditItemValue";Descending=$false},@{Expression="Severity";Descending=$true},@{Expression="ID";Descending=$false}
 		$results | Export-Csv -Path $fileToExport -Encoding ASCII -NoType
 
 
@@ -4549,7 +4549,7 @@ PROCESS
 			$reportHTML += $tableFooterHTML
 			
 			if($fails.Count -gt 0){
-				$fails = $fails | sort ID | select ID -unique
+				$fails = $fails | Sort-Object ID | Select-Object ID -unique
 				# Recommendations section
 				$recommendationsHTML = "<div>"
 				$recommendationsHTML += "<h2>Recommendations for failed validations:</h2>"
@@ -4699,7 +4699,7 @@ PROCESS
 	$isPISysAuditInitialized = (Get-Variable "PISysAuditInitialized" -Scope "Global" -ErrorAction "SilentlyContinue").Value					
 		
 	# If initialization failed, leave!
-	if(($isPISysAuditInitialized -eq $null) -or ($isPISysAuditInitialized -eq $false))
+	if(($null -eq $isPISysAuditInitialized) -or ($isPISysAuditInitialized -eq $false))
 	{
 		$msg = "PI System Audit Module initialization failed"
 		Write-PISysAudit_LogMessage $msg "Error" $fn
@@ -4726,7 +4726,7 @@ PROCESS
 	# ............................................................................................................
 	# Validate if a ComputerParams table has been passed, if not create one that use localhost as the default
 	# ............................................................................................................
-	if($ComputerParamsTable -eq $null)
+	if($null -eq $ComputerParamsTable)
 	{
 		# Initialize.
 		$ComputerParamsTable = @{}

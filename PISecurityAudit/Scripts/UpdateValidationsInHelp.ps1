@@ -36,7 +36,7 @@ foreach ($line in $helpFile)
 				$fnsSorted = @()
                 foreach($fn in $lib.Keys){ $fnsSorted += Get-Help $fn }
                 # Keys get out of order so we need to sort them by ID (Synopsis is of form <ID> - <Name>)
-				$fnsSorted = $fnsSorted | select * | sort Synopsis
+				$fnsSorted = $fnsSorted | Select-Object * | Sort-Object Synopsis
 				# now we can record each validation.
                 foreach($fn in $fnsSorted){
 					$fnHelp = Get-Help $fn.Name

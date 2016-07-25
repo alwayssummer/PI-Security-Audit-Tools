@@ -99,7 +99,7 @@ PROCESS
 		# Compliance is to have computer belonging to a domain.
 		# If the value is null or empty, it means it is not defined and the result of
 		# the test is False (fail), otherwise it is true (pass).		
-		if(($value -eq $null) -or ($value -eq "")) 
+		if(($null -eq $value) -or ($value -eq "")) 
 		{ 
 			$result =  $false 
 			$msg = "Machine is not a member of an AD Domain."
