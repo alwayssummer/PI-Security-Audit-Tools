@@ -59,7 +59,7 @@ function SetFolders
 	# ..\Scripts\PISYSAUDIT
 	# ..\Scripts\Temp
 	# ..\Export
-	# ..\piconfig
+	# ..\Scripts\piconfig
 	# ..\pwd	
 	$scriptsPath = Split-Path $modulePath
 	$rootPath = Split-Path $scriptsPath				
@@ -73,9 +73,9 @@ function SetFolders
 	New-Item $scriptsPathTemp -type directory
 	}
 
-	$picnfgPath = Join-Path -Path $rootPath -ChildPath "piconfig"
+	$picnfgPath = Join-Path -Path $scriptsPath -ChildPath "piconfig"
 	$pwdPath = Join-Path -Path $rootPath -ChildPath "pwd"		
-	$logFile = Join-Path -Path $rootPath -ChildPath "PISystemAudit.log"		
+	$logFile = Join-Path -Path $exportPath -ChildPath "PISystemAudit.log"		
 
 	# Store them at within the global scope range.	
 	New-Variable -Name "ScriptsPath" -Option "Constant" -Scope "Global" -Visibility "Public" -Value $scriptsPath
