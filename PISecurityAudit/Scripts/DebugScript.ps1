@@ -4,6 +4,6 @@
 
 If(Get-Module PISYSAudit){
 Remove-Module PISYSAudit}
-$modulepath = $PSScriptRoot + '\PISYSAUDIT.psd1'
+$modulepath = (Split-Path $PSScriptRoot) + '\PISYSAUDIT.psd1'
 Import-Module $modulepath
 piaudit 

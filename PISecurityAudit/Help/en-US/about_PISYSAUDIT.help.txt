@@ -91,26 +91,29 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		AU10002 - Operating System SKU
 		VALIDATION: verifies that the OS Stock Keeping Unit (SKU) is appropriate for 
 		production use.
-		COMPLIANCE: SKU should match one of the following: 12, 13, 14, 29, 39, 40, 41 or 42.  
+		COMPLIANCE: SKU should match one of the following: 12, 13, 14, 29, 39, 40, 41 or 42.
+		All SKU values are viewable here: 
+		<a href="http://msdn.microsoft.com/en-us/library/ms724358.aspx">http://msdn.microsoft.com/en-us/library/ms724358.aspx</a>  
 		These SKUs were chosen to highlight the reduced attack surface area of a core 
 		installation of Windows Server.  For more on the advantages of Windows Server Core, 
 		please see:
-		https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx
+		<a href="https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx">https://msdn.microsoft.com/en-us/library/hh846314(v=vs.85).aspx </a>
 
 		AU10003 - Firewall Enabled
 		VALIDATION: verifies that the Windows host based firewall is enabled. 
-		COMPLIANCE: enable the Windows firewall.  A firewall's effectiveness is heavily
-		dependent on the configuration.  For PI specific port requirements, see: 
-		https://techsupport.osisoft.com/Troubleshooting/KB/KB01162.
+		COMPLIANCE: enable the Windows firewall for Domain, Private and Public Scope.  
+		A firewall's effectiveness is heavily dependent on the configuration.  
+		For PI specific port requirements, please see: 
+		<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB01162"> https://techsupport.osisoft.com/Troubleshooting/KB/KB01162 </a> 
 		For more general information on the Windows firewall, see "Windows Firewall with 
-		Advanced Security Overview" on TechNet:
-		https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx.
+		Advanced Security Overview" on TechNet: 
+		<a href="https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx">https://technet.microsoft.com/en-us/library/hh831365(v=ws.11).aspx </a>
 
 		AU10004 - AppLocker Enabled
-		VALIDATION: verifies that AppLocker is enabled.  
+		VALIDATION: verifies that AppLocker is enabled.   
 		COMPLIANCE: set AppLocker to Enforce mode after establishing a policy.  For a 
-		primer on running AppLocker on a PI Data Archive, see:
-		https://techsupport.osisoft.com/Troubleshooting/KB/KB00994
+		primer on running AppLocker on a PI Data Archive, see: 
+		<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB00994">https://techsupport.osisoft.com/Troubleshooting/KB/KB00994</a>
 
 		AU10005 - UAC Enabled
 		VALIDATION: verifies that UAC is enabled.  More precisely, it verifies the 
@@ -118,9 +121,9 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		EnableInstallerDetection, PromptOnSecureDesktop and EnableSecureUIAPaths.
 		Additionally, a check is performed for the feature ValidateAdminCodeSignatures.  
 		Lower severity is assigned if this is the only feature disabled.
-		COMPLIANCE: enable the flagged UAC features.  For more information on specific
-		UAC features, see:
-		https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx.
+		COMPLIANCE: enable the flagged UAC features through Local Security Policy.  
+		For more information on specific UAC features, see: 
+		<a href="https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx">https://technet.microsoft.com/en-us/library/dd835564(v=ws.10).aspx </a>
 
 		AU20001 - PI Data Archive Table Security Check
 		VALIDATION: examines the database security of the PI Data Archive and flags any 
@@ -141,15 +144,15 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		COMPLIANCE: upgrade the PI Data Archive to the latest version, PI Data Archive 
 		2016 (3.4.400.1162).  For more information, see the "Upgrade a PI Data Archive Server" 
 		section of the PI Data Archive Installation and Upgrade Guide, Live Library: 
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD.
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD ">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0BDEB1F5-C72F-4865-91F7-F3D38A2975BD </a>
 
 		AU20004 - Check Edit Days
-		VALIDATION: verified that Edit Days is set. 
+		VALIDATION: verified that the Edit Days tuning parameter is set. 
 		COMPLIANCE: set to a value greater than zero.  EditDays defines the number of past 
 		days where events can be modified in the Snapshot or Archive databases. A zero value means 
 		no time check is done.  For instructions to set EditDays, see "Modify the EditDays tuning 
 		parameter" section in the PI Data Archive System Management Guide:
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399.
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399 ">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-0865CC31-BF8C-4347-B717-15071ED51399 </a>
 
 		AU20005 - Auto Trust Configuration
 		VALIDATION: verifies that the autotrustconfig tuning parameter is set to create 
@@ -163,7 +166,7 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		COMPLIANCE: set the archive_maxqueryexecutionsec tuning parameter to a value between 60 
 		and 300.  For more information on this parameter and other that can protect against expensive 
 		queries, see the knowledgebase article 3224OSI8 
-		https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8
+		<a href="https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8">https://techsupport.osisoft.com/Troubleshooting/KB/3224OSI8  </a>
 
 		AU20007 - Check if the explicit login is disabled
 		VALIDATION: verifies that explicit login is disabled as an authentication protocol.   
@@ -171,20 +174,20 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		This is equivalent to the third notch, "Disable explicit login", or higher on the Security 
 		Settings plugin in PI SMT.  For more information, see "Security Best Practice #2" and "Security 
 		Best Practice #3" in KB00833. 
-		https://techsupport.osisoft.com/Troubleshooting/KB/KB00833
+		<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB00833">https://techsupport.osisoft.com/Troubleshooting/KB/KB00833 </a>
 
 		AU20008 - Check if piadmin is not used
 		VALIDATION: verifies that piadmin is not used in trusts or mappings. 
 		COMPLIANCE: replace any trusts or mappings that use piadmin with a mapping or trust to a
 		PI Identity with appropriate privilege for the applications that will use it.  For more 
 		information, see "Security Best Practice" #4 in KB00833: 
-		https://techsupport.osisoft.com/Troubleshooting/KB/KB00833.
+		<a href="https://techsupport.osisoft.com/Troubleshooting/KB/KB00833 ">https://techsupport.osisoft.com/Troubleshooting/KB/KB00833 </a>
 
-		AU20010 - PI Data Archive SPN Check
+		AU20010 - Check PI Server SPN
 		VALIDATION: Checks PI Data Archive SPN assignment.
 		COMPLIANCE: PI Data Archive SPNs exist and are assigned to the pinetmgr Service account. This makes Kerberos Authentication possible.
 		For more information, see "PI and Kerberos authentication" in the PI Live Library. 
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D </a>
 
 		AU30001 - PI AF Server Service Account Check
 		VALIDATION: verifies that the AF Server application service is not running as the account 
@@ -201,7 +204,7 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		false, thereby requiring impersonation for access to external tables.  This setting can be 
 		changed by running the AFDiag utility with the /ExternalDataTablesAllowNonImpersonatedUsers- 
 		flag.  For more information, see "AFDiag utility parameters" in the PI Live Library. 
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F </a>
 
 		AU30003 - PI AF Server Service Access Check
 		VALIDATION: verifies that the PI AF application server service does not have excessive 
@@ -209,14 +212,14 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		COMPLIANCE: ensure that the account does not have the following privileges: 
 		SeDebugPrivilege, SeTakeOwnershipPrivilege and SeTcbPrivilege.  For information on these 
 		rights and how to set them, see "User Rights" on TechNet: 
-		https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx.
+		<a href="https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx">https://technet.microsoft.com/en-us/library/dd349804(v=ws.10).aspx</a>
 
 		AU30004 - PI AF Server Plugin Verify Level Check
 		VALIDATION: verifies that PI AF requires plugins to be validated. 
 		COMPLIANCE: set the Configuration Setting PlugInVerifyLevel to RequireSigned or 
 		RequireSignedTrustedProvider.  This can be done with AFDiag /PluginVerifyLevel:<Level>.
 		For more information, see "AFDiag utility parameters" in the PI Live Library. 
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F </a>
 
 		AU30005 - PI AF Server File Extension Whitelist
 		VALIDATION: verifies file extension whitelist for PI AF. 
@@ -224,70 +227,71 @@ VALIDATION CHECKS AND COMPLIANCE CONDITIONS
 		extensions: docx:xlsx:csv:pdf:txt:rtf:jpg:jpeg:png:svg:tiff:gif or a subset thereof.
 		This can be done with AFDiag /FileExtensions:<ExtensionList>.  For more information, 
 		see "AFDiag utility parameters" in the PI Live Library. 
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F.
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-7092DD14-7901-4D63-8B9D-4414C569EA5F </a>
 
 		AU30006 - PI AF Server Version
 		VALIDATION: verifies PI AF Server version. 
 		COMPLIANCE: upgrade to the latest version of PI AF Server.  For more information, 
 		see "PI AF Server upgrades" in the PI Live Library. 
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6.
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-CF854B20-29C7-4A5A-A303-922B74CE03C6 </a>
 
-		AU30007 - PI AF Server SPN Check
+		AU30007 - Verify AF Server SPN exists
 		VALIDATION: Checks PI AF Server SPN assignment.
 		COMPLIANCE: PI AF Server SPNs exist and are assigned to the AF Service account. This makes Kerberos Authentication possible.
 		For more information, see "PI AF and Kerberos authentication" in the PI Live Library. 
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D 
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D">https://livelibrary.osisoft.com/LiveLibrary/content/en/server-v7/GUID-531FFEC4-9BBB-4CA0-9CE7-7434B21EA06D</a>
 
 		AU40001 - SQL Server xp_CmdShell Check
 		VALIDATION: verifies that SQL Server does not have xp_CmdShell enabled.
 		COMPLIANCE: disable xp_CmdShell configuration option.  This option can be configured 
 		using the Policy-Based Management or the sp_configure stored procedure.  For more 
 		information, see:
-		https://msdn.microsoft.com/en-us/library/ms190693.aspx.
+		<a href="https://msdn.microsoft.com/en-us/library/ms190693.aspx">https://msdn.microsoft.com/en-us/library/ms190693.aspx</a>
 
 		AU40002 - SQL Server Adhoc Queries Check
 		VALIDATION: verifies that SQL Server does not have Ad Hoc Distributed Queries enabled.    
 		COMPLIANCE: disable Ad Hoc Distributed Queries configuration option.  This option can be 
 		configured using the Policy-Based Management or the sp_configure stored procedure. For more 
 		information, see: 
-		https://msdn.microsoft.com/en-us/library/ms187569.aspx.
+		<a href="https://msdn.microsoft.com/en-us/library/ms187569.aspx">https://msdn.microsoft.com/en-us/library/ms187569.aspx </a>
 
 		AU40003 - SQL Server DB Mail XPs Check
 		VALIDATION CHECK: verifies that SQL Server does not have Ad Hoc Distributed Queries enabled.</br>
 		FOR COMPLIANCE: disable Database Mail XPs configuration option.  This option can be configured 
 		using the Policy-Based Management or the sp_configure stored procedure. For more information, 
 		see:
-		https://msdn.microsoft.com/en-us/library/ms191189.aspx.
+		<a href="https://msdn.microsoft.com/en-us/library/ms191189.aspx">https://msdn.microsoft.com/en-us/library/ms191189.aspx</a>
 
 		AU40004 - SQL Server OLE Automation Procedures Check
 		VALIDATION: verifies that SQL Server does not have OLE Automation Procedures enabled. 
 		COMPLIANCE: disable the OLE Automation Procedures configuration option.  This option can 
 		be configured using the Policy-Based Management or the sp_configure stored procedure. For 
 		more information, see:
-		https://msdn.microsoft.com/en-us/library/ms191188.aspx.
+		<a href="https://msdn.microsoft.com/en-us/library/ms191188.aspx">https://msdn.microsoft.com/en-us/library/ms191188.aspx</a>
 
 		AU50001 - Check for latest version of Coresight
 		VALIDATION: verifies PI Coresight version.
 		COMPLIANCE: upgrade to the latest version of PI Coresight.  For more information, 
 		see "Upgrade a PI Coresight installation" in the PI Live Library.
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-8D4F039D8DA6">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-5CF8A863-E056-4B34-BB6B-8D4F039D8DA6</a>
 
-		AU50002 - Check Coresight AppPool identity
+		AU50002 - Check Coresight AppPools identity
 		VALIDATION: checks PI Coresight AppPool identity.
-		COMPLIANCE: Use a custom domain account. Network Service is acceptable, but not ideal.
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411 
+		COMPLIANCE: Use a custom domain account. Network Service is acceptable, but not ideal. 
+		For more information, see "Create a service account for PI Coresight" in the PI Live Library. 
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-A790D013-BAC8-405B-A017-33E55595B411</a>
 
-		AU50003 - Check Coresight SSL configuration
-		VALIDATION: Checks whether SSL is enabled and enforced on the Coresight Web Site.<br/>
+		AU50003 - Coresight SSL check
+		VALIDATION: Checks whether SSL is enabled and enforced on the Coresight Web Site.
 		COMPLIANCE: A valid https binding is configured and only connections with SSL should be allowed.
-		For more information, see "Configure Secure Sockets Layer (SSL) access" in the PI Live Library. <br/>
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B 	
+		For more information, see "Configure Secure Sockets Layer (SSL) access" in the PI Live Library. 
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-CB46B733-264B-48D3-9033-73D16B4DBD3B</a>
 
-		AU50004 - Check Coresight SPN configuration
-		VALIDATION: Checks PI Coresight SPN assignment. <br/>
+		AU50004 - Coresight SPN check
+		VALIDATION: Checks PI Coresight SPN assignment. 
 		COMPLIANCE: HTTP or HOST SPNs exist and are assigned to the Coresight AppPool account. This makes Kerberos Authentication possible.
-		For more information, see the PI Live Library link below. <br/>
-		https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46 
+		For more information, see the PI Live Library link below. 
+		<a href="https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46">https://livelibrary.osisoft.com/LiveLibrary/content/en/coresight-v7/GUID-68329569-D75C-406D-AE2D-9ED512E74D46</a>
 
 		//ENDSECTION - VALIDATIONS//
 
@@ -309,6 +313,9 @@ CONTRIBUTE
         https://github.com/osisoft/PI-System-Audit-Tools/issues
         
         
+
+
+
 
 
 
