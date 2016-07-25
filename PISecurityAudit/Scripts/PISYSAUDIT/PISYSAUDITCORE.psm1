@@ -644,7 +644,7 @@ param(
 					# Write the script block template with '[' and ']' delimiter because the
 					# [string]::Format function will fail and then replace with the '{' and '}'
 					#......................................................................................
-					$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
+					$scriptBlockCmdTemplate = "if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ]"
 					$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $OutputFilePath)
 					$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
 			
@@ -696,7 +696,7 @@ param(
 					# Write the script block template with '[' and ']' delimiter because the
 					# [string]::Format function will fail and then replace with the '{' and '}'
 					#......................................................................................
-					$scriptBlockCmdTemplate = "[ if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ] ]"
+					$scriptBlockCmdTemplate = "if(Test-Path `"{0}`") [ Remove-Item `"{0}`" ]"
 					$scriptBlockCmd = [string]::Format($scriptBlockCmdTemplate, $OutputFilePath)
 					$scriptBlockCmd = ($scriptBlockCmd.Replace("[", "{")).Replace("]", "}")			
 			
@@ -3204,9 +3204,9 @@ PROCESS
 			$outputDebugFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piconfig_output_debug.txt"
 			$inputFilePath = Join-Path -Path $scriptsPathTemp -ChildPath "piconfig_input.dif"
 
-			Clear-Content $outputFilePath
-			Clear-Content $outputDebugFilePath
-			Clear-Content $inputFilePath
+			if(Test-Path $outputFilePath){Clear-Content $outputFilePath}
+			if(Test-Path $outputDebugFilePath){Clear-Content $outputDebugFilePath}
+			if(Test-Path $inputFilePath){Clear-Content $inputFilePath}
 
 			Out-File -FilePath $inputFilePath -InputObject ("@outp " + $outputFilePath) -Encoding ASCII	
 			Add-Content -Path $inputFilePath -Value (Get-Content $PIConfigInputFilePath)			
@@ -3223,6 +3223,10 @@ PROCESS
 
 			# Read the content.
 			$outputFileContent = Get-Content -Path $outputFilePath
+
+			if(Test-Path $outputFilePath){Remove-Item $outputFilePath}
+			if(Test-Path $outputDebugFilePath){Remove-Item $outputDebugFilePath}
+			if(Test-Path $inputFilePath){Remove-Item $inputFilePath}
 		}
 		else
 		{					
@@ -3325,6 +3329,8 @@ PROCESS
 					return $null		
 				}
 			}
+
+			if(Test-Path $outputFilePath){Remove-Item $outputFilePath}
 		}
 							
 		# Return the output file path.
