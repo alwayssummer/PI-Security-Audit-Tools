@@ -3,9 +3,7 @@
 # ***********************************************************************
 # * Modulename:   PISYSAUDIT
 # * Filename:     PISYSAUDITCHECKLIB5.psm1
-# * Version:      1.0.0.8
 # * Description:  Validation rules for PI Coresight.
-# * Authors:  Jim Davidson, Bryan Owen and Mathieu Hamel from OSIsoft.
 # *
 # * Copyright 2016 OSIsoft, LLC
 # * Licensed under the Apache License, Version 2.0 (the "License");
