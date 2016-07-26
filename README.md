@@ -44,6 +44,10 @@ AU50004	- Coresight: Service Principal Name Check
 
 ## Getting Started
 
+You can access the latest release version of the PI Security Audit Tools from the Releases section of this repository linked below.  
+[https://github.com/osisoft/PI-Security-Audit-Tools/releases](https://github.com/osisoft/PI-Security-Audit-Tools/releases)
+
+
 SETUP INSTRUCTIONS:  
 The PISysAudit module does not require installation; you only need to extract the package. You will need to import the module from the extracted location in order to use it. The file structure is the following:  
   * PISecurityAudit = Contains the module definition.
