@@ -97,6 +97,13 @@ You can also find several examples of commands and syntaxes for this module with
 Check out the Wiki for tutorials and more information on the project:
       https://github.com/osisoft/PI-Security-Audit-Tools/wiki
 
+## Contributing
+
+We welcome everyone to share enhancement requests, issues and contributions.  While all contributions will be considered by our team, we cannot accept any changes until they have been reviewed.  This is to ensure they are appropriate and aligned with the goals of the project.  We will make every effort to respond in a timely fashion, but please be patient during the review process.  
+
+To help streamline the process, please make sure that you review our guidance with respect to issue submissions, enhancements and pull requests on our Wiki page linked below.  
+[https://github.com/osisoft/PI-Security-Audit-Tools/wiki/Submitting-Pull-Requests,-Issues-and-Enhancement-Requests](https://github.com/osisoft/PI-Security-Audit-Tools/wiki/Submitting-Pull-Requests,-Issues-and-Enhancement-Requests)
+
 ## Licensing  
 
 Copyright 2016 OSIsoft, LLC.
