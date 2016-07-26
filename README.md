@@ -103,10 +103,13 @@ Check out the Wiki for tutorials and more information on the project:
 
 ## Contributing
 
+Please review our general [Contribution Guidelines](https://github.com/osisoft/contributing) for all OSIsoft projects.  
+
 We welcome everyone to share enhancement requests, issues and contributions.  While all contributions will be considered by our team, we cannot accept any changes until they have been reviewed.  This is to ensure they are appropriate and aligned with the goals of the project.  We will make every effort to respond in a timely fashion, but please be patient during the review process.  
 
 To help streamline the process, please make sure that you review our guidance with respect to issue submissions, enhancements and pull requests on our Wiki page linked below.  
 [https://github.com/osisoft/PI-Security-Audit-Tools/wiki/Submitting-Pull-Requests,-Issues-and-Enhancement-Requests](https://github.com/osisoft/PI-Security-Audit-Tools/wiki/Submitting-Pull-Requests,-Issues-and-Enhancement-Requests)
+
 
 ## Licensing  
 
