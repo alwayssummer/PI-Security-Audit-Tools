@@ -44,9 +44,7 @@ AU50004	- Coresight: Service Principal Name Check
 
 ## Getting Started
 
-You can access the latest release version of the PI Security Audit Tools from the Releases section of this repository linked below.  
-[https://github.com/osisoft/PI-Security-Audit-Tools/releases](https://github.com/osisoft/PI-Security-Audit-Tools/releases)
-
+You can access the latest release version of the PI Security Audit Tools from the [Releases](https://github.com/osisoft/PI-Security-Audit-Tools/releases) section of this repository.  
 
 SETUP INSTRUCTIONS:  
 The PISysAudit module does not require installation; you only need to extract the package. You will need to import the module from the extracted location in order to use it. The file structure is the following:  
@@ -98,18 +96,15 @@ For full contextual help, giving examples and a description of each audit check,
 
 You can also find several examples of commands and syntaxes for this module within examples.ps1 file (located in the ..\PISecurityAudit\Scripts folder).  
 
-Check out the Wiki for tutorials and more information on the project:
-      https://github.com/osisoft/PI-Security-Audit-Tools/wiki
+Check out the [Wiki](https://github.com/osisoft/PI-Security-Audit-Tools/wiki) for tutorials and more information on the project.
 
 ## Contributing
 
-Please review our general [Contribution Guidelines](https://github.com/osisoft/contributing) for all OSIsoft projects.  
+Please make sure that you read our general [Contribution Guidelines](https://github.com/osisoft/contributing) and agree with them.  These guidelines apply to all OSIsoft projects on GitHub.  
 
 We welcome everyone to share enhancement requests, issues and contributions.  While all contributions will be considered by our team, we cannot accept any changes until they have been reviewed.  This is to ensure they are appropriate and aligned with the goals of the project.  We will make every effort to respond in a timely fashion, but please be patient during the review process.  
 
-To help streamline the process, please make sure that you review our guidance with respect to issue submissions, enhancements and pull requests on our Wiki page linked below.  
-[https://github.com/osisoft/PI-Security-Audit-Tools/wiki/Submitting-Pull-Requests,-Issues-and-Enhancement-Requests](https://github.com/osisoft/PI-Security-Audit-Tools/wiki/Submitting-Pull-Requests,-Issues-and-Enhancement-Requests)
-
+To help streamline the process, please make sure that you review our guidance with respect to [Submitting Pull Requests, Issues and Enhancement Requests](https://github.com/osisoft/PI-Security-Audit-Tools/wiki/Submitting-Pull-Requests,-Issues-and-Enhancement-Requests) on our Wiki page.  
 
 ## Licensing  
 
